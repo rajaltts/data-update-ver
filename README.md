@@ -1,20 +1,18 @@
 # Introduction 
-TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project. 
+This project is related to the development of DataClean. 
 
 # Getting Started
-TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
-1.	Installation process
-2.	Software dependencies
-3.	Latest releases
-4.	API references
+This project builds a SPA using ReactJS and WebAssembly.
+The WebAssembly(wasm) file (dataClean.wasm) is generated from C++ using emscripten.
+Today this wasm file is commited in the project (src/assets) but it should be generated from C++ code in the future.
 
-# Build and Test
-TODO: Describe and show how to build your code and run the tests. 
-
-# Contribute
-TODO: Explain how other users and developers can contribute to make your code better. 
-
-If you want to learn more about creating good readme files then refer the following [guidelines](https://docs.microsoft.com/en-us/azure/devops/repos/git/create-a-readme?view=azure-devops). You can also seek inspiration from the below readme files:
-- [ASP.NET Core](https://github.com/aspnet/Home)
-- [Visual Studio Code](https://github.com/Microsoft/vscode)
-- [Chakra Core](https://github.com/Microsoft/ChakraCore)
+You need to install node to build the project.
+To install
+1. clone the rep on your system
+    git clone https://icme@dev.azure.com/icme/DataReduction/_git/DataReduction
+2. install all dependencies
+    npm install  (in the DataReduction folder)
+3. Start in dev mode
+    npm run start
+4. Open your browser (http://localhost:3000/)
+    
