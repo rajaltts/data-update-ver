@@ -1,12 +1,64 @@
-import React, { Component, Fragment} from 'react';
-import classes from './PlotBuilder.module.css';
+import React, { Fragment, useEffect, useState, useReducer } from 'react';
+import { Col, Row } from 'antd';
+import 'antd/dist/antd.css';
 import FileLoader from '../../components/FileLoader/FileLoader';
+import PhysicalMeasurementForm from '../../components/PhysicalMeasurementForm/PhysicalMeasurementForm';
+import OperationControls from '../../components/OperationControls/OperationControls';
 import PlotCurve from '../../components/PlotCurve/PlotCurve';
-import OperationControls from '../../components/OperationControls/OperationControls'
-import PhysicalMeasurementForm from '../../components/PhysicalMeasurementForm/PhysicalMeasurementForm'
+import DataTree from '../../components/DataTree/DataTree';
 
 import DC from '../../assets/dataClean.js';
 import DCWASM from '../../assets/dataClean.wasm';
+
+// dataReducer manages action on curves and associated data (tree,...)
+const dataReducer = (currentData, action) => {
+    switch( action.type ) {
+        case 'SET':{
+            // input: curves
+            // output: replace current curves by the input curves and init tree
+            const dt = [];
+            const dt_entry = {title: 'group1', key: '0-0', children: []};
+            action.curves.forEach( (item,i) => {
+                const index = i+1;
+                const dt_entry_curve ={ title: 'curve'+i, key: '0-'+index};
+                dt_entry.children.push(dt_entry_curve);
+            });
+            dt.push(dt_entry);
+            return {curves: action.curves, tree: dt, keys: currentData.keys};
+        }
+        case 'UPDATE_CURVES':{
+            // input: curves
+            // output: replace current curves by the input curves and update keys
+            const keys = [];
+            action.curves.forEach( (item,i) => {
+                if(item.selected){
+                    const index = i+1;
+                    keys.push('0-'+index);
+                } 
+            });
+            return {...currentData, curves: action.curves, keys: keys };
+        }
+        case 'CHECK_CURVES':{
+            // input: keys is the array of selected curves
+            // output: modify current curves selected and opacity properties
+            currentData.curves.forEach( (item,i) => {
+                item.selected = false;
+                item.opacity = 0.2;
+            });
+            action.keys.forEach( (item,i) => {
+                const index_curve = parseInt(item.charAt(item.length-1))-1; // TODO do not work more than 10 curves
+                if(index_curve>=0){ // not for 0-0 the group checkbox
+                    currentData.curves[index_curve].selected = true;
+                    currentData.curves[index_curve].opacity = 1; 
+                }
+            });
+
+            return {...currentData, keys: action.keys };
+        }
+        default:
+            throw new Error('Not be reach this case');
+    }
+}
 
 const dc = DC({
     locateFile: () => {
@@ -14,119 +66,80 @@ const dc = DC({
     },
 });
 
-class PlotBuilder extends Component{
-    constructor(props){
-        super(props);
-        this.state = {
-            curves: [ ],
-            operations: [
-                {
-                    label: 'Cleaning End auto',
-                    type: 'op_cleaning_end_auto'
-                },
-                {
-                    label: 'Cleaning End manual',
-                    type: 'op_cleaning_end_manual',
-                    hasParam: true,
-                    value: '0.05'
-                },
-                {
-                    label: 'Shifting',
-                    type: 'op_shifting'
-                },
-                {
-                    label: 'Averaging',
-                    type: 'op_averaging'
-                },
-                {
-                    label: 'Template',
-                    type: 'op_template_plastic_tensile'
-                }
-            ],
-            physicalMeasurementX: 'strain_true',
-            physicalMeasurementY: 'stress_true',
-        };
-    }
+const PlotBuilder = () => {
+    const [physicalMeasurementX, setPhysicalMeasurementX] = useState('strain_true');
+    const [physicalMeasurementY, setPhysicalMeasurementY] = useState('stress_true');
+    const [data, dispatch]  =  useReducer(dataReducer,{curves: [],
+                                                       tree: [{title: 'no data', key: '0-0', disabled: true}],
+                                                       keys: ['0-0']
+                                                    }
+                                            );
 
-    // Plot handler
-    clickLegendHandler = (event) => {
-        console.log("SIMPLE CLICK LEGEND");
-        console.log(event);
-       
-        const curve_index = event.curveNumber;
-        const updatedCurves = this.state.curves;
-
-        const newSelected = !this.state.curves[curve_index].selected;
-        let newOpacity = 1;
-        if(this.state.curves[curve_index].opacity===1) {
-            newOpacity = 0.2;
+    const [operations, setOperations] =  useState([
+        {
+            label: 'Cleaning End auto',
+            type: 'op_cleaning_end_auto'
+        },
+        {
+            label: 'Cleaning End manual',
+            type: 'op_cleaning_end_manual',
+            hasParam: true,
+            value: '0.05'
+        },
+        {
+            label: 'Shifting',
+            type: 'op_shifting'
+        },
+        {
+            label: 'Averaging',
+            type: 'op_averaging'
+        },
+        {
+            label: 'Template',
+            type: 'op_template_plastic_tensile'
         }
-        updatedCurves[curve_index].selected = newSelected;
-        updatedCurves[curve_index].opacity = newOpacity;
+    ]);
 
-        this.setState( { curves : updatedCurves});
-        return false; // return false to disable the default behavior on plot_legendclick
+    useEffect( () => {
+        console.log("UseEffect");
+    });
+
+    //CSV handler
+    const handleOnFileLoad = (result) => {
+        console.log("----CSV handler ----");
+        const s = result[0].data.length;
+        let st = [];
+        // st = [ { x: [1,2,..], y: [1,2,3,..], name: 'curve1'} , { x: [1,2,..], y: [1,2,3,..], name: 'curve2'}]
+        for(let i=0; i<s/2; i++){
+            const xs = result.map( line => line.data[2*i]);
+            const ys = result.map( line => line.data[2*i+1]);
+            xs.forEach( function(item,index,arr) { arr[index] = parseFloat(item); });
+            ys.forEach( function(item,index,arr) { arr[index] = parseFloat(item); });
+            const curve = { x: xs, y: ys, name: 'curve'+i, selected: true, opacity: 1};
+            st.push(curve);
+        } 
+        dispatch({type: 'SET', curves: st});
     }
 
-    doubleClickLegendHandler = (event) => {
-        console.log("DOUBLE CLICK LEGEND");
-        console.log(event);
-       
-        const curve_index = event.curveNumber;
-        const updatedCurves = this.state.curves;
+    // handler Curve specifications
+    const changePhysicalMeasurementXHandler = (event) => {
+        setPhysicalMeasurementX(event.target.value);
+    };
+    const changePhysicalMeasurementYHandler = (event) => {
+        setPhysicalMeasurementY(event.target.value);
+    };
 
-        updatedCurves.forEach(function(item,index,arr) {
-            if(index===curve_index){
-                arr[index].selected = true;
-                arr[index].opacity  = 1;
-            } else {
-                arr[index].selected = false;
-                arr[index].opacity  = 0.2;
-            }
-         });
-
-         console.log(updatedCurves);
-
-        this.setState( { curves : updatedCurves});
-        return false; // return false to disable the default behavior on plot_legendclick
-    }
-
-    clickPointHandler = (data) => { // should be replace by a call to updateCurveHandler with the right ALGO/METHOD and id
-        console.log("CLICK POINT HANDLER");
-        console.log(data);
-        const curve_idx = data.points[0].curveNumber;
-        const x = data.points[0].x;
-        const pt_index = data.points[0].pointIndex;
-        console.log(curve_idx);
-        const newCurves = this.state.curves;
-
-        if(newCurves[curve_idx].selected){
-            const x_new = [];
-            const y_new = [];
-            for(let i=0; i<= pt_index; i++){
-                x_new.push(newCurves[curve_idx].x[i]);
-                y_new.push(newCurves[curve_idx].y[i]);
-            }
-            // reset x and y
-           newCurves[curve_idx].x.length = 0;
-           newCurves[curve_idx].y.length = 0;
-           // update x and y array
-           newCurves[curve_idx].x = x_new;
-           newCurves[curve_idx].y = y_new;
-           console.log(newCurves[curve_idx]);
-       }
-
-        this.setState({curves: newCurves});
-    }
-
-    updatePlot = (event) => {
-        console.log(event); 
-    }
-    
     //Operation Handler
-    updatedCurveHandler = (type) => {
+    const updatedCurveHandler = (type) => {
+        
         console.log("----------transform curves-------------");
-        const newCurves = this.state.curves;
+        const newCurves = []; // do not use newCurves = curves because it will a reference because curves must be unchanged to activate the update, newCurves = [...curves] or curves.slice() are not a deep copy but a shallow copy -> does not work
+        // perform a hard copy by hand
+        for(let ic=0; ic<data.curves.length; ic++){
+            const curve = { x: data.curves[ic].x, y: data.curves[ic].y, name: 'curve'+ic, selected: data.curves[ic].selected, opacity: data.curves[ic].opacity};
+            newCurves.push(curve);
+        }
+        
         // use dataClean C++ lib    
         dc.then((core) => {
             // create a datase
@@ -148,16 +161,16 @@ class PlotBuilder extends Component{
                 }
                 console.log('nb points:' + vecX.size());
                 // set name -> TODO should be define in the UI
-                if(this.state.physicalMeasurementX==='strain_true'){
+                if(physicalMeasurementX==='strain_true'){
                     curve.setXName(core.PhysicalMeasurement.STRAIN_TRUE);
                 }
-                else if(this.state.physicalMeasurementX==='strain_engineering'){
+                else if(physicalMeasurementX==='strain_engineering'){
                     curve.setXName(core.PhysicalMeasurement.STRAIN_ENGINEERING);
                 }
-                if(this.state.physicalMeasurementY==='stress_true'){
+                if(physicalMeasurementY==='stress_true'){
                     curve.setYName(core.PhysicalMeasurement.STRESS_TRUE);
                 }
-                else if(this.state.physicalMeasurementY==='stress_engineering'){
+                else if(physicalMeasurementY==='stress_engineering'){
                     curve.setYName(core.PhysicalMeasurement.STRESS_ENGINEERING);
                 }
                
@@ -180,7 +193,6 @@ class PlotBuilder extends Component{
             const applyOperation = (dataprocess,type) => {
                 return new Promise((success,failure) => {
                     console.log("OPERATION STARTED");
-                    console.log(this.state.value);
                     let check = true;
                     //if(type==='op_cleaning_end_auto'){
                     if(type==='op_template_plastic_tensile'){
@@ -204,8 +216,8 @@ class PlotBuilder extends Component{
                     } else if(type==='op_cleaning_end_manual'){
                         // create operation
                         const operation = new core.Operation(core.ActionType.CLEANING_ENDS,core.MethodType.MAX_X);
-                        const op_index = this.state.operations.findIndex( op => op.type === type);
-                        const value = Number(this.state.operations[op_index].value);
+                        const op_index = operations.findIndex( op => op.type === type);
+                        const value = Number(operations[op_index].value);
                         operation.addParameterFloat("value", value); 
                         // apply operation
                          check = dataprocess.apply(operation);
@@ -234,23 +246,6 @@ class PlotBuilder extends Component{
                          check = dataprocess.apply(operation);
                          operation.delete();
                     }
-                    // else if(type==='op_template_plastic_tensile'){
-                    //     // create operation
-                    //     try{
-                    //         const operation = new core.Operation(core.ActionType.CLEANING_ENDS,core.MethodType.Y_MAX);
-                    //         // operation.addParameterFloat("max", 0.01); // for shifting
-                    //         // operation.addParameterFloat("delta", 0.005);
-                    //         // operation.addParameterInt("regularization", -4); 
-                    //        // operation.addParameterString("extrapolating_end_point","x_value"); // for extrapolating
-                    //        // operation.addParameterFloat("extrapolating_end_point_value",0.05);
-                    //         // apply operation
-                    //          check = dataprocess.apply(operation);
-                    //          operation.delete();
-                    //     }
-                    //     catch(err){
-                    //         console.log(err);
-                    //     }
-                    // } 
                     if(check) {
                         success(dataprocess);
                     } else {
@@ -296,7 +291,6 @@ class PlotBuilder extends Component{
                     curve_out.delete();
                     vecX_out.delete();
                     vecY_out.delete();
-                        
                 }
                 if(dataset_out.hasCurve('averaging')){
                     const curve_out = dataset_out.getCurve('averaging');
@@ -316,8 +310,8 @@ class PlotBuilder extends Component{
                 }
 
                 // update the state with the new curves
-                console.log("UPDATE STATE");                
-                this.setState({curves: newCurves});
+                console.log("UPDATE STATE");
+                dispatch({type: 'UPDATE_CURVES', curves: newCurves});                
             }
 
             const todoOperationFailed = (datprocess) => {
@@ -326,110 +320,132 @@ class PlotBuilder extends Component{
             }
 
             const promise = applyOperation(dataprocess,type);
-            promise.then(todoAfterOperationApplied,todoOperationFailed);
+            promise.then(todoAfterOperationApplied,todoOperationFailed).then( () => {
+                    console.log("Second then");
+                });
         }); 
+    
     }
-
-    changedParamHandler = (event, type) => {
-        const operationIndex = this.state.operations.findIndex( op => op.type === type);
+    
+    const changedParamHandler = (event, type) => {
+        const operationIndex = operations.findIndex( op => op.type === type);
         const operation = {
-            ...this.state.operations[operationIndex]
+            ...operations[operationIndex]
         }
         operation.value = event.target.value;
-        const operations = [...this.state.operations];
+        const operations = [...operations];
         operations[operationIndex] = operation;
-        this.setState({operations: operations});
+        setOperations(operations);
     }
 
+    // Plot handler
+    const clickLegendHandler = (event) => {
+        const curve_index = event.curveNumber;
+        const updatedCurves = data.curves;
 
-    //CSV handler
-    handleOnFileLoad = (result) => {
-        //console.log("----CSV handler ----");
-        //console.log(result);
-        const s = result[0].data.length;
-        let st = [];
-        // st = [ { x: [1,2,..], y: [1,2,3,..], name: 'curve1'} , { x: [1,2,..], y: [1,2,3,..], name: 'curve2'}]
-        for(let i=0; i<s/2; i++){
-            const xs = result.map( line => line.data[2*i]);
-            const ys = result.map( line => line.data[2*i+1]);
-            xs.forEach( function(item,index,arr) { arr[index] = parseFloat(item); });
-            ys.forEach( function(item,index,arr) { arr[index] = parseFloat(item); });
-            const curve = { x: xs, y: ys, name: 'curve'+i, selected: true, opacity: 1};
-            st.push(curve)
-        } 
-        //console.log(st);
-        this.setState( { curves: st })
+        const newSelected = !data.curves[curve_index].selected;
+        let newOpacity = 1;
+        if(data.curves[curve_index].opacity===1) {
+            newOpacity = 0.2;
+        }
+        updatedCurves[curve_index].selected = newSelected;
+        updatedCurves[curve_index].opacity = newOpacity;
+
+        //setCurves(updatedCurves);
+        dispatch({type: 'UPDATE_CURVES', curves: updatedCurves});    
+        return false; // return false to disable the default behavior on plot_legendclick
     }
 
-    // handler Curve specifications
-    changePhysicalMeasurementXHandler = (event) => {
-        this.setState({physicalMeasurementX: event.target.value});
-    }
-    changePhysicalMeasurementYHandler = (event) => {
-        this.setState({physicalMeasurementY: event.target.value});
+    const clickPointHandler = (data) => { // should be replace by a call to updateCurveHandler with the right ALGO/METHOD and id
+        console.log("CLICK POINT HANDLER");
+        console.log(data);
+
+        const curve_idx = data.points[0].curveNumber;
+        const x = data.points[0].x;
+        const pt_index = data.points[0].pointIndex;
+        console.log(curve_idx);
+        const newCurves = [];
+
+        for(let ic=0; ic<data.curves.length; ic++){
+            if(ic===curve_idx){
+                const x_new = [];
+                const y_new = [];
+                for(let i=0; i<= pt_index; i++){
+                    x_new.push(data.curves[curve_idx].x[i]);
+                    y_new.push(data.curves[curve_idx].y[i]);
+                }
+                const curve = { x: x_new, y: y_new, name: 'curve'+ic, selected: true, opacity: 1};
+                newCurves.push(curve);
+            } else {
+                const curve = { x: data.curves[ic].x, y: data.curves[ic].y, name: 'curve'+ic, selected: data.curves[ic].selected, opacity: data.curves[ic].opacity};
+                newCurves.push(curve);
+
+            }
+        }
+       dispatch({type: 'UPDATE_CURVES', curves: newCurves});  
     }
 
-    render() {
-        
-        return (
-            <div>
-                <h1> DataClean Application </h1>
-                <div className={classes.FileLoader}>
+    // DataTree handler
+    const checkDataTreeHandler =  (checkedKeys) => {
+        console.log('onCheck', checkedKeys);
+        const keys = [];
+        if(checkedKeys.length>0){
+            const group_index = checkedKeys[checkedKeys.length-1].charAt(0);
+            checkedKeys.forEach( (item, index) =>
+            {
+                if(item.charAt(0)===group_index){
+                    keys.push(item);
+                }  
+            });
+        }
+        dispatch({ type: 'CHECK_CURVES', keys: keys});
+      };
+
+    return (
+        <>
+            <Row>
+                <Col span={6}>
                     <FileLoader 
-                    handleOnFileLoad={this.handleOnFileLoad}/>
-                </div>
-                
-                <div>
+                        handleOnFileLoad={handleOnFileLoad}/>
+                </Col>
+                <Col span={6}>
                     <PhysicalMeasurementForm
-                    variable='x'
-                    value={this.state.physicalMeasurementX}
-                    handleChange={this.changePhysicalMeasurementXHandler} />
+                        variable='x'
+                        value={physicalMeasurementX}
+                        handleChange={changePhysicalMeasurementXHandler}
+                    />
                     <PhysicalMeasurementForm
-                    variable='y'
-                    value={this.state.physicalMeasurementY}
-                    handleChange={this.changePhysicalMeasurementYHandler} />
-                </div>
-
-                <div className={classes.PlotBuilder}>
+                        variable='y'
+                        value={physicalMeasurementY}
+                        handleChange={changePhysicalMeasurementYHandler}
+                    />
+                </Col>
+                <Col span={12}>
+                    <DataTree
+                        treeData={data.tree}
+                        checkedKeys={data.keys}
+                        onCheck={checkDataTreeHandler} />
+                </Col>
+            </Row>
+            <Row>
+                <Col span={8}>
                     <OperationControls
-                    operations={this.state.operations}
-                    value={this.state.value}
-                    updatedCurve={this.updatedCurveHandler}
-                    changedParam={this.changedParamHandler}
+                        operations={operations}
+                        updatedCurve={updatedCurveHandler}
+                        changedParam={changedParamHandler}
                     />
+                </Col>
+                <Col span={12}>
                     <PlotCurve
-                        curves={this.state.curves}
-                        //updatePlot = {this.updatePlot}
-                        //doubleClickLegendHandler={this.doubleClickLegendHandler} // Do not work seems to know
-                        clickLegendHandler={this.clickLegendHandler}
-                        clickPointHandler = {this.clickPointHandler}
+                        curves={data.curves}
+                        //updatePlot = {updatePlot}
+                        clickLegendHandler={clickLegendHandler}
+                        clickPointHandler = {clickPointHandler}
                     />
-                </div>
-            </div>
-           
-
-            
-
-            // <Fragment className={classes.PlotBuilder}>
-                
-            //     <h1> DataClean Application </h1>
-            //     <FileLoader 
-            //         handleOnFileLoad={this.handleOnFileLoad}/>
-            //      <PlotCurve
-            //             curves={this.state.curves}
-            //             //updatePlot = {this.updatePlot}
-            //             //doubleClickLegendHandler={this.doubleClickLegendHandler} // Do not work seems to know
-            //             clickLegendHandler={this.clickLegendHandler}
-            //             clickPointHandler = {this.clickPointHandler}
-            //         />
-            //     <OperationControls
-            //         value={this.state.value}
-            //         updatedCurve={this.updatedCurveHandler}
-            //     />
-            // </Fragment>
-        );
-    }
-
+                </Col>
+            </Row>
+        </>
+    );
 }
 
 export default PlotBuilder;
