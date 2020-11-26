@@ -32,7 +32,7 @@ const PlotCurve = (props) => {
   }
 
   const layout = { width: 1000, height: 600, modebardisplay: false};
-  
+ 
   var config = {
     displaylogo: false, // remove plotly icon
     reponsive: true,

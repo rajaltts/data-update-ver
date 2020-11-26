@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useState, useReducer } from 'react';
-import { Col, Row } from 'antd';
+import { Col, Row , Descriptions } from 'antd';
 import 'antd/dist/antd.css';
 import FileLoader from '../../components/FileLoader/FileLoader';
 import PhysicalMeasurementForm from '../../components/PhysicalMeasurementForm/PhysicalMeasurementForm';
@@ -13,48 +13,81 @@ import DCWASM from '../../assets/dataClean.wasm';
 // dataReducer manages action on curves and associated data (tree,...)
 const dataReducer = (currentData, action) => {
     switch( action.type ) {
-        case 'SET':{
-            // input: curves
-            // output: replace current curves by the input curves and init tree
-            const dt = [];
-            const dt_entry = {title: 'group1', key: '0-0', children: []};
-            action.curves.forEach( (item,i) => {
+        case 'ADD_GROUP':{
+            // input: group
+            // output: insert the group in data and add an entry in the tree
+            const group_id = action.group.id;
+            let groups_new = [];
+            let dt_new = [];
+            
+            const group_key = group_id+'-0';
+           
+            const dt_entry = {title: action.group.label, key: group_key, children: []};
+            action.group.curves.forEach( (item,i) => {
                 const index = i+1;
-                const dt_entry_curve ={ title: 'curve'+i, key: '0-'+index};
+                const curve_key = group_id+'-'+item.id;
+                const dt_entry_curve ={ title: item.name, key: curve_key };
                 dt_entry.children.push(dt_entry_curve);
             });
-            dt.push(dt_entry);
-            return {curves: action.curves, tree: dt, keys: currentData.keys};
+
+            if(group_id===0) { // replace the init group by the first
+                groups_new.push(action.group);
+                dt_new.push(dt_entry);
+                currentData.keys.push(group_key); // select the new group only for the first group
+            } else { // add group to existing groups
+                groups_new = [...currentData.groups, action.group];
+                dt_new = [...currentData.tree, dt_entry];
+            }
+            return {...currentData, groups: groups_new, tree: dt_new};
+
         }
         case 'UPDATE_CURVES':{
             // input: curves
-            // output: replace current curves by the input curves and update keys
-            const keys = [];
-            action.curves.forEach( (item,i) => {
-                if(item.selected){
-                    const index = i+1;
-                    keys.push('0-'+index);
-                } 
-            });
-            return {...currentData, curves: action.curves, keys: keys };
+            // output: replace current curves by the input curves
+            console.log(currentData);
+            const group_new = [...currentData.groups];
+            group_new[currentData.selected_group].curves = action.curves;
+            console.log(group_new);
+            return {...currentData, groups: group_new};
+
         }
         case 'CHECK_CURVES':{
             // input: keys is the array of selected curves
             // output: modify current curves selected and opacity properties
-            currentData.curves.forEach( (item,i) => {
+            currentData.groups[action.groupid].curves.forEach( (item,i) => {
                 item.selected = false;
                 item.opacity = 0.2;
             });
             action.keys.forEach( (item,i) => {
                 const index_curve = parseInt(item.charAt(item.length-1))-1; // TODO do not work more than 10 curves
                 if(index_curve>=0){ // not for 0-0 the group checkbox
-                    currentData.curves[index_curve].selected = true;
-                    currentData.curves[index_curve].opacity = 1; 
+                    currentData.groups[action.groupid].curves[index_curve].selected = true;
+                    currentData.groups[action.groupid].curves[index_curve].opacity = 1; 
                 }
             });
-
-            return {...currentData, keys: action.keys };
+            return {...currentData, keys: action.keys, selected_group: action.groupid };
         }
+        case 'CLICK_CURVE':{
+            const curr_status = currentData.groups[currentData.selected_group].curves[action.curveid].selected;
+            const new_keys = currentData.keys;
+            if(curr_status){ // must be deselected
+                currentData.groups[currentData.selected_group].curves[action.curveid].selected = false;
+                currentData.groups[currentData.selected_group].curves[action.curveid].opacity = 0.2;
+                const remove_key = currentData.selected_group+'-'+currentData.groups[currentData.selected_group].curves[action.curveid].id;
+                const index = new_keys.indexOf(remove_key);
+                if(index > -1)
+                    new_keys.splice(index,1);
+            } else {
+                currentData.groups[currentData.selected_group].curves[action.curveid].selected = true;
+                currentData.groups[currentData.selected_group].curves[action.curveid].opacity = 1.;
+                new_keys.push(currentData.selected_group+'-'+currentData.groups[currentData.selected_group].curves[action.curveid].id);
+            }
+            return {...currentData, keys: new_keys}; 
+        }
+        case 'X_TYPE':
+            return {...currentData, xtype: action.xtype};
+        case 'Y_TYPE':
+            return {...currentData, ytype: action.ytype};
         default:
             throw new Error('Not be reach this case');
     }
@@ -67,11 +100,55 @@ const dc = DC({
 });
 
 const PlotBuilder = () => {
-    const [physicalMeasurementX, setPhysicalMeasurementX] = useState('strain_true');
-    const [physicalMeasurementY, setPhysicalMeasurementY] = useState('stress_true');
-    const [data, dispatch]  =  useReducer(dataReducer,{curves: [],
+
+    /*
+    data structure
+    {
+        type: 'tensile'(default),'compressive'||'shear','bearing',
+        xtype: 'strain_engineering'||'strain_true'(default),
+        ytype: 'stress_engineering'||'stress_true'(default),
+        xunit: 'no'(default),
+        yunit: 'MPa'(default),'Pa','psi','ksi',
+        groups: [
+            {
+                id: INTERGER (0->),
+                label: STRING,
+                curves: [CURVE]
+            },
+            {...},...
+        ]
+        
+        tree: [
+            {
+                title: STRING(group_label),
+                key: STRING(group_id-0),
+                children: [
+                    {
+                        title: STRING(curve_label),
+                        key: STRING(group_id-curve_id)
+                    },
+                    {...},...
+                ]
+            }
+        ],
+
+        keys: [ STRING(group_id-curve-id)],
+        selected_group : INTEGER(0->)
+    }
+
+    CURVE: {id: INTEGER (1->),  x: [NUMERIC], y: [NUMERIC], name: STRING , selected: BOOLEAN, opacity: NUMERIC(0->1) }
+
+    */
+    const [data, dispatch]  =  useReducer(dataReducer,{
+                                                        type: 'tensile',
+                                                        xtype: 'strain_true',
+                                                        ytype: 'stress_true',
+                                                        xunit: 'no',
+                                                        yunit: 'MPa',
+                                                        groups: [ { id: -1, curves: []}],
                                                        tree: [{title: 'no data', key: '0-0', disabled: true}],
-                                                       keys: ['0-0']
+                                                       keys: [],
+                                                       selected_group: 0
                                                     }
                                             );
 
@@ -108,25 +185,30 @@ const PlotBuilder = () => {
     const handleOnFileLoad = (result) => {
         console.log("----CSV handler ----");
         const s = result[0].data.length;
-        let st = [];
+        let curves_ = [];
         // st = [ { x: [1,2,..], y: [1,2,3,..], name: 'curve1'} , { x: [1,2,..], y: [1,2,3,..], name: 'curve2'}]
         for(let i=0; i<s/2; i++){
             const xs = result.map( line => line.data[2*i]);
             const ys = result.map( line => line.data[2*i+1]);
             xs.forEach( function(item,index,arr) { arr[index] = parseFloat(item); });
             ys.forEach( function(item,index,arr) { arr[index] = parseFloat(item); });
-            const curve = { x: xs, y: ys, name: 'curve'+i, selected: true, opacity: 1};
-            st.push(curve);
+            const curve = { id: i+1, x: xs, y: ys, name: 'curve'+i, selected: true, opacity: 1};
+            curves_.push(curve);
         } 
-        dispatch({type: 'SET', curves: st});
+
+        const last_group = data.groups.slice(-1)[0];
+        const last_id = last_group.id;
+        const curr_id = last_id+1;
+        const group_ = { id: curr_id, label: 'group'+curr_id, curves: curves_ };
+        dispatch({type: 'ADD_GROUP', group: group_});
     }
 
     // handler Curve specifications
     const changePhysicalMeasurementXHandler = (event) => {
-        setPhysicalMeasurementX(event.target.value);
+        dispatch({type: 'X_TYPE', xtype: event.target.value });
     };
     const changePhysicalMeasurementYHandler = (event) => {
-        setPhysicalMeasurementY(event.target.value);
+        dispatch({type: 'Y_TYPE', ytype: event.target.value }); 
     };
 
     //Operation Handler
@@ -135,8 +217,8 @@ const PlotBuilder = () => {
         console.log("----------transform curves-------------");
         const newCurves = []; // do not use newCurves = curves because it will a reference because curves must be unchanged to activate the update, newCurves = [...curves] or curves.slice() are not a deep copy but a shallow copy -> does not work
         // perform a hard copy by hand
-        for(let ic=0; ic<data.curves.length; ic++){
-            const curve = { x: data.curves[ic].x, y: data.curves[ic].y, name: 'curve'+ic, selected: data.curves[ic].selected, opacity: data.curves[ic].opacity};
+        for(let ic=0; ic<data.groups[data.selected_group].curves.length; ic++){
+            const curve = { x: data.groups[data.selected_group].curves[ic].x, y: data.groups[data.selected_group].curves[ic].y, name: 'curve'+ic, selected: data.groups[data.selected_group].curves[ic].selected, opacity: data.groups[data.selected_group].curves[ic].opacity};
             newCurves.push(curve);
         }
         
@@ -161,16 +243,16 @@ const PlotBuilder = () => {
                 }
                 console.log('nb points:' + vecX.size());
                 // set name -> TODO should be define in the UI
-                if(physicalMeasurementX==='strain_true'){
+                if(data.xtype==='strain_true'){
                     curve.setXName(core.PhysicalMeasurement.STRAIN_TRUE);
                 }
-                else if(physicalMeasurementX==='strain_engineering'){
+                else if(data.xtype==='strain_engineering'){
                     curve.setXName(core.PhysicalMeasurement.STRAIN_ENGINEERING);
                 }
-                if(physicalMeasurementY==='stress_true'){
+                if(data.ytype==='stress_true'){
                     curve.setYName(core.PhysicalMeasurement.STRESS_TRUE);
                 }
-                else if(physicalMeasurementY==='stress_engineering'){
+                else if(data.ytype==='stress_engineering'){
                     curve.setYName(core.PhysicalMeasurement.STRESS_ENGINEERING);
                 }
                
@@ -340,20 +422,11 @@ const PlotBuilder = () => {
 
     // Plot handler
     const clickLegendHandler = (event) => {
-        const curve_index = event.curveNumber;
-        const updatedCurves = data.curves;
-
-        const newSelected = !data.curves[curve_index].selected;
-        let newOpacity = 1;
-        if(data.curves[curve_index].opacity===1) {
-            newOpacity = 0.2;
-        }
-        updatedCurves[curve_index].selected = newSelected;
-        updatedCurves[curve_index].opacity = newOpacity;
-
-        //setCurves(updatedCurves);
-        dispatch({type: 'UPDATE_CURVES', curves: updatedCurves});    
-        return false; // return false to disable the default behavior on plot_legendclick
+        return false; 
+        // disable this action
+        //const curve_index = event.curveNumber;
+        //dispatch({type: 'CLICK_CURVE', curveid: parseInt(curve_index)});    
+        //return false; // return false to disable the default behavior on plot_legendclick
     }
 
     const clickPointHandler = (data) => { // should be replace by a call to updateCurveHandler with the right ALGO/METHOD and id
@@ -366,18 +439,18 @@ const PlotBuilder = () => {
         console.log(curve_idx);
         const newCurves = [];
 
-        for(let ic=0; ic<data.curves.length; ic++){
+        for(let ic=0; ic<data.groups[data.selected_group].curves.length; ic++){
             if(ic===curve_idx){
                 const x_new = [];
                 const y_new = [];
                 for(let i=0; i<= pt_index; i++){
-                    x_new.push(data.curves[curve_idx].x[i]);
-                    y_new.push(data.curves[curve_idx].y[i]);
+                    x_new.push(data.groups[data.selected_group].curves[curve_idx].x[i]);
+                    y_new.push(data.groups[data.selected_group].curves[curve_idx].y[i]);
                 }
                 const curve = { x: x_new, y: y_new, name: 'curve'+ic, selected: true, opacity: 1};
                 newCurves.push(curve);
             } else {
-                const curve = { x: data.curves[ic].x, y: data.curves[ic].y, name: 'curve'+ic, selected: data.curves[ic].selected, opacity: data.curves[ic].opacity};
+                const curve = { x: data.groups[data.selected_group].curves[ic].x, y: data.groups[data.selected_group].curves[ic].y, name: 'curve'+ic, selected: data.groups[data.selected_group].curves[ic].selected, opacity: data.groups[data.selected_group].curves[ic].opacity};
                 newCurves.push(curve);
 
             }
@@ -389,8 +462,10 @@ const PlotBuilder = () => {
     const checkDataTreeHandler =  (checkedKeys) => {
         console.log('onCheck', checkedKeys);
         const keys = [];
+        let group_index;;
         if(checkedKeys.length>0){
-            const group_index = checkedKeys[checkedKeys.length-1].charAt(0);
+            //const group_index = checkedKeys[checkedKeys.length-1].charAt(0);
+            group_index = checkedKeys.slice(-1)[0].charAt(0);  // index group of last check
             checkedKeys.forEach( (item, index) =>
             {
                 if(item.charAt(0)===group_index){
@@ -398,7 +473,7 @@ const PlotBuilder = () => {
                 }  
             });
         }
-        dispatch({ type: 'CHECK_CURVES', keys: keys});
+        dispatch({ type: 'CHECK_CURVES', keys: keys, groupid: parseInt(group_index)});
       };
 
     return (
@@ -409,35 +484,51 @@ const PlotBuilder = () => {
                         handleOnFileLoad={handleOnFileLoad}/>
                 </Col>
                 <Col span={6}>
-                    <PhysicalMeasurementForm
+                    <Descriptions bordered layout="vertical" size='small'>
+                            <Descriptions.Item label="Curve info">
+                                Test type: {data.type}
+                                <br />
+                                X type: {data.xtype}
+                                <br />
+                                X unit: {data.xunit}
+                                <br />
+                                Y type: {data.ytype}
+                                <br />
+                                Y unit: {data.yunit}
+                                <br />
+                            </Descriptions.Item>
+                    </Descriptions>
+                    {/* <PhysicalMeasurementForm
                         variable='x'
-                        value={physicalMeasurementX}
+                        value={data.xtype}
                         handleChange={changePhysicalMeasurementXHandler}
                     />
                     <PhysicalMeasurementForm
                         variable='y'
-                        value={physicalMeasurementY}
+                        value={data.ytype}
                         handleChange={changePhysicalMeasurementYHandler}
-                    />
+                    /> */}
                 </Col>
-                <Col span={12}>
+            </Row>
+            <Row>
+                <Col span={6}>
+                    <Row>
                     <DataTree
                         treeData={data.tree}
                         checkedKeys={data.keys}
                         onCheck={checkDataTreeHandler} />
+                    </Row>
+                    <Row>
+                        <OperationControls
+                                    operations={operations}
+                                    updatedCurve={updatedCurveHandler}
+                                    changedParam={changedParamHandler}
+                                />
+                    </Row>
                 </Col>
-            </Row>
-            <Row>
-                <Col span={8}>
-                    <OperationControls
-                        operations={operations}
-                        updatedCurve={updatedCurveHandler}
-                        changedParam={changedParamHandler}
-                    />
-                </Col>
-                <Col span={12}>
+                <Col span={16}>
                     <PlotCurve
-                        curves={data.curves}
+                        curves={data.groups[data.selected_group].curves}
                         //updatePlot = {updatePlot}
                         clickLegendHandler={clickLegendHandler}
                         clickPointHandler = {clickPointHandler}

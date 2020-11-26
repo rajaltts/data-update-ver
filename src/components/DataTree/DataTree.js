@@ -55,23 +55,6 @@ const DataTree = (props) => {
     setAutoExpandParent(false);
   };
 
-//   const onCheck = (checkedKeys) => {
-//     console.log('onCheck', checkedKeys);
-//     const last = checkedKeys[checkedKeys.length-1];
-//     console.log(last);
-//     //const group_index = last.charAt(0);
-//     const group_index = checkedKeys[checkedKeys.length-1].charAt(0);
-    
-//     console.log(group_index);
-//     const keys = [];
-//     checkedKeys.forEach( (item, index) =>
-//         {
-//             if(item.charAt(0)===group_index)
-//              keys.push(item);
-//         });
-//     console.log(keys);
-//     setCheckedKeys(keys);
-//   };
 
   const onSelect = (selectedKeys, info) => {
     console.log('onSelect', info);
@@ -81,7 +64,6 @@ const DataTree = (props) => {
   return (
     <Tree
       checkable
-      multiple='true'
       onExpand={onExpand}
       expandedKeys={expandedKeys}
       autoExpandParent={autoExpandParent}
