@@ -1,11 +1,12 @@
 import React, { Fragment, useEffect, useState, useReducer } from 'react';
-import { Col, Row , Descriptions } from 'antd';
+import { Col, Row , Descriptions, Button } from 'antd';
 import 'antd/dist/antd.css';
 import FileLoader from '../../components/FileLoader/FileLoader';
 import PhysicalMeasurementForm from '../../components/PhysicalMeasurementForm/PhysicalMeasurementForm';
 import OperationControls from '../../components/OperationControls/OperationControls';
 import PlotCurve from '../../components/PlotCurve/PlotCurve';
 import DataTree from '../../components/DataTree/DataTree';
+import axios from '../../axios-orders';
 
 import DC from '../../assets/dataClean.js';
 import DCWASM from '../../assets/dataClean.wasm';
@@ -40,6 +41,9 @@ const dataReducer = (currentData, action) => {
             }
             return {...currentData, groups: groups_new, tree: dt_new};
 
+        }
+        case 'SET':{
+            return  action.input  ;
         }
         case 'UPDATE_CURVES':{
             // input: curves
@@ -179,7 +183,12 @@ const PlotBuilder = () => {
 
     useEffect( () => {
         console.log("UseEffect");
-    });
+        axios.get('https://dataclean-82e1c.firebaseio.com/data.json')
+        .then( response => {
+            dispatch({type:'SET', input: response.data });
+        })
+        .catch( error => console.log(error));
+    }, []);  // need [] to be executed only once time
 
     //CSV handler
     const handleOnFileLoad = (result) => {
@@ -476,15 +485,26 @@ const PlotBuilder = () => {
         dispatch({ type: 'CHECK_CURVES', keys: keys, groupid: parseInt(group_index)});
       };
 
+    // http handler
+    const saveDBHandler = (event) => {
+        console.log("SaveInFirebase");
+        axios.post('/data.json',data)
+            .then(response => console.log(response))
+            .catch(error => console.log(error));
+    };
+
     return (
         <>
             <Row>
-                <Col span={6}>
+                {/* <Col span={6}>
                     <FileLoader 
                         handleOnFileLoad={handleOnFileLoad}/>
-                </Col>
-                <Col span={6}>
-                    <Descriptions bordered layout="vertical" size='small'>
+                </Col> */}
+                <Col span={24}>
+                    <Descriptions bordered layout="horizontal" size='small'>
+                            <Descriptions.Item label="Data from">
+                                https://dataclean-82e1c.firebaseio.com/
+                            </Descriptions.Item>
                             <Descriptions.Item label="Curve info">
                                 Test type: {data.type}
                                 <br />
@@ -517,6 +537,9 @@ const PlotBuilder = () => {
                         treeData={data.tree}
                         checkedKeys={data.keys}
                         onCheck={checkDataTreeHandler} />
+                    {/* <Button type="primary" onClick={saveDBHandler}>
+                        Save in DB
+                    </Button> */}
                     </Row>
                     <Row>
                         <OperationControls
