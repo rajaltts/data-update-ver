@@ -1,15 +1,18 @@
 "use strict";
 
 const path = require("path");
+const CleanPlugin = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
-    mode: 'development',
+    mode: 'production',
     target: 'web',
     node: {
         fs: 'empty'  // need to us plotly
     },
-    
+    optimization: {
+        minimize: false
+    },
     // The application entry point
     entry:{
         app: path.join(__dirname, 'src', 'index.tsx')
@@ -17,8 +20,7 @@ module.exports = {
     // Where to compile the bundle
     output: {
         filename: 'bundle.js',
-        path: path.resolve(__dirname, 'dist'),
-        publicPath: 'dist'
+        path: path.resolve(__dirname, 'dist')
     },
     // Supported file loaders
     module: {
@@ -34,27 +36,26 @@ module.exports = {
         },
         {
             test: /\.(wasm)$/,
-            loader: 'file-loader',
-            type: 'javascript/auto',
+            loader: "file-loader",
+            type: "javascript/auto"
         }
         ]
     },
    
-    // Set debugging source maps to be "inline" for
-    // simplicity and ease of use
-    devtool: "inline-source-map",  //  need in tsconfig "sourceMap": true 
+    devtool: "none",  
     // File extensions to support resolving
     resolve: {
         extensions: ['*','.ts', '.tsx', '.js']
     },
-    // devServer: {
-    //     contentBase: path.join(__dirname, "public/"),
-    //     port: 3000,
-    //     publicPath: "http://localhost:3000/dist/",
-    //     hotOnly: true
-    // },
     plugins: [
-        new HtmlWebpackPlugin()
-    ]
+        // to clean dist before 
+        new CleanPlugin.CleanWebpackPlugin({
+            cleanOnceBeforeBuildPatterns: ['*.js','*.html']
+        }),
+        new HtmlWebpackPlugin({
+            filename: 'index.html',
+            inject: true,
+            template: path.resolve(__dirname, 'public', 'index.html')})
 
+    ]
 };
