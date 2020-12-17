@@ -47,12 +47,10 @@ module.exports = {
     resolve: {
         extensions: ['*','.ts', '.tsx', '.js']
     },
-    // devServer: {
-    //     contentBase: path.join(__dirname, "public/"),
-    //     port: 3000,
-    //     publicPath: "http://localhost:3000/dist/",
-    //     hotOnly: true
-    // },
+    devServer: {
+        contentBase: path.join(__dirname, ""),
+        port: 3000
+    },
     plugins: [
         new HtmlWebpackPlugin()
     ]

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import OperationControl from './OperationControl/OperationControl';
 import { Tabs, Switch, Space, Button, message } from 'antd';
-//import InteractiveOps from './InteractiveOps';
 import { Operation, Parameter } from '../../template.model';
 
 interface OperationControlsProps {
