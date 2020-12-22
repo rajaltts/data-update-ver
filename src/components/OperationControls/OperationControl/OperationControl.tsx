@@ -1,5 +1,5 @@
-import React, { Fragment, useState } from 'react';
-import { Select, Button, Input, Space, List, Typography, Divider  } from 'antd';
+import React, { Fragment, useEffect, useState } from 'react';
+import { Select, Button, Input, Space, Alert, Typography, Divider  } from 'antd';
 
 
 interface OperationControlProps {
@@ -7,7 +7,10 @@ interface OperationControlProps {
     selected_method: string;
     automatic_mode: boolean;
     changeSelectedMethod: any;
-    updated: any;
+    applyButton: any;
+    resetButton: any;
+    changeParameter: any;
+    status: string;
 };
 
 
@@ -15,24 +18,61 @@ interface OperationControlProps {
 const OperationControl: React.FC<OperationControlProps> = (props) => {
     type param_type = { name: string; value: string;};
     type Param_type = { hasParam: boolean; params: param_type[]; type: string};
-    const [param, setParam] = useState<Param_type>({hasParam: false, params: [], type:''});
     
     const { Option } = Select;
     
     const changeMethodHandler = (selectedMethod: string) => {
         props.changeSelectedMethod(selectedMethod);
-        const selected_method = props.methods.find( e => e.type===selectedMethod );
-        if(selected_method.params.length>0){
-            setParam({hasParam: true, params: selected_method.params, type: selectedMethod });
-        } else {
-            setParam({hasParam: false, params: [], type: selectedMethod});
-        }
+    }
+    
+    const changePamaterHandler =  (e: any, name: string) => {
+        const value: string = e.target.value;
+        return props.changeParameter(name,value);
     }
 
-    const handleSelectedMethod= () => { 
-    return props.selected_method;
-     };
-    
+    const selectParamHandler = (value:any, name: string) => {
+        return props.changeParameter(name,value);
+    }
+
+    const DisplayParameters = () => {
+        const sm = props.methods.find( e => e.type===props.selected_method );
+        let items = [];
+        if(sm.params.length>0){
+          sm.params.map( par => {
+              if( 'selection' in par){
+                items.push(
+                    <>
+                    <br/>
+                    {par.label}
+                    <Select placeholder="Default value" size='small' value={par.value} style={{width: 150}} onChange={ (e) => selectParamHandler(e,par.name)}>{
+                        par.selection.map( (elm,index) => {
+                            return(<Option value={elm.name}>{elm.label}</Option>);
+                        })
+                    }
+                    </Select>
+                    </>
+                );
+
+              } else {
+                items.push(
+                    <Input size='small' type="text" addonBefore={par.label} defaultValue={par.value.toString() } onChange={ e => changePamaterHandler(e,par.name)} />
+                  )
+              }
+              
+             
+          });            
+        } 
+        return <>{items}</>;
+    }
+
+    const DisplayAlert = () => {
+        let ret: any;
+        if(props.status==='failed')
+            ret = <Alert  message="FAILED" type="error"/>;
+        else
+            ret = null;
+        return ret;
+    }
 
     return(
         <>
@@ -45,19 +85,18 @@ const OperationControl: React.FC<OperationControlProps> = (props) => {
         }
         </Select>
        
-        {param.hasParam && param.params.map( par => {
-            return(
-                <Input size='small' addonBefore={par.name} defaultValue={par.value.toString() } onChange={ () => {} } />
-            );
-        })}
+        <DisplayParameters/>
         
         <br/>
         <br/>
-        
-        {!props.automatic_mode && <Space>
-                <Button size="small" type="primary" onClick={() => {}}>Reset</Button>
-                <Button size="small" type="primary" onClick={(event) => props.updated(event,param.type)}>Apply</Button>
-         </Space>}
+        {/* && (props.status==='success'||props.status==='waiting') */}
+        {(!props.automatic_mode ) && <Space>
+                <Button size="small" type="primary" onClick={props.resetButton}>Cancel</Button>
+                <Button size="small" type="primary" onClick={props.applyButton}>Apply</Button>
+         </Space>
+         }
+         {!props.automatic_mode && <DisplayAlert/>}
+
         </>
     
     );

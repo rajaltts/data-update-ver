@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import OperationControl from './OperationControl/OperationControl';
 import { Tabs, Switch, Space, Button, message } from 'antd';
+import { CheckOutlined } from '@ant-design/icons';
 import { Operation, Parameter } from '../../template.model';
 
 interface OperationControlsProps {
@@ -8,13 +9,15 @@ interface OperationControlsProps {
     updateTemplate: any;
     changeSelectedMethod: any;
     updatedCurve: any;
-
+    resetCurve: any;
+    changeParameter: any;
+    resetAll: any;
 };
 
 const OperationControls: React.FC<OperationControlsProps> = (props) => {
 
     const [current, setCurrent] = useState('1');
-    const [auto, setAuto] = useState(true);
+    const [auto, setAuto] = useState(false);
 
    
     const { TabPane } = Tabs;
@@ -51,17 +54,15 @@ const OperationControls: React.FC<OperationControlsProps> = (props) => {
         setAuto(checked);
     };
 
-   
-
     return (
     <>
     <div style={{borderStyle: 'solid', borderWidth: '2px', margin: 'auto', padding: '10px'}}>
         <h1 style={{textAlign: 'center'}}>
-            Treatment: Tensile
+            Analysis type: Tensile
         </h1>
         <Space align='center'>
             Manual
-            <Switch  defaultChecked style={{backgroundColor: "grey"}} onChange={switchChange} />
+            <Switch style={{backgroundColor: "grey"}} onChange={switchChange} />
             Auto
         </Space>
             
@@ -75,18 +76,31 @@ const OperationControls: React.FC<OperationControlsProps> = (props) => {
             >{
             props.operations.map( (op,index) => {
                 const tab_name = "Step "+(++index).toString();
+                let flag: any;
+                if(!auto && op.status==='success'){
+                    flag = (<span> {tab_name} <CheckOutlined/></span>);
+                } else {
+                    flag = (<span> {tab_name} </span>);
+                }
+
+                
                 return(
-                    <TabPane tab={tab_name}
+                <TabPane tab={flag}
                              key={index.toString()}
                              disabled={disabledFct(index.toString())}>
-                        Operation {op.action}
-                        <br/>
+                        <h1>{op.action_label}</h1>   
+                        
                         <OperationControl
                             methods = {op.methods}
                             selected_method = {op.selected_method}
                             automatic_mode = {auto}
                             changeSelectedMethod = {(select: string) => changeSelectedMethod2(select,op.action)}
-                            updated= {props.updatedCurve}/>
+                            changeParameter = { (name: string, value: string) => props.changeParameter(name, value, op.action)}
+                            applyButton = { (event: any) => props.updatedCurve(event,op.action)}
+                            resetButton = { (event: any) => props.resetCurve(event,op.action)}
+                            status = {op.status}
+                            />
+                            
                     </TabPane>
                 );
             })
@@ -95,9 +109,10 @@ const OperationControls: React.FC<OperationControlsProps> = (props) => {
     <br/>
     <br/>
     
+    
     <Space style={{paddingLeft: '15px'}}>
-            <Button size="small" type="primary" onClick={() => {}}>Reset all</Button>
-            <Button size="small" type="primary" onClick={() => {}}>Apply all</Button>
+            <Button size="small" type="primary" onClick={props.resetAll}>Reset all</Button>
+            {auto && <Button size="small" type="primary" onClick={(event: any) => {props.updatedCurve(event,'Template')}}>Apply all</Button>}
     </Space>
     
     <br/>

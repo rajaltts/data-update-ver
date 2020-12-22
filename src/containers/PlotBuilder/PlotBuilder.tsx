@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useState, useReducer } from 'react';
-import { Col, Row , Descriptions, Button } from 'antd';
+import { Col, Row , Alert, Button } from 'antd';
 import 'antd/dist/antd.css';
 import PlotCurve from '../../components/PlotCurve/PlotCurve';
 import OperationControls from '../../components/OperationControls/OperationControls'
@@ -8,8 +8,8 @@ import CurveControls from '../../components/CurveControls/CurveControls'
 import { Data, Group, Curve, Tree, GroupData, CurveData } from '../../data.model';
 import { Operation } from '../../template.model';
 
-//import Module from '../../assets/dataclean/dataclean';
 import ReactWasm from '../../assets/dataclean/dataclean.js'
+
 interface EmscriptenModule {
     [key: string]: any
 }
@@ -18,16 +18,17 @@ interface EmscriptenModule {
 type Action = 
     | {type: 'CHECK_CURVES', keys: string[], groupid: number}
     | {type: 'SET', input: any}
-    | {type: 'UPDATE_CURVES', curves: Curve[] };
+    | {type: 'UPDATE_CURVES', curves: Curve[] }
+    | {type: 'RESET_CURVES', input: any};
 
 const dataReducer = (currentData: Data, action: Action) => {
    switch (action.type) {
         case 'SET':{
             const data: Data = {type: action.input.type,
                                 xtype: action.input.xtype,
-                                ytype: action.input.xtype,
-                                xunit: action.input.xtype,
-                                yunit: action.input.ytype,
+                                ytype: action.input.ytype,
+                                xunit: action.input.xunit,
+                                yunit: action.input.yunit,
                                 groups: [],
                                 tree: { groupData: [],
                                         keys: [],
@@ -83,6 +84,11 @@ const dataReducer = (currentData: Data, action: Action) => {
             console.log(group_new);
             return {...currentData, groups: group_new};
         }
+        case 'RESET_CURVES': {
+             const group_new = [...currentData.groups];
+             group_new[action.input.groupId].curves = action.input.curves;
+             return {...currentData, groups: group_new}
+        }
         default:
             throw new Error('Not be reach this case'); 
    }
@@ -91,6 +97,7 @@ const dataReducer = (currentData: Data, action: Action) => {
 interface PlotBuilderProps {};
 
 const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
+    // datat represents the state related to curves management 
     const [data, dispatch]  =  useReducer(dataReducer,
         {
             type: 'tensile', xtype: '', ytype: '', xunit: '', yunit: '',
@@ -106,114 +113,158 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                     selectedGroup: 0}
         }
         );
-    
-    const [operations, setOperations] = useState( [
-            {
-                action: 'Cleaning_ends',
-                methods: [
-                    { 
-                        label: 'none',
-                        type: 'None',
-                        params: []
-                    },
-                    {
-                        label: 'Y_Max',
-                        type: 'Y_Max',
-                        params: []
-                    },
-                    {
-                        label: 'Max_X',
-                        type: 'Max_X',
-                        params: [{name: 'x',  value: '0.05'}]
-                    }
-                   
-                ],
-                selected_method: 'None'
-            },
-            {
-                action: 'Shifting',
-                methods: [
-                    { 
-                        label: 'none',
-                        type: 'None',
-                        params: []
-                    },
-                    {
-                        label: 'X_shift_defined',
-                        type: 'X_shift_defined',
-                        params: [{name: 'x',  value: '0.05'}]
-                    },
-                    {
-                        label: 'X_tangent_xrange',
-                        type: 'X_tangent_xrange',
-                        params: []
-                    }
-                ],
-                selected_method: 'None'
-            },
-            {
-                action: 'Averaging',
-                methods: [
-                    { 
-                        label: 'none',
-                        type: 'None',
-                        params: []
-                    },
-                    {
-                        label: 'spline',
-                        type: 'Spline',
-                        params: [{name: 'number of points', value: '30'}, {name: 'delta', value: '0.005'}, { name: 'regularization', value: '-4'} ]
-                    },
-                    {
-                        label: 'polynomial',
-                        type: 'Polynomial',
-                        params: [{name: 'number of points', value: '30'},{name: 'order', value: '6'}]
-                    }
-                ],
-                selected_method: 'None'
-            }
-        ]);
 
-    // a template is an array of operations
+    const [previousCurves, setPreviousCurves] = useState(
+        {
+            groupId: -1,
+            action: '',
+            curves:  [ {id: -1, x: [], y: [], name: 'toto', selected: false, opacity: 0} ]
+        }
+    );    
+    // operations represent the state related to actions/methods/parameters 
+    // for tensile case
+    const operations_initial = [
+        {
+            action: 'Cleaning_ends',
+            action_label: 'Cleaning ends',
+            methods: [
+                { 
+                    label: 'None',
+                    type: 'None',
+                    params: []
+                },
+                {
+                    label: 'Strength',
+                    type: 'Y_Max',
+                    params: []
+                },
+                {
+                    label: 'Max strain',
+                    type: 'X_Max',
+                    params: []
+                },
+                {
+                    label: 'Strain',
+                    type: 'Max_X',
+                    params: [{label: 'value', name: 'value',  value: '0.05'}]
+                },
+                {
+                    label: 'Stress',
+                    type: 'Max_Y',
+                    params: [{label: 'value', name: 'value',  value: '1000'}]
+                }
+            ],
+            selected_method: 'None',
+            status: 'waiting'
+        },
+        {
+            action: 'Shifting',
+            action_label: 'Shifting',
+            methods: [
+                { 
+                    label: 'None',
+                    type: 'None',
+                    params: []
+                },
+                {
+                    label: 'Defined strain',
+                    type: 'X_shift_defined',
+                    params: [{label: 'value', name: 'value',  value: '-0.01'}]
+                },
+                {
+                    label: 'Stiffness stress based',
+                    type: 'X_tangent_yrange',
+                    params: [{label: 'min stress', name: 'min', value: '0'},
+                             {label: 'max stress', name: 'max', value: '100'}]
+                },
+                {
+                    label: 'Stiffness strain based',
+                    type: 'X_tangent_xrange',
+                    params: [{label: 'min strain', name: 'min', value: '0'},
+                             {label: 'max strain',  name: 'max',value: '0.001'}]
+                }
+            ],
+            selected_method: 'None',
+            status: ''
+        },
+        {
+            action: 'Averaging',
+            action_label: 'Averaging',
+            methods: [
+                { 
+                    label: 'none',
+                    type: 'None',
+                    params: []
+                },
+                {
+                    label: 'spline',
+                    type: 'Spline',
+                    params: [{label: 'end point', name: 'end_point',  selection: [{label:'strain',name:'x_value'},{label:'mean max strain', name:'mean_max_x'}], value: 'x_value'},
+                             {label:'end point value', name: 'end_point_value',  value: ''},
+                             {label:'number of points', name: 'number_of_points',  value: '30'},
+                             {label:'number of nodes', name: 'number_of_nodes', value: '10'},
+                             {label:'regularization', name: 'regularization', value: '-4'} ]
+                },
+                {
+                    label: 'polynomial',
+                    type: 'Polynomial',
+                    params: [{label:'number of points', name: 'number_of_points', value: '30'},
+                             {label:'order', name: 'order', value: '6'}]
+                }
+            ],
+            selected_method: 'None',
+            status: ''
+        }
+    ]
+    const [operations, setOperations] = useState(operations_initial);
+    // a template represent a particular set of action/method/parameter initialize by a json file
     const [template, setTemplate] = useState<Operation[]>([{action: '', method: ''}]);
 
-    const [init,setInit] = useState<Boolean>(false);
-
-    // fct called by  init button to init data and template 
-    //function initHandler() {
+    // fct called by  init button to init data state and template state 
     const initHandler = () => { 
+        // init data state
         let data_file = require('../../data/data.json');
         dispatch({type: 'SET', input: data_file});
-       
-
+       // init template stae
        let tensile_template: Operation[] = require('../../data/tensile_template.json');
        setTemplate(tensile_template);
-
-       // update operations with the template
-       // NB: I do not use template but tensile_template because useState is asynchroneous, not sure that template is defined
-       // Need to use useEffect to track
-       // TO BE CHANGED
-        tensile_template.forEach( (elem,index) => {
-            const op_index = operations.findIndex( op => op.action === elem.action );
-            if(op_index===-1)
-                throw new Error("ERROR in tensile template: action not found");
-            const op = operations[op_index];
-            const meth_index = op.methods.findIndex( met => met.type === elem.method);
-            if(meth_index===-1)
-                throw new Error("ERROR in tensile template: action not found");
-            const operationsUpdated = [...operations];
-            const paramsUpdated= elem.params;
-            operationsUpdated[op_index].methods[meth_index].params.length = 0;
-            for(let i=0; i< paramsUpdated!.length; i++){
-                const new_param = { name: paramsUpdated![i].name, value:  paramsUpdated![i].value.toString()  };
-                operationsUpdated[op_index].methods[meth_index].params.push(new_param);
-            }
-            operationsUpdated[op_index].selected_method = elem.method;
-            setOperations(operationsUpdated);         
-        }
-        );
-
+       // init operations state
+       setOperations(operations_initial);
     };
+
+    // use to update operations state from template state
+    useEffect( () => {
+        if(template.length>1){
+            template.forEach( (elem,index) => {
+                const op_index = operations.findIndex( op => op.action === elem.action );
+                if(op_index===-1)
+                    throw new Error("ERROR in tensile template: action not found");
+                const op = operations[op_index];
+                const meth_index = op.methods.findIndex( met => met.type === elem.method);
+                if(meth_index===-1)
+                    throw new Error("ERROR in tensile template: action not found");
+                const operationsUpdated = [...operations];
+                const paramsUpdated= elem.params;
+                
+                const param_cur = operationsUpdated[op_index].methods[meth_index].params;
+                const param_new = [];
+                for(let i=0; i<param_cur.length;i++ ){
+                    const name_c = param_cur[i].name;
+                    const param_temp = paramsUpdated.find( p => p.name===name_c);
+                    if(param_temp !== undefined ){
+                        //const new_param = {label: param_cur[i].label, name: param_cur[i].name, value: param_temp.value.toString() };
+                        const new_param ={...param_cur[i], value: param_temp.value.toString()};
+                        param_new.push(new_param);
+                    }
+                }
+                operationsUpdated[op_index].methods[meth_index].params.length = 0;
+                operationsUpdated[op_index].methods[meth_index].params = param_new;
+                operationsUpdated[op_index].selected_method = elem.method;
+                setOperations(operationsUpdated);         
+            }
+            );
+        }
+    },template);
 
     
     const updateTemplateHandler = () => {
@@ -248,16 +299,43 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         dispatch({ type: 'CHECK_CURVES', keys: keys, groupid: group_id});
     };
 
+    const changeParameterHandler = (name: string, value: string, action: string) => {
+        const a = operations.find( (el) => el.action === action);
+        const sm = a.selected_method;
+        const m = a.methods.find( e => e.type === sm);
+        const p = m.params.find( e => e.name === name);
+        p.value = value;
+    }
     //Operation Handler
-    const updatedCurveHandler = (event,type) => {
+    const updatedCurveHandler = (event,action) => {
+        const group_id = data.tree.selectedGroup;
+        let action_selected: any;
+        let type: string; // name of the method selected
+        let method_selected: any;
+        if(action==='Template'){
+            type='Template';
+        } else {
+            action_selected = operations.find( (el) => el.action === action);
+            type = operations.find( (el) => el.action === action).selected_method;
+            method_selected = action_selected.methods.find( e => e.type === type);
+        }
+        
+    
         console.log("----------transform curves-------------");
         const newCurves = []; // do not use newCurves = curves because it will a reference because curves must be unchanged to activate the update, newCurves = [...curves] or curves.slice() are not a deep copy but a shallow copy -> does not work
+        const prevCurves = [];
         // perform a hard copy by hand
-        const curves = data.groups[data.tree.selectedGroup].curves;
-        for(let ic=0; ic<data.groups[data.tree.selectedGroup].curves.length; ic++){
+        const curves = data.groups[group_id].curves;
+        for(let ic=0; ic<data.groups[group_id].curves.length; ic++){
             const curve = { x: curves[ic].x, y: curves[ic].y, name: 'curve'+ic, selected: curves[ic].selected, opacity: curves[ic].opacity};
             newCurves.push(curve);
+            const curve2 = { x: [...curves[ic].x], y: [...curves[ic].y], name: 'curve'+ic, selected: curves[ic].selected, opacity: curves[ic].opacity}
+            prevCurves.push(curve2);
         }
+
+        // save previous curves
+        const prev_curves = {groupId: group_id, action: action_selected, curves: prevCurves };
+        setPreviousCurves(prev_curves);
         
         // test
         const Module: EmscriptenModule  = {};
@@ -318,7 +396,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                 return new Promise((success,failure) => {
                     console.log("OPERATION STARTED");
                     let check = true;
-                    if(type==='Y_Max'){
+                    if(type==='Y_Max'){ 
                         // create operation
                         const operation = new Module.Operation(Module.ActionType.CLEANING_ENDS,Module.MethodType.Y_MAX);
                         console.log(operation);
@@ -326,6 +404,109 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                          check = dataprocess.apply(operation);
                          operation.delete();
                     }
+                    if(type==='X_Max'){ 
+                        // create operation
+                        const operation = new Module.Operation(Module.ActionType.CLEANING_ENDS,Module.MethodType.X_MAX);
+                        console.log(operation);
+                         // apply operation
+                         check = dataprocess.apply(operation);
+                         operation.delete();
+                    }
+                    else if(type==='Max_X'){
+                        // create operation
+                        const operation = new Module.Operation(Module.ActionType.CLEANING_ENDS,Module.MethodType.MAX_X);
+                        const param = method_selected.params.find( e => e.name === 'value');
+                        const value = Number(param.value);
+                        operation.addParameterFloat("value",value);
+                        console.log(operation);
+                         // apply operation
+                         check = dataprocess.apply(operation);
+                         operation.delete();
+                    }
+                    else if(type==='Max_Y'){
+                        // create operation
+                        const operation = new Module.Operation(Module.ActionType.CLEANING_ENDS,Module.MethodType.MAX_Y);
+                        const param = method_selected.params.find( e => e.name === 'value');
+                        const value = Number(param.value);
+                        operation.addParameterFloat("value",value);
+                        console.log(operation);
+                         // apply operation
+                         check = dataprocess.apply(operation);
+                         operation.delete();
+                    } 
+                    else if(type==='X_shift_defined'){
+                        // create operation
+                        const operation = new Module.Operation(Module.ActionType.SHIFTING,Module.MethodType.X_SHIFT_DEFINED);
+                        const param = method_selected.params.find( e => e.name === 'value');
+                        const value = Number(param.value);
+                        operation.addParameterFloat("max", value); 
+                        // apply operation
+                         check = dataprocess.apply(operation);
+                         operation.delete();
+                    }
+                    else if(type==='X_tangent_yrange'){
+                        // create operation
+                        const operation = new Module.Operation(Module.ActionType.SHIFTING,Module.MethodType.X_TANGENT_YRANGE);
+                        const param_min = method_selected.params.find( e => e.name === 'min');
+                        const value_min = Number(param_min.value);
+                        operation.addParameterFloat("min", value_min);
+                        const param_max = method_selected.params.find( e => e.name === 'max');
+                        const value_max = Number(param_max.value);
+                        operation.addParameterFloat("max", value_max); 
+                        // apply operation
+                         check = dataprocess.apply(operation);
+                         operation.delete();
+                    }
+                    else if(type==='X_tangent_xrange'){
+                        // create operation
+                        const operation = new Module.Operation(Module.ActionType.SHIFTING,Module.MethodType.X_TANGENT_XRANGE);
+                        const param_min = method_selected.params.find( e => e.name === 'min');
+                        const value_min = Number(param_min.value);
+                        operation.addParameterFloat("min", value_min);
+                        const param_max = method_selected.params.find( e => e.name === 'max');
+                        const value_max = Number(param_max.value);
+                        operation.addParameterFloat("max", value_max); 
+                        // apply operation
+                         check = dataprocess.apply(operation);
+                         operation.delete();
+                    }  
+                    else if(type==='Spline'){
+                        // create operation
+                        const operation = new Module.Operation(Module.ActionType.AVERAGING,Module.MethodType.SPLINE);
+                        const param_nb_nodes = method_selected.params.find( e => e.name === 'number_of_nodes');
+                        const value_nb_nodes = Number(param_nb_nodes.value);
+                        operation.addParameterInt("number_of_nodes", value_nb_nodes);
+                        const param_reg = method_selected.params.find( e => e.name === 'regularization');
+                        const value_reg = Number(param_reg.value);
+                        operation.addParameterInt("regularization",value_reg);
+                        const param_pts = method_selected.params.find( e => e.name === 'number_of_points');
+                        const value_pts = Number(param_pts.value);
+                        operation.addParameterInt("number_of_points",value_pts); 
+                        const param_end_point = method_selected.params.find( e => e.name === 'end_point');
+                        const value_end_point = param_end_point.value;
+                        operation.addParameterString("end_point",value_end_point);
+                        const param_end_point_value =  method_selected.params.find( e => e.name === 'end_point_value');
+                        if(param_end_point_value.value.length >0){
+                            const value_end_point_value = Number(param_end_point_value.value);
+                            operation.addParameterFloat("end_point_value",value_end_point_value);
+                        }
+                        // apply operation
+                        try{
+                            check = dataprocess.apply(operation);
+                        } catch (error) {
+                            console.log("AVERAGING ERROR"+error);
+                        }
+                        operation.delete();
+                    } 
+                    else if(type==='Template'){
+                        let template_tensile_no_extraplation = require('../../data/template_tensile_no_extrapolation.json');
+                        let s = JSON.stringify(template_tensile_no_extraplation);
+                        const operation = new Module.Operation(s);
+                        // apply operation
+                        check = dataprocess.apply(operation);
+                        operation.delete();
+                    }
+                    
                     if(check) {
                         success(dataprocess);
                     } else {
@@ -390,12 +571,24 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
 
                 // update the state with the new curves
                 console.log("UPDATE STATE");
-                dispatch({type: 'UPDATE_CURVES', curves: newCurves});                
+                dispatch({type: 'UPDATE_CURVES', curves: newCurves});
+                // flag status operation
+                const operationsUpdate = [...operations];
+                const ind = operationsUpdate.findIndex( (el) => el.action === action);
+                operationsUpdate[ind].status = 'success';
+                if(ind<operationsUpdate.length-1)
+                    operationsUpdate[ind+1].status = 'waiting';
+               // operationsUpdate.find( (el) => el.action === action).status = 'success';
+                setOperations(operationsUpdate);
             }
 
-            const todoOperationFailed = (datprocess) => {
+            const todoOperationFailed = (dataprocess) => {
                 console.log("ERROR KO"+dataprocess.getErrorMessage());
                 console.log("LOG OK:"+dataprocess.logfile());
+                // flag status operation
+                const operationsUpdate = [...operations];
+                operationsUpdate.find( (el) => el.action === action).status = 'failed';
+                setOperations(operationsUpdate);
             }
 
             const promise = applyOperation(dataprocess,type);
@@ -404,6 +597,17 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                 });
         });
         
+    };
+
+    const resetOperationHandler = (event, action) => {
+        dispatch({type: 'RESET_CURVES',input: previousCurves});
+         // flag status operation
+        const operationsUpdate = [...operations];
+        const ind = operationsUpdate.findIndex( (el) => el.action === action);
+        operationsUpdate[ind].status = 'waiting';
+        if(ind<operationsUpdate.length)
+            operationsUpdate[ind+1].status = '';
+        setOperations(operationsUpdate);
     };
 
     return (
@@ -417,7 +621,11 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                          operations={operations}
                          updateTemplate={updateTemplateHandler}
                          changeSelectedMethod={changeSelectedMethodHandler}
-                         updatedCurve={updatedCurveHandler}/>
+                         changeParameter= {changeParameterHandler}
+                         updatedCurve={updatedCurveHandler}
+                         resetCurve={resetOperationHandler}
+                         resetAll={initHandler}
+                         />
                 </Col>
                 <Col span={12}>
                     <PlotCurve

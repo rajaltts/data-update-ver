@@ -11,7 +11,7 @@ module.exports = {
         fs: 'empty'  // need to us plotly
     },
     optimization: {
-        minimize: false
+        minimize: true // set to false to have a readable bundle.js file
     },
     // The application entry point
     entry:{
