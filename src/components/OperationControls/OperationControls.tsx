@@ -52,24 +52,25 @@ const OperationControls: React.FC<OperationControlsProps> = (props) => {
     const switchChange = (checked: boolean, event: Event) => {
         console.log('swtich to $(checked)');
         setAuto(checked);
-    };
+    }
+
 
     return (
-    <>
-    <div style={{borderStyle: 'solid', borderWidth: '2px', margin: 'auto', padding: '10px'}}>
-        <h1 style={{textAlign: 'center'}}>
-            Analysis type: Tensile
-        </h1>
-        <Space align='center'>
-            Manual
-            <Switch style={{backgroundColor: "grey"}} onChange={switchChange} />
-            Auto
-        </Space>
+     <>
+     <div style={{borderStyle: 'solid', borderWidth: '2px', margin: 'auto', padding: '10px'}}>
+         <h1 style={{textAlign: 'center'}}>
+             Analysis type: Tensile
+         </h1>
+         <Space align='center'>
+             Manual
+             <Switch style={{backgroundColor: "grey"}} onChange={switchChange} />
+             Auto
+         </Space>
             
-        <br/>
-        <br/>
+         <br/>
+         <br/>
 
-        <Tabs style={{borderStyle: 'solid', borderWidth: '2px', margin: 'auto', padding: '10px'}}
+         <Tabs style={{borderStyle: 'solid', borderWidth: '2px', margin: 'auto', padding: '10px'}}
             defaultActiveKey="1"  type="card"
             onChange={callback}
             onTabClick={tabClickHandler}
@@ -123,6 +124,7 @@ const OperationControls: React.FC<OperationControlsProps> = (props) => {
    
     </>
     );
+
 /*
     return (
         <Tabs defaultActiveKey="1"  type="card" onChange={callback} onTabClick={tabClickHandler}>

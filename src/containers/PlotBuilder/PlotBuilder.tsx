@@ -4,6 +4,7 @@ import 'antd/dist/antd.css';
 import PlotCurve from '../../components/PlotCurve/PlotCurve';
 import OperationControls from '../../components/OperationControls/OperationControls'
 import CurveControls from '../../components/CurveControls/CurveControls'
+import Steps from '../../components/Steps/Steps';
 
 import { Data, Group, Curve, Tree, GroupData, CurveData } from '../../data.model';
 import { Operation } from '../../template.model';
@@ -617,7 +618,14 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
             </Row>
             <Row justify="space-around">
                 <Col span={6}>
-                    <OperationControls
+                    <Steps operations={operations}
+                           changeSelectedMethod={changeSelectedMethodHandler}
+                           changeParameter= {changeParameterHandler}
+                           updatedCurve={updatedCurveHandler}
+                           resetCurve={resetOperationHandler}
+                           resetAll={initHandler}
+                    />
+                    {/* <OperationControls
                          operations={operations}
                          updateTemplate={updateTemplateHandler}
                          changeSelectedMethod={changeSelectedMethodHandler}
@@ -625,7 +633,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                          updatedCurve={updatedCurveHandler}
                          resetCurve={resetOperationHandler}
                          resetAll={initHandler}
-                         />
+                         /> */}
                 </Col>
                 <Col span={12}>
                     <PlotCurve

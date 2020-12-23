@@ -43,7 +43,7 @@ const CurveControls: React.FC<CurveControlsProps> = (props) => {
             Curves
           </h1>
           <br/>
-          <Space>
+          <Space align='start'>
             <Radio.Group onChange={onChangeGroup} value={group}>{
                 props.groupData.map( (g,index) => {
                     return(
