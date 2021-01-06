@@ -12,6 +12,7 @@ interface StepProps {
     applyButton: any;
     resetButton: any;
     status: string;
+    error_msg: string;
 };
 
 const Step: React.FC<StepProps> = (props) => {
@@ -64,7 +65,7 @@ const Step: React.FC<StepProps> = (props) => {
     const DisplayAlert = () => {
         let ret: any;
         if(props.status==='failed')
-            ret = <Alert  message="FAILED" type="error"/>;
+            ret = <Alert  message={props.error_msg} type="error"/>;
         else
             ret = null;
         return ret;

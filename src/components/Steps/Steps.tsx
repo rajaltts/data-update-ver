@@ -29,6 +29,10 @@ const Steps: React.FC<StepsProps> = (props) => {
         return  props.changeSelectedMethod(select,action);
     }
 
+    const changeParameter =  (name: string, value: string, action: string) => {
+        return props.changeParameter(name, value, action);
+    }
+
     const updatedCurveHandler = (event:any, action: string) => {
         return props.updatedCurve(event,action);
     }
@@ -46,10 +50,11 @@ const Steps: React.FC<StepsProps> = (props) => {
                               methods = {op.methods}
                               selected_method = {op.selected_method}
                               changeSelectedMethod = {(select: string) => changeSelectedMethod2(select,op.action)}
-                              changeParameter = { (name: string, value: string) => props.changeParameter(name, value, op.action)}
+                              changeParameter = { (name: string, value: string) => changeParameter(name, value, op.action)}
                               applyButton = { (event: any) => updatedCurveHandler(event,op.action)}
                               resetButton = { (event: any) => resetCurveHandler(event,op.action)}
-                              status = {op.status} 
+                              status = {op.status}
+                              error_msg = { op.error}
                         />);
         });
         return steps[current];

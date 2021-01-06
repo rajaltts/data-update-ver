@@ -4,6 +4,7 @@ import { CSVReader } from 'react-papaparse';
 const buttonRef = React.createRef()
 
 class FileLoader extends Component {
+  
 
     handleOpenDialog = (e) => {
         // Note that the ref is set async, so it might be null at some point

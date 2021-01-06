@@ -95,7 +95,10 @@ const dataReducer = (currentData: Data, action: Action) => {
    }
 };
 
-interface PlotBuilderProps {};
+interface PlotBuilderProps {
+    data_input: any;
+    template_input: any;
+};
 
 const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
     // datat represents the state related to curves management 
@@ -156,7 +159,8 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                 }
             ],
             selected_method: 'None',
-            status: 'waiting'
+            status: 'waiting',
+            error: ''
         },
         {
             action: 'Shifting',
@@ -186,7 +190,8 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                 }
             ],
             selected_method: 'None',
-            status: ''
+            status: '',
+            error: ''
         },
         {
             action: 'Averaging',
@@ -214,7 +219,8 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                 }
             ],
             selected_method: 'None',
-            status: ''
+            status: '',
+            error: ''
         }
     ]
     const [operations, setOperations] = useState(operations_initial);
@@ -223,18 +229,21 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
 
     // fct called by  init button to init data state and template state 
     const initHandler = () => { 
-        // init data state
-        let data_file = require('../../data/data.json');
-        dispatch({type: 'SET', input: data_file});
-       // init template stae
-       let tensile_template: Operation[] = require('../../data/tensile_template.json');
-       setTemplate(tensile_template);
-       // init operations state
-       setOperations(operations_initial);
+    //     // init data state
+    //     let data_file = require('../../data/data.json');
+    //     dispatch({type: 'SET', input: data_file});
+    //    // init template stae
+    //    let tensile_template: Operation[] = require('../../data/tensile_template.json');
+    //    setTemplate(tensile_template);
+    //    // init operations state
+    //    setOperations(operations_initial);
     };
 
     // use to update operations state from template state
     useEffect( () => {
+        dispatch({type: 'SET', input: props.data_input});
+        setTemplate(props.template_input);
+
         if(template.length>1){
             template.forEach( (elem,index) => {
                 const op_index = operations.findIndex( op => op.action === elem.action );
@@ -589,6 +598,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                 // flag status operation
                 const operationsUpdate = [...operations];
                 operationsUpdate.find( (el) => el.action === action).status = 'failed';
+                operationsUpdate.find( (el) => el.action === action).error = dataprocess.getErrorMessage();
                 setOperations(operationsUpdate);
             }
 
