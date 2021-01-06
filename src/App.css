@@ -2,3 +2,149 @@
     margin: 1rem;
     font-family: Arial, Helvetica, sans-serif;
   }
+  
+  .PropertyDef .ant-checkbox-group .ant-checkbox-group-item{
+    display: block;
+   
+  }
+
+  .PropertyDef .ant-checkbox-group{
+    margin-left: 40px;
+  }
+
+  .PropertyDef{
+    margin: 20px;
+    border-style: solid;
+    border-width: 1px;
+    border-color: rgb(231, 230, 230);
+    padding: 20px;
+    margin-top: 40px;
+  }
+
+    .DefineGroup{
+    margin: 20px;
+    border-style: solid;
+    border-width: 1px;
+    border-color: rgb(231, 230, 230);
+    padding: 20px;
+    margin-top: 40px;
+    width:110vh;
+  }
+
+  div.ButtonPanel{
+    margin: 40px;
+    
+  }
+
+  div.ButtonPrevious{
+    float: left;
+  }
+  div.ButtonNext{
+    float: right;
+  }
+  div.DefineGroupsDiv{
+    width:max-content;
+  }
+
+  div.steps-content{
+    overflow: auto;
+  }
+
+  section.DRLayout{
+    background: none;
+  }
+
+
+
+
+
+
+  .DropContainer {
+    text-align: center;
+  }
+  
+  
+  .DropContainer-header {
+    /*background-color: #282c34;*/
+    min-height: 100vh;
+    display: flex;
+    /* flex-direction: column;
+    align-items: center;
+    justify-content: center; */
+    /*font-size: calc(1px + 2vmin);*/
+    /*color: white;*/
+  }
+  .drag-n-drop {
+    padding: .5rem;
+    display: grid;
+    gap: .5rem;
+    width: 100%;
+    height: 100%;
+    grid-template-columns: repeat(auto-fill, 300px);
+    align-items: start;
+  }
+  .dnd-group {
+
+    border-radius: 5px;
+    padding: 1px;
+    min-height: 90px;
+    box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.3);
+  }
+  .dnd-item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /*min-height: 150px;*/
+    background-color: white;
+    border-radius: 5px;
+    color: black;
+    font-size: 12px;
+    box-shadow:0 0 5px 0 rgba(0, 0, 0, 0.3);
+   }
+  .dnd-item:not(:last-of-type) {
+    margin-bottom: 5px;
+  }
+  .dnd-item * {  
+    margin: 0;
+    font-size: 12px;
+  }
+  .group-title {
+    text-align: left;
+    margin-bottom: .5rem;
+    font-size: 12px;
+    font-weight: bold;
+  }
+  .current {
+    background-color: #F5F5F5;;
+  }
+  
+  .App-link {
+    color: #61dafb;
+  }
+  
+  @keyframes App-logo-spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  div.GroupLabel{
+    justify-content: center;
+    font-size: 13px;
+    font-weight:bold;
+  }
+
+  div.GroupLabel .ant-col input{
+    font-size: 13px;
+  }
+
+.PlotCurve{
+  width: 50%;
+  height: 80%;
+}
+.CardTitle{
+  font-weight: bold;
+}
