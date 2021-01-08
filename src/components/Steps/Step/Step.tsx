@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useState, useRef, useEffect, useReducer} from 'react'
 import {Select, Button, Space, Input, Alert } from 'antd';
 
 interface StepProps {
@@ -15,8 +15,18 @@ interface StepProps {
     error_msg: string;
 };
 
+
+
 const Step: React.FC<StepProps> = (props) => {
+   
+    const [buttonDisabled,setButtonDisabled] = useState(false);
     const { Option } = Select;
+
+    // useEffect(() => {
+    //     if(status==='success'){
+    //         setButtonDisabled(true);
+    //     }
+    // },[buttonDisabled]);
 
     const changeMethodHandler = (selectedMethod: string) => {
         props.changeSelectedMethod(selectedMethod);
@@ -89,11 +99,9 @@ const Step: React.FC<StepProps> = (props) => {
     <DisplayParameters/>
 
     <br/>
-     
     {(!props.automatic_mode ) &&<Space style={{ paddingTop: '10px'}}>
-        <Button size="small" type="primary" onClick={() => {}}>Reset</Button>
         <Button size="small" type="primary" onClick={props.resetButton}>Cancel</Button>
-        <Button size="small" type="primary" onClick={props.applyButton}>Apply</Button>
+        <Button size="small" type="primary" disabled={props.status==='success'} onClick={props.applyButton}>Apply</Button>
     </Space>}
 
     {!props.automatic_mode && <DisplayAlert/>}
