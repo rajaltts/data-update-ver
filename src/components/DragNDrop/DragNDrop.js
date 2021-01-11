@@ -2,7 +2,7 @@ import React, {useState, useRef, useEffect} from 'react'
 import {PlusOutlined,DeleteOutlined,CheckOutlined } from '@ant-design/icons'
 import {Input, Row, Col, Checkbox} from'antd'
 
-const colors =["#e51c23", // red
+export const colors =["#e51c23", // red
 "#3f51b5", // indigo
 "#259b24", // green
 "#9c27b0", // purple

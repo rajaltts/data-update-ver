@@ -22,12 +22,6 @@ const Step: React.FC<StepProps> = (props) => {
     const [buttonDisabled,setButtonDisabled] = useState(false);
     const { Option } = Select;
 
-    // useEffect(() => {
-    //     if(status==='success'){
-    //         setButtonDisabled(true);
-    //     }
-    // },[buttonDisabled]);
-
     const changeMethodHandler = (selectedMethod: string) => {
         props.changeSelectedMethod(selectedMethod);
     }
@@ -102,7 +96,7 @@ const Step: React.FC<StepProps> = (props) => {
     {(!props.automatic_mode ) &&<Space style={{ paddingTop: '10px'}}>
         <Button size="small" type="primary" onClick={props.resetButton}>Cancel</Button>
         <Button size="small" type="primary" disabled={props.status==='success'} onClick={props.applyButton}>Apply</Button>
-    </Space>}
+   </Space>}
 
     {!props.automatic_mode && <DisplayAlert/>}
      

@@ -2,6 +2,7 @@ import React  from 'react';
 import PlotlyChart from 'react-plotlyjs-ts';
 
 import { Curve } from '../../data.model';
+import { colors } from '../../components/DragNDrop/DragNDrop'
 
 interface PlotCurveProps {
    curves: Curve[];
@@ -21,6 +22,7 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
       y: props.curves[i].y,
       name: props.curves[i].name,
       opacity: props.curves[i].opacity,
+      line: { color: colors[i] },
     // visible: props.curves[i].selected,
     };
     if(props.curves[i].name==='average'){
@@ -30,7 +32,10 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
   }
 
   //const layout = { width: 1000, height: 600, modebardisplay: false};
-  const layout = { modebardisplay: false};
+  const layout = { 
+    modebardisplay: false,
+    showlegend: false
+  };
   const config = {
     displaylogo: false, // remove plotly icon
     reponsive: true

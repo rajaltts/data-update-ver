@@ -18,16 +18,13 @@ const App: React.FC = () => {
 
 
   return (
-    <Layout>
-    <Header> </Header>
-    <Layout>
-      <Content>
+    <Layout style={{height:"100vh"}}>
+      <Content >
       <PlotBuilder  
             data_input = {data_file}
             template_input = {tensile_template}/>
       </Content>
     </Layout>
-  </Layout>
   );
 }
 
