@@ -119,8 +119,23 @@ class SelectProperties extends React.Component {
             </thead>
             <tbody>
                 {this.state.selectedAnalysisType.mat.map((matObj,index) =>{
+                    let strikeout = Object.keys(matObj.propObject).length === 0 ;
+                    if(!strikeout){
+                        let empty = true;
+                         this.state.selectedPropDef.map((prop, index1)=>{
+                                console.log(matObj.label+"   "+matObj.propObject[prop]+" "+matObj.propObject.hasOwnProperty(prop));
+                                if(empty){
+                                if(matObj.propObject.hasOwnProperty(prop)){
+                                    empty = false;                                
+                                }
+
+                             }
+                             
+                        });
+                        strikeout = empty;
+                    }
                     return(<tr key={'mattr'+index}>
-                       <td  key={'mattd'+index} className="MatData"> <span className={Object.keys(matObj.propObject).length === 0  ?"EmptyPropDef":""}> {matObj.label }</span></td>
+                       <td  key={'mattd'+index} className="MatData"> <span className={strikeout  ?"EmptyPropDef":""}> {matObj.label }</span></td>
                        { this.state.selectedPropDef.map((prop, index1)=>{
                              return(<td key={'mattdcol'+index+""+index1} className={matObj.propObject[prop]!==undefined  ?"Available Grid":"NotAvailable Grid"}></td>)
                         })}
