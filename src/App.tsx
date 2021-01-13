@@ -29,8 +29,7 @@ const App: React.FC = () => {
 
 
   return (
-    <Layout>
-    <Header> </Header>
+
     <Layout>
       <Content>
       <PlotBuilder  
@@ -38,7 +37,7 @@ const App: React.FC = () => {
             template_input = {tensile_template}/>
       </Content>
     </Layout>
-  </Layout>  );
+ );
 }
 
 
