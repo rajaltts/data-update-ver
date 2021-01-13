@@ -1,11 +1,13 @@
 import React  from 'react';
 import PlotlyChart from 'react-plotlyjs-ts';
+import {Table } from 'antd';
 
 import { Curve } from '../../data.model';
 import { colors } from '../../components/DragNDrop/DragNDrop'
 
 interface PlotCurveProps {
    curves: Curve[];
+   data: any[];
 };
 
 const PlotCurve: React.FC<PlotCurveProps> = (props) => {
@@ -69,7 +71,30 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
                                                   //-'Other', hoverClosestGl2d, hoverClosestPie, toggleHover, resetViews, toImage, sendDataToCloud, toggleSpikelines, resetViewMapbox
   }
    */ 
+
+  function DisplayData(props) {
+
+    const columns =[
+      {title: 'Parameter', dataIndex: 'parameter', key: 'name'},
+      {title: 'Value', dataIndex: 'value', key: 'value'}
+    ];
+
+
+    let datasource: any[] = [];
+    props.data.forEach( (e,index) => {
+      if(e.label !== '')
+        datasource.push({key: index.toString(), parameter: e.label, value: e.value});
+    });
+
+    if(datasource.length>0){
+      return <Table dataSource={datasource} columns={columns} size='small' bordered={true} pagination={false}  style={{width: '500px'}}/>;
+    } else {
+      return <div></div>;
+    }    
+  } 
+
   return(
+    <>
     <PlotlyChart
       data = { data }
       layout = { layout }
@@ -79,6 +104,10 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
       //onLegendDoubleClick =  { (event) => props.doubleClickLegendHandler(event)}
       //onLegendClick =  { (event) => props.clickLegendHandler(event)}
     />
+    <DisplayData
+       data={props.data}/>
+    </>
+
   );
 }
    

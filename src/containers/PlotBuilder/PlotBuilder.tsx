@@ -21,7 +21,7 @@ interface EmscriptenModule {
 type Action = 
     | {type: 'CHECK_CURVES', keys: string[], groupid: number}
     | {type: 'SET', input: any}
-    | {type: 'UPDATE_CURVES', curves: Curve[] }
+    | {type: 'UPDATE_CURVES', curves: Curve[], data: any[] }
     | {type: 'RESET_CURVES', input: any};
 
 const dataReducer = (currentData: Data, action: Action) => {
@@ -39,7 +39,7 @@ const dataReducer = (currentData: Data, action: Action) => {
                                 };
            
             action.input.groups.forEach( (g,index_g) => {
-                const group_c: Group = { id: index_g, curves: []};
+                const group_c: Group = { id: index_g, curves: [], data: []};
                 const group_d: GroupData = { title: g.label, treeData: []};
 
                 g.curves.forEach( (c, index_c) => {
@@ -49,6 +49,7 @@ const dataReducer = (currentData: Data, action: Action) => {
                                              selected: true, opacity: 1};
                     
                     group_c.curves.push(curve_d);
+                    group_c.data.push({label:'',value: 0});
 
                     const curve_data: CurveData = { title: c.label,key: '',icon: <LineOutlined style={{fontSize: '24px', color: colors[index_c]}}/>};
                     curve_data.key = index_g.toString()+'-'+index_c.toString();
@@ -85,6 +86,7 @@ const dataReducer = (currentData: Data, action: Action) => {
             console.log(currentData);
             const group_new = [...currentData.groups];
             group_new[currentData.tree.selectedGroup].curves = action.curves;
+            group_new[currentData.tree.selectedGroup].data = action.data;
             console.log(group_new);
             return {...currentData, groups: group_new};
         }
@@ -109,7 +111,8 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         {
             type: 'tensile', xtype: '', ytype: '', xunit: '', yunit: '',
             groups: [{id: -1,
-                      curves: [ {id: -1, x: [], y: [], name: 'toto', selected: false, opacity: 0} ]
+                      curves: [ {id: -1, x: [], y: [], name: 'toto', selected: false, opacity: 0} ],
+                      data: [ {label: '', value: 0} ]
                      }
                     ],
             tree: { groupData: [ {title:'group1',
@@ -208,7 +211,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                 {
                     label: 'spline',
                     type: 'Spline',
-                    params: [{label: 'end point', name: 'end_point',  selection: [{label:'strain',name:'x_value'},{label:'mean max strain', name:'mean_max_x'}], value: 'x_value'},
+                    params: [{label: 'end point', name: 'end_point',  selection: [{label:'strain',name:'x_value'},{label:'mean max strain', name:'mean_max_x'}], value: 'mean_max_x'},
                              {label:'end point value', name: 'end_point_value',  value: ''},
                              {label:'number of points', name: 'number_of_points',  value: '30'},
                              {label:'number of nodes', name: 'number_of_nodes', value: '10'},
@@ -313,11 +316,13 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
     };
 
     const changeParameterHandler = (name: string, value: string, action: string) => {
-        const a = operations.find( (el) => el.action === action);
+        const operationsUpdate = [...operations];
+        const a = operationsUpdate.find( (el) => el.action === action);
         const sm = a.selected_method;
         const m = a.methods.find( e => e.type === sm);
         const p = m.params.find( e => e.name === name);
         p.value = value;
+        setOperations(operationsUpdate);
     }
     //Operation Handler
     const updatedCurveHandler = (event,action) => {
@@ -532,6 +537,8 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                 
                  // get results
                 const dataset_out = dataprocess.getOutputDataset();
+                // get data anaytics
+                let data_analytics: any[] = [{label:'', value:0}];
                 // get curves
                 for(let curve_idx=0;curve_idx<newCurves.length;curve_idx++){
                     const curve_out = dataset_out.getCurve(newCurves[curve_idx].name);
@@ -580,11 +587,59 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                     curve_out.delete();
                     vecX_out.delete();
                     vecY_out.delete();
+
+                    // DataAnaytics
+                    // create DataProcess
+                    const dp_data = new Module.DataProcess(dataset_out);
+                    // create operation                   
+                   const op_slope = new Module.Operation(Module.ActionType.DATA_ANALYTICS,Module.MethodType.SLOPE_POINT);
+                    // apply operation
+                    const check = dp_data.apply(op_slope);
+                    const dp_data_out = dp_data.getOutputDataset();
+                    const curve_data_out = dp_data_out.getCurve('averaging');
+                    let vecY_data_out = curve_data_out.getY();
+                    const young = vecY_data_out.get(0);
+                    console.log("Young ="+young);
+                    data_analytics.length = 0;
+                    data_analytics.push({label: "Young's Modulus", value: young});
+                    op_slope.delete();
+                    dp_data.delete();
+
+                    // create DataProcess
+                    const dp_data_end = new Module.DataProcess(dataset_out);                 
+                    const op_end = new Module.Operation(Module.ActionType.DATA_ANALYTICS,Module.MethodType.END_POINT);
+                    const check_end = dp_data_end.apply(op_end);
+                    const dp_data_end_out = dp_data_end.getOutputDataset();
+                    const curve_data_end_out = dp_data_end_out.getCurve('averaging');
+                    const vecX_data_end_out = curve_data_end_out.getX();
+                    const vecY_data_end_out = curve_data_end_out.getY();
+                    const strain_at_break = vecX_data_end_out.get(0);
+                    const stress_at_break = vecY_data_end_out.get(0);
+                    data_analytics.push({label: "Strain at Break", value: strain_at_break});
+                    data_analytics.push({label: "Strength at Break", value: stress_at_break});
+                    op_end.delete();
+                    dp_data_end.delete();
+
+                    // create DataProcess
+                    const dp_data_max = new Module.DataProcess(dataset_out);                 
+                    const op_max = new Module.Operation(Module.ActionType.DATA_ANALYTICS,Module.MethodType.MAX_POINT);
+                    const check_max = dp_data_max.apply(op_max);
+                    const dp_data_max_out = dp_data_max.getOutputDataset();
+                    const curve_data_max_out = dp_data_max_out.getCurve('averaging');
+                    const vecX_data_max_out = curve_data_max_out.getX();
+                    const vecY_data_max_out = curve_data_max_out.getY();
+                    const strain_at_ultimate_strength = vecX_data_max_out.get(0);
+                    const stress_at_ultimate_strength = vecY_data_max_out.get(0);
+                    data_analytics.push({label: "Strain at Ultimate Strength", value: strain_at_ultimate_strength});
+                    data_analytics.push({label: "Strength at  Ultimate Strength", value: stress_at_ultimate_strength});
+                    op_max.delete();
+                    dp_data_max.delete();
+                    
                 }
 
                 // update the state with the new curves
                 console.log("UPDATE STATE");
-                dispatch({type: 'UPDATE_CURVES', curves: newCurves});
+                dispatch({type: 'UPDATE_CURVES', curves: newCurves, data: data_analytics});
                 // flag status operation
                 const operationsUpdate = [...operations];
                 const ind = operationsUpdate.findIndex( (el) => el.action === action);
@@ -650,7 +705,8 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                 </Col>
                 <Col flex="800px">
                     <PlotCurve
-                       curves={data.groups[data.tree.selectedGroup].curves} />
+                       curves={data.groups[data.tree.selectedGroup].curves}
+                       data={data.groups[data.tree.selectedGroup].data}  />
                 </Col>
                 <Col flex="auto">
                     <CurveControls 

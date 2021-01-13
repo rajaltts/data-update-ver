@@ -11,6 +11,7 @@ export type Curve = {
 export type Group = {
     id: number;
     curves: Curve[]; 
+    data: any[];
 };
 
 export type Data = {
