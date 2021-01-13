@@ -1,6 +1,7 @@
 .App {
     margin: 1rem;
     font-family: Arial, Helvetica, sans-serif;
+    color:#666666;
   }
   
   .PropertyDef .ant-checkbox-group .ant-checkbox-group-item{
@@ -19,6 +20,15 @@
     border-color: rgb(231, 230, 230);
     padding: 20px;
     margin-top: 40px;
+    
+  }
+  .PropertyDefLayout{
+    padding: 20px 20px 20px 0;
+    border: 1px solid rgb(231, 230, 230);
+
+  }
+  .AnalysisClass{
+    padding: 20px 20px 20px 0;    
   }
 
     .DefineGroup{
@@ -147,4 +157,43 @@
 }
 .CardTitle{
   font-weight: bold;
+}
+.Available{
+ background-color: green;
+}
+.NotAvailable{
+  background-color: red;
+}
+
+
+.Grid {
+  font-family: Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+}
+
+.Grid td, .Grid th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+.Grid tr:nth-child(even){background-color: #F7F7F7;}
+
+.Grid tr:nth-child(odd){background-color: #FFF;}
+
+.Grid th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #CCCCCC;
+  color: #666666;
+}
+
+.Grid td.MatData {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  color: #666666;
+}
+span.EmptyPropDef{
+  text-decoration: line-through;
 }

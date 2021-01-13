@@ -25,6 +25,12 @@ module.exports = {
     // Supported file loaders
     module: {
         rules: [
+            {
+                test: /\.(js|jsx)$/,
+                exclude: /(node_modules|bower_components)/,
+                loader: "babel-loader",
+                options: { presets: ["@babel/env"] },
+              },
         {
             test: /\.tsx?$/,
             loader: "ts-loader",
@@ -45,7 +51,7 @@ module.exports = {
     devtool: "none",  
     // File extensions to support resolving
     resolve: {
-        extensions: ['*','.ts', '.tsx', '.js']
+        extensions: ['*','.ts', '.tsx', '.js', '.jsx']
     },
     plugins: [
         // to clean dist before 

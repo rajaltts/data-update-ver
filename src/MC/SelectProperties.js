@@ -1,5 +1,5 @@
 import React from 'react';
-import { Col, Row, Descriptions, Button, Checkbox,Skeleton, Layout } from 'antd';
+import { Col, Row, Descriptions, Button, Checkbox,Skeleton, Layout, Select } from 'antd';
 import 'antd/dist/antd.css';
 import axios from '../axios-orders';
 import "../App.css";
@@ -10,11 +10,15 @@ class SelectProperties extends React.Component {
         this.state = {
             selectedPropDef:[],
             propDefs:[],
-            loaded:false
+            loaded:false,
+            analysisTypes:[],
+            selectedAnalysisType:{mat:[]},
+            propLabelMap:{}
         }
         this.getPropertyDef = this.getPropertyDef.bind(this);
         this.handleNext = this.handleNext.bind(this);
         this.onChangeCheckbox = this.onChangeCheckbox.bind(this);
+        this.onAnalysisTypeChange = this.onAnalysisTypeChange.bind(this);
         this.sendData = this.sendData.bind(this);
     }
 
@@ -24,14 +28,32 @@ class SelectProperties extends React.Component {
             current : 1,
             previous : false,
             propDefs : this.state.propDefs,
-            stateChanged:this.state.stateChanged
+            stateChanged:this.state.stateChanged,
+            analysisTypes: this.state.analysisTypes,
+            selectedAnalysisType: this.state.selectedAnalysisType,
+            propLabelMap: this.state.propLabelMap
         }
         this.sendData(json);
     }
 
     onChangeCheckbox(checkedValues) {
-        this.state.selectedPropDef = checkedValues;
-        this.state.stateChanged = true;
+        this.setState({
+            selectedPropDef : checkedValues,
+            stateChanged : true
+        });
+
+      }
+
+    onAnalysisTypeChange(checkedValues, oldValue) {
+        let propdef = this.state.analysisTypes[checkedValues].propDef;
+        let propDefSelected = propdef.map((prop,index)=> {return prop.value});
+        this.setState({
+            selectedAnalysisType : this.state.analysisTypes[checkedValues],
+            propDefs :  this.state.analysisTypes[checkedValues].propDef,
+            stateChanged : true,
+            selectedPropDef  : propDefSelected
+        })
+        
       }
 
     componentDidMount() {
@@ -42,7 +64,10 @@ class SelectProperties extends React.Component {
                 propDefs: this.props.propState.propDefs,
                 selectedPropDef: this.props.propState.selectedPropDef,
                 loaded: true,
-                stateChanged: false
+                stateChanged: false,
+                analysisTypes: this.props.propState.analysisTypes,
+                selectedAnalysisType: this.props.propState.selectedAnalysisType,
+                propLabelMap: this.props.propState.propLabelMap,
             })
         }
     }
@@ -56,9 +81,15 @@ class SelectProperties extends React.Component {
             .then(response => {
                 console.log(response);
                 const res = response.data;
+                let propDef = res.selectedAnalysisType.propDef;
+                let propDefSelected = propDef.map((prop,index)=> {return prop.value});
                 this.setState({
                     propDefs: res.propDef,
-                    loaded: true
+                    loaded: true,
+                    analysisTypes: res.analysis,
+                    selectedAnalysisType: res.selectedAnalysisType,
+                    propLabelMap: res.propLabelMap,
+                    selectedPropDef: propDefSelected
                 })
 
 
@@ -76,20 +107,57 @@ class SelectProperties extends React.Component {
 
 
     render() {
+        let propDefArray = this.state.selectedAnalysisType.propDef===undefined?[]:this.state.selectedAnalysisType.propDef;
+        let nextButtonEnabled =this.state.selectedPropDef.length === 0 ?"disabled":"";
+        let NextButton = <Button type="primary" disabled = {nextButtonEnabled} onClick={e => { this.handleNext() }}>Next</Button>
+        let table = <table className="Grid">
+            <thead><tr key={'mattr01'}><th key='propCol0'></th>{
+                
+            this.state.selectedPropDef.map((prop, index)=>{
+                return(<th key={'propCol'+index+1}>{this.state.propLabelMap[prop]}</th>)
+            })}</tr>
+            </thead>
+            <tbody>
+                {this.state.selectedAnalysisType.mat.map((matObj,index) =>{
+                    return(<tr key={'mattr'+index}>
+                       <td  key={'mattd'+index} className="MatData"> <span className={Object.keys(matObj.propObject).length === 0  ?"EmptyPropDef":""}> {matObj.label }</span></td>
+                       { this.state.selectedPropDef.map((prop, index1)=>{
+                             return(<td key={'mattdcol'+index+""+index1} className={matObj.propObject[prop]!==undefined  ?"Available Grid":"NotAvailable Grid"}></td>)
+                        })}
+                    </tr>)
+                })}
+            </tbody>
+        </table>
+        
         return (
             <>
                 <Layout className="DRLayout">
                 <div id='PropertyDef' className="PropertyDef">
-
-                   <Row><Skeleton loading={!this.state.loaded}>
-                          <Checkbox.Group options={this.state.propDefs} onChange={this.onChangeCheckbox} defaultValue={this.state.selectedPropDef}/> 
+                <Skeleton loading={!this.state.loaded}>
+                   <Row className="AnalysisClass">
+                   <Select size='small' value={this.state.selectedAnalysisType.title} style={{width: 150}} onChange={(e)=>this.onAnalysisTypeChange(e,this.state.selectedAnalysisType)}>
+                       {
+                        this.state.analysisTypes.map( (analysis,index) => {
+                            return(<Select.Option key={'propOption'+index} value={index}>{analysis.title}</Select.Option>);
+                        })
+                    }
+                    </Select></Row><Row>
+                    <Layout className="PropertyDefLayout">
+                          <Checkbox.Group options={propDefArray} onChange={this.onChangeCheckbox} defaultValue={this.state.selectedPropDef}/> 
+                          </Layout>
+                          </Row>
+                          <Row>
+                    <Layout >
+                          {table}
+                          </Layout>
+                          </Row>
                         </Skeleton>
 
-                    </Row>
+            
                 </div>
                 <div className="ButtonPanel">
                     <div className="ButtonNext">
-                        <Button type="primary" onClick={e => { this.handleNext() }}>Next</Button>
+                        {NextButton}
                     </div>
                 </div>
                 </Layout>

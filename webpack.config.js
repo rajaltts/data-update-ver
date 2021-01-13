@@ -51,7 +51,7 @@ module.exports = {
     devtool: "inline-source-map",  //  need in tsconfig "sourceMap": true 
     // File extensions to support resolving
     resolve: {
-        extensions: ['*','.ts', '.tsx', '.js']
+        extensions: ['*','.ts', '.tsx', '.js', '.jsx']
     },
     devServer: {
         contentBase: path.join(__dirname, ""),

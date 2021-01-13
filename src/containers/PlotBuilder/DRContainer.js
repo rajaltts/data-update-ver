@@ -25,6 +25,7 @@ class DRContainer extends React.Component {
             selectedCurves:[],
             groups:[],
             plotBuildModel:{},
+            propLabelMap:{}
         }
         //this.getPropertyDef = this.getPropertyDef.bind(this);
         const { Step } = Steps;
@@ -38,6 +39,9 @@ class DRContainer extends React.Component {
             selectedPropDef: childData.selectedPropDef,
             previous: childData.previous,
             propDefs : childData.propDefs,
+            analysisTypes: childData.analysisTypes,
+            selectedAnalysisType: childData.selectedAnalysisType,
+            propLabelMap: childData.propLabelMap,
             reloadStep2 : childData.stateChanged
        });
 
@@ -61,7 +65,10 @@ class DRContainer extends React.Component {
             url:this.props.modelState.url,
             previous:this.state.previous,
             propDefs:this.state.propDefs,
-            selectedPropDef:this.state.selectedPropDef
+            selectedPropDef:this.state.selectedPropDef,
+            analysisTypes: this.state.analysisTypes,
+            selectedAnalysisType: this.state.selectedAnalysisType,
+            propLabelMap: this.state.propLabelMap
         }
         let curveJson ={
             query:this.props.modelState.query,
@@ -119,16 +126,4 @@ class DRContainer extends React.Component {
     }
 }
 
-window.renderDRContainer = (model, element) => {
-    console.log("Test External Method:" + model);
-    ReactDOM.render(<DRContainer modelState={model} />, element);
-    console.log("Test External Method element:" + element);
-
-    //ReactDOM.render(<PlotBuilder modelState={model}/>, element);
-}
-/*export const renderPlotBuilder = (model) =>  {
-    console.log("Test External Method:"+model);
-    
-    ReactContentRenderer.render(<PlotBuilder modelState={model}/>, document.getElementById("root"));
-}*/
 export default DRContainer;
