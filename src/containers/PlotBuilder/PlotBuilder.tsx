@@ -1,10 +1,12 @@
 import React, { Fragment, useEffect, useState, useReducer } from 'react';
 import { Col, Row , Alert, Button } from 'antd';
+import {LineOutlined} from '@ant-design/icons'
 import 'antd/dist/antd.css';
 import PlotCurve from '../../components/PlotCurve/PlotCurve';
 import OperationControls from '../../components/OperationControls/OperationControls'
 import CurveControls from '../../components/CurveControls/CurveControls'
 import Steps from '../../components/Steps/Steps';
+import { colors } from '../../components/DragNDrop/DragNDrop'
 
 import { Data, Group, Curve, Tree, GroupData, CurveData } from '../../data.model';
 import { Operation } from '../../template.model';
@@ -48,8 +50,9 @@ const dataReducer = (currentData: Data, action: Action) => {
                     
                     group_c.curves.push(curve_d);
 
-                    const curve_data: CurveData = { title: c.label,key: ''};
+                    const curve_data: CurveData = { title: c.label,key: '',icon: <LineOutlined style={{fontSize: '24px', color: colors[index_c]}}/>};
                     curve_data.key = index_g.toString()+'-'+index_c.toString();
+
                     group_d.treeData.push(curve_data);
                     if(index_g===0)
                         data.tree.keys.push(curve_data.key);
@@ -110,7 +113,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                      }
                     ],
             tree: { groupData: [ {title:'group1',
-                                  treeData: [{title: 'curve1', key: '0-0'}]
+                                  treeData: [{title: 'curve1', key: '0-0', icon: <LineOutlined/>}]
                                   }
                                 ],
                     keys: [],
@@ -627,7 +630,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                 <Button size="small" type="primary" onClick={() => initHandler()}>Init</Button>
             </Row>
             <Row justify="space-around">
-                <Col span={6}>
+                <Col flex="300px">
                     <Steps operations={operations}
                            changeSelectedMethod={changeSelectedMethodHandler}
                            changeParameter= {changeParameterHandler}
@@ -645,11 +648,11 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                          resetAll={initHandler}
                          /> */}
                 </Col>
-                <Col span={12}>
+                <Col flex="800px">
                     <PlotCurve
                        curves={data.groups[data.tree.selectedGroup].curves} />
                 </Col>
-                <Col span={6}>
+                <Col flex="auto">
                     <CurveControls 
                         groupData={data.tree.groupData}
                         checkedKeys={data.tree.keys}

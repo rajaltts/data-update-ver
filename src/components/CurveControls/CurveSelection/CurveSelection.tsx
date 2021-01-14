@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Tree } from 'antd';
 import { CurveData } from '../../../data.model';
+
 interface CurveSelection {
     treeData: CurveData[];
     checkedKeys: string[];
@@ -19,6 +20,7 @@ interface CurveSelection {
      return(
         <>
             <Tree
+            showIcon
             checkable
             checkedKeys={props.checkedKeys}
             selectedKeys={selectedKeys}

@@ -29,9 +29,8 @@ const App: React.FC = () => {
 
 
   return (
-
-    <Layout>
-      <Content>
+    <Layout style={{height:"100vh"}}>
+      <Content >
       <PlotBuilder  
             data_input = {data_file}
             template_input = {tensile_template}/>

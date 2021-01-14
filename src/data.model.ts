@@ -27,6 +27,7 @@ export type Data = {
 export type CurveData = {
     title: string; // curve name
     key: string;   // group_id-curve_id
+    icon: any;
 };
 
 export type GroupData = {
