@@ -99,7 +99,7 @@ const Steps: React.FC<StepsProps> = (props) => {
         </div>
 
         <Space style={{paddingLeft: '15px', paddingTop: '15px'}}>
-            <Button size="small" type="primary" onClick={props.resetAll}>Reset all</Button>
+            {/* <Button size="small" type="primary" onClick={props.resetAll}>Reset all</Button> */}
             {auto && <Button size="small" type="primary" onClick={(event: any) => {props.updatedCurve(event,'Template')}}>Apply all</Button>}
         </Space>
 

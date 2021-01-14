@@ -6,16 +6,25 @@ import PlotCurve from '../../components/PlotCurve/PlotCurve';
 import OperationControls from '../../components/OperationControls/OperationControls'
 import CurveControls from '../../components/CurveControls/CurveControls'
 import Steps from '../../components/Steps/Steps';
-import { colors } from '../../components/DragNDrop/DragNDrop'
-
 import { Data, Group, Curve, Tree, GroupData, CurveData } from '../../data.model';
 import { Operation } from '../../template.model';
 
 import ReactWasm from '../../assets/dataclean/dataclean.js'
+import {colors} from '../../assets/colors';
+import { tensile_operations_config } from '../../assets/tensile_operations_config.js';
 
+
+//---------INTERFACE-----------------------------
 interface EmscriptenModule {
     [key: string]: any
-}
+};
+
+interface PlotBuilderProps {
+    data_input: any;
+    template_input: any;
+};
+
+//--------REDUCER-----------------------------------
 
 // use discriminated union type
 type Action = 
@@ -100,12 +109,10 @@ const dataReducer = (currentData: Data, action: Action) => {
    }
 };
 
-interface PlotBuilderProps {
-    data_input: any;
-    template_input: any;
-};
-
+//--------COMPONENT-----------------------------------------
 const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
+
+    //-----------STATE----------------------------------------
     // datat represents the state related to curves management 
     const [data, dispatch]  =  useReducer(dataReducer,
         {
@@ -131,160 +138,87 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
             curves:  [ {id: -1, x: [], y: [], name: 'toto', selected: false, opacity: 0} ]
         }
     );    
-    // operations represent the state related to actions/methods/parameters 
-    // for tensile case
-    const operations_initial = [
-        {
-            action: 'Cleaning_ends',
-            action_label: 'Cleaning ends',
-            methods: [
-                { 
-                    label: 'None',
-                    type: 'None',
-                    params: []
-                },
-                {
-                    label: 'Strength',
-                    type: 'Y_Max',
-                    params: []
-                },
-                {
-                    label: 'Max strain',
-                    type: 'X_Max',
-                    params: []
-                },
-                {
-                    label: 'Strain',
-                    type: 'Max_X',
-                    params: [{label: 'value', name: 'value',  value: '0.05'}]
-                },
-                {
-                    label: 'Stress',
-                    type: 'Max_Y',
-                    params: [{label: 'value', name: 'value',  value: '1000'}]
-                }
-            ],
-            selected_method: 'None',
-            status: 'waiting',
-            error: ''
-        },
-        {
-            action: 'Shifting',
-            action_label: 'Shifting',
-            methods: [
-                { 
-                    label: 'None',
-                    type: 'None',
-                    params: []
-                },
-                {
-                    label: 'Defined strain',
-                    type: 'X_shift_defined',
-                    params: [{label: 'value', name: 'value',  value: '-0.01'}]
-                },
-                {
-                    label: 'Stiffness stress based',
-                    type: 'X_tangent_yrange',
-                    params: [{label: 'min stress', name: 'min', value: '0'},
-                             {label: 'max stress', name: 'max', value: '100'}]
-                },
-                {
-                    label: 'Stiffness strain based',
-                    type: 'X_tangent_xrange',
-                    params: [{label: 'min strain', name: 'min', value: '0'},
-                             {label: 'max strain',  name: 'max',value: '0.001'}]
-                }
-            ],
-            selected_method: 'None',
-            status: '',
-            error: ''
-        },
-        {
-            action: 'Averaging',
-            action_label: 'Averaging',
-            methods: [
-                { 
-                    label: 'none',
-                    type: 'None',
-                    params: []
-                },
-                {
-                    label: 'spline',
-                    type: 'Spline',
-                    params: [{label: 'end point', name: 'end_point',  selection: [{label:'strain',name:'x_value'},{label:'mean max strain', name:'mean_max_x'}], value: 'mean_max_x'},
-                             {label:'end point value', name: 'end_point_value',  value: ''},
-                             {label:'number of points', name: 'number_of_points',  value: '30'},
-                             {label:'number of nodes', name: 'number_of_nodes', value: '10'},
-                             {label:'regularization', name: 'regularization', value: '-4'} ]
-                },
-                {
-                    label: 'polynomial',
-                    type: 'Polynomial',
-                    params: [{label:'number of points', name: 'number_of_points', value: '30'},
-                             {label:'order', name: 'order', value: '6'}]
-                }
-            ],
-            selected_method: 'None',
-            status: '',
-            error: ''
-        }
-    ]
-    const [operations, setOperations] = useState(operations_initial);
-    // a template represent a particular set of action/method/parameter initialize by a json file
-    const [template, setTemplate] = useState<Operation[]>([{action: '', method: ''}]);
+   
+    // operations represent the state related to actions/methods/parameters
+    const [operations, setOperations] = useState([{ action: 'None', 
+                                                    action_label: 'None',
+                                                    methods: [{label: 'None', type: 'None', params: []}],
+                                                    selected_method: 'None',
+                                                    status: 'waiting',
+                                                    error: ''}]);
 
-    // fct called by  init button to init data state and template state 
-    const initHandler = () => { 
-    //     // init data state
-    //     let data_file = require('../../data/data.json');
-    //     dispatch({type: 'SET', input: data_file});
-    //    // init template stae
-    //    let tensile_template: Operation[] = require('../../data/tensile_template.json');
-    //    setTemplate(tensile_template);
-    //    // init operations state
-    //    setOperations(operations_initial);
-    };
+      // a template represent a particular set of action/method/parameter initialize by a json file
+    const [template, setTemplate] = useState({"operations": []});
+
+    //---------EFFECT-----------------------------------------
+    // initialize the states (componentDidMount)
+    useEffect( () => {
+        dispatch({type: 'SET', input: props.data_input}); // init data(curves) state with props
+        // TODO init Operations with the right congig (tensile, compression, ...) depending on analysis_type given by props.analysisType 
+        setOperations(tensile_operations_config); // init operations state with the tensile structure (default values)
+        setTemplate(props.template_input); // init template from props
+    },[]);
 
     // use to update operations state from template state
+    // update operations state from template state (componentDidUpdate)
     useEffect( () => {
-        dispatch({type: 'SET', input: props.data_input});
-        setTemplate(props.template_input);
-
-        if(template.length>1){
-            template.forEach( (elem,index) => {
-                const op_index = operations.findIndex( op => op.action === elem.action );
-                if(op_index===-1)
-                    throw new Error("ERROR in tensile template: action not found");
-                const op = operations[op_index];
-                const meth_index = op.methods.findIndex( met => met.type === elem.method);
-                if(meth_index===-1)
-                    throw new Error("ERROR in tensile template: action not found");
-                const operationsUpdated = [...operations];
-                const paramsUpdated= elem.params;
-                
-                const param_cur = operationsUpdated[op_index].methods[meth_index].params;
-                const param_new = [];
-                for(let i=0; i<param_cur.length;i++ ){
-                    const name_c = param_cur[i].name;
-                    const param_temp = paramsUpdated.find( p => p.name===name_c);
-                    if(param_temp !== undefined ){
-                        //const new_param = {label: param_cur[i].label, name: param_cur[i].name, value: param_temp.value.toString() };
-                        const new_param ={...param_cur[i], value: param_temp.value.toString()};
-                        param_new.push(new_param);
-                    }
-                }
-                operationsUpdated[op_index].methods[meth_index].params.length = 0;
-                operationsUpdated[op_index].methods[meth_index].params = param_new;
-                operationsUpdated[op_index].selected_method = elem.method;
-                setOperations(operationsUpdated);         
-            }
-            );
-        }
-    },template);
-
+        try { // if action/methods found in template does not correspond to value in operations state, the template is not used and default values for operations will appear. A console log error is used but we must inform the user with a notifications (TODO)
+            if(template.operations.length>1){
+                template.operations.forEach( (elem,index) => {
+                    // check if Action and Operations in template file are found in local operations
+                    const op_index = operations.findIndex( op => op.action === elem.action );
+                    if(op_index===-1)
+                        throw new Error("ERROR in tensile template: action not found.");
+                    const op = operations[op_index];
+                    const meth_index = op.methods.findIndex( met => met.type === elem.method);
+                    if(meth_index===-1)
+                        throw new Error("ERROR in tensile template: action not found.");
     
-    const updateTemplateHandler = () => {
+                    // update local operations with template file    
+                    const operationsUpdated = [...operations];
+                    if('parameters' in elem) { // some operation has no parameters
+                        const params_input= elem.parameters;
+                        
+                        const param_cur = operationsUpdated[op_index].methods[meth_index].params;
+                        const param_new = [];
+                        for(let i=0; i<param_cur.length;i++ ){
+                            const name_c = param_cur[i].name;
+                            const param_temp = params_input.find( p => Object.keys(p)[0]===name_c);
+                            if(param_temp !== undefined ){ // param found in the input template
+                                const new_param ={...param_cur[i], value: Object.values(param_temp)[0].toString()};
+                                param_new.push(new_param);
+                            } else { // keep the default
+                                const default_param={...param_cur[i]};
+                                param_new.push(default_param);
+                            }
+                        }
+                        operationsUpdated[op_index].methods[meth_index].params.length = 0;
+                        operationsUpdated[op_index].methods[meth_index].params = param_new;
+                    }
+                    operationsUpdated[op_index].selected_method = elem.method;
+                    // check if we must convert the data, only if engineering type
+                    if(elem.action === "Convert"){
+                        if(data.xtype.search("engineering") * data.ytype.search("engineering") < 0)
+                            throw new Error("ERROR in data definition: cannot mix true and engineering data type");
+                        if(data.xtype.search("engineering") < 0){ // not found 
+                            operationsUpdated[op_index].status = 'hide';
+                        }
+                    }
+                    
+                    setOperations(operationsUpdated);         
+                });
+            }
+        } catch(e) {
+            console.log("ERROR: Input template not valid."+e.message+" Operations are set to default value");
+        }
+    },[template]);
 
+
+    //---------HANDLER-------------------------------------------
+     // fct called by  resetAll button 
+     const initHandler = () => { 
+        dispatch({type: 'SET', input: props.data_input}); // init curves
+        setTemplate(props.template_input); // init operations
     };
 
     const changeSelectedMethodHandler = (selectedMethod: string,action: string) => {

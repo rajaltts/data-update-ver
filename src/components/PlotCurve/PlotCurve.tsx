@@ -3,7 +3,7 @@ import PlotlyChart from 'react-plotlyjs-ts';
 import {Table } from 'antd';
 
 import { Curve } from '../../data.model';
-import { colors } from '../../components/DragNDrop/DragNDrop'
+import { colors } from '../../assets/colors.js';
 
 interface PlotCurveProps {
    curves: Curve[];

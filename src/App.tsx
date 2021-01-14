@@ -25,8 +25,7 @@ const App: React.FC = () => {
   const { Header, Footer, Sider, Content } = Layout;
 
   let data_file = require('./data/data.json');
-  let tensile_template = require('./data/tensile_template.json');
-
+  let tensile_template = require('./data/template_tensile_no_extrapolation.json');
 
   return (
     <Layout style={{height:"100vh"}}>
