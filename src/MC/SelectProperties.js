@@ -3,6 +3,7 @@ import { Col, Row, Descriptions, Button, Checkbox,Skeleton, Layout, Select } fro
 import 'antd/dist/antd.css';
 import axios from '../axios-orders';
 import "../App.css";
+import { CheckCircleOutlined, CheckOutlined } from '@ant-design/icons';
 
 class SelectProperties extends React.Component {
     constructor(props) {
@@ -114,7 +115,7 @@ class SelectProperties extends React.Component {
             <thead><tr key={'mattr01'}><th key='propCol0'></th>{
                 
             this.state.selectedPropDef.map((prop, index)=>{
-                return(<th key={'propCol'+index+1}>{this.state.propLabelMap[prop]}</th>)
+                return(<th style={{textAlign: 'center'}}  key={'propCol'+index+1}>{this.state.propLabelMap[prop]}</th>)
             })}</tr>
             </thead>
             <tbody>
@@ -137,7 +138,7 @@ class SelectProperties extends React.Component {
                     return(<tr key={'mattr'+index}>
                        <td  key={'mattd'+index} className="MatData"> <span className={strikeout  ?"EmptyPropDef":""}> {matObj.label }</span></td>
                        { this.state.selectedPropDef.map((prop, index1)=>{
-                             return(<td key={'mattdcol'+index+""+index1} className={matObj.propObject[prop]!==undefined  ?"Available Grid":"NotAvailable Grid"}></td>)
+                             return(<td key={'mattdcol'+index+""+index1} style={{textAlign: 'center'}} >{matObj.propObject[prop]!==undefined  ?<CheckOutlined style={{fontSize: '24px'}}/>:"" }</td>)
                         })}
                     </tr>)
                 })}

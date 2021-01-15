@@ -16,12 +16,13 @@ import { tensile_operations_config } from '../../assets/tensile_operations_confi
 
 //---------INTERFACE-----------------------------
 interface EmscriptenModule {
-    [key: string]: any
+    [key: string]: any    
 };
 
 interface PlotBuilderProps {
     data_input: any;
     template_input: any;
+    parentCallback: any;
 };
 
 //--------REDUCER-----------------------------------
@@ -248,6 +249,27 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         }
         dispatch({ type: 'CHECK_CURVES', keys: keys, groupid: group_id});
     };
+
+    const handlePrevious = () =>{
+        let json = {
+            current: 1,
+            previous: true,
+        }
+        sendData(json);
+    }
+
+    const handleNext= () =>{
+
+        let json = {
+            current: 3,
+            previous: false,
+        }
+        sendData(json);
+    }
+
+    const sendData = (result) => {
+        props.parentCallback(result);
+    }
 
     const changeParameterHandler = (name: string, value: string, action: string) => {
         const operationsUpdate = [...operations];
@@ -614,7 +636,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
     };
 
     return (
-        <>
+        <> 
             <Row>
                 <Button size="small" type="primary" onClick={() => initHandler()}>Init</Button>
             </Row>
@@ -650,6 +672,15 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                         
                 </Col>
             </Row>
+            
+            <div className="ButtonPanel">
+                    <div className="ButtonPrevious">
+                        <Button  onClick={e => { handlePrevious() }}>Previous</Button>
+                    </div>
+                    <div className="ButtonNext">
+                        <Button type="primary" onClick={e => { handleNext() }}>Next</Button>
+                    </div>
+                </div>
         </>
     );
         

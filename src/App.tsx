@@ -28,11 +28,11 @@ const App: React.FC = () => {
   let tensile_template = require('./data/template_tensile_no_extrapolation.json');
 
   return (
-    <Layout style={{height:"100vh"}}>
+    <Layout style={{height:"90%"}}>
       <Content >
-      <PlotBuilder  
+      <PlotBuilder 
             data_input = {data_file}
-            template_input = {tensile_template}/>
+            template_input = {tensile_template} parentCallback = {""}/>
       </Content>
     </Layout>
  );

@@ -59,6 +59,23 @@ class DRContainer extends React.Component {
        });
     }
 
+    callbackFunctionStep3 = (childData) => {
+      console.log("Parent recieved Selector Data: "+JSON.stringify(childData));
+      this.setState({
+          current: childData.current,
+           previous: childData.previous,
+     });
+  }
+
+  callbackFunctionStep4 = (childData) => {
+    console.log("Parent recieved Selector Data: "+JSON.stringify(childData));
+    this.setState({
+        current: childData.current,
+         previous: childData.previous,
+         plotBuildModel : childData,
+   });
+}
+
     render() {
         let propDefJson ={
             query:this.props.modelState.query,
@@ -93,11 +110,11 @@ class DRContainer extends React.Component {
             },
             {
               title: 'Data Analysis',
-              content: <PlotBuilder  data_input = {this.state.plotBuildModel} template_input = {tensile_template}/>
+              content: <PlotBuilder  data_input = {this.state.plotBuildModel} template_input = {tensile_template} parentCallback = {this.callbackFunctionStep3}/>
             },
             {
               title: 'Save Results',
-              content: 'Last-content'
+              content: 'Last-Content'
             },
           ];
         const  current  = this.state.current;
