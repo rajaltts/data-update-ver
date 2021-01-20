@@ -14,6 +14,7 @@ import {colors} from '../../assets/colors';
 import { tensile_operations_config } from '../../assets/tensile_operations_config.js';
 
 
+
 //---------INTERFACE-----------------------------
 interface EmscriptenModule {
     [key: string]: any    
@@ -37,6 +38,8 @@ type Action =
 const dataReducer = (currentData: Data, action: Action) => {
    switch (action.type) {
         case 'SET':{
+            if(action.input === undefined)
+                return currentData;
             const data: Data = {type: action.input.type,
                                 xtype: action.input.xtype,
                                 ytype: action.input.ytype,
@@ -141,12 +144,12 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
     );    
    
     // operations represent the state related to actions/methods/parameters
-    const [operations, setOperations] = useState([{ action: 'None', 
-                                                    action_label: 'None',
-                                                    methods: [{label: 'None', type: 'None', params: []}],
-                                                    selected_method: 'None',
-                                                    status: 'waiting',
-                                                    error: ''}]);
+    const [operations, setOperations] = useState<Operation[]>([{ action: 'None', 
+                                                                action_label: 'None',
+                                                                 methods: [{label: 'None', type: 'None', params: []}],
+                                                                 selected_method: 'None',
+                                                                status: 'waiting',
+                                                                error: ''}]);
 
       // a template represent a particular set of action/method/parameter initialize by a json file
     const [template, setTemplate] = useState({"operations": []});
@@ -444,34 +447,134 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                          check = dataprocess.apply(operation);
                          operation.delete();
                     }  
-                    else if(type==='Spline'){
-                        // create operation
-                        const operation = new Module.Operation(Module.ActionType.AVERAGING,Module.MethodType.SPLINE);
-                        const param_nb_nodes = method_selected.params.find( e => e.name === 'number_of_nodes');
-                        const value_nb_nodes = Number(param_nb_nodes.value);
-                        operation.addParameterInt("number_of_nodes", value_nb_nodes);
-                        const param_reg = method_selected.params.find( e => e.name === 'regularization');
-                        const value_reg = Number(param_reg.value);
-                        operation.addParameterInt("regularization",value_reg);
-                        const param_pts = method_selected.params.find( e => e.name === 'number_of_points');
-                        const value_pts = Number(param_pts.value);
-                        operation.addParameterInt("number_of_points",value_pts); 
+                    else if(type==='Polynomial'){
+
+
+
+                       /* 
+                        // create macro operation
+                        const macro_op = new Module.Operation(Module.ActionType.MACRO, Module.MethodType.NONE);
+                        // create none operation
+                        const op_none = new Module.Operation(Module.ActionType.NONE, Module.MethodType.NONE);
+                        const op_none_id = macro_op.insertOperation(op_none);
+*/
+                        // create averaging operation
+                        const op_averaging = new Module.Operation(Module.ActionType.AVERAGING,Module.MethodType.POLYNOMIAL);
+                        const param_order = method_selected.params.find( e => e.name === 'order');
+                        const value_order = Number(param_order.value);
+                        op_averaging.addParameterInt("order", value_order);
                         const param_end_point = method_selected.params.find( e => e.name === 'end_point');
                         const value_end_point = param_end_point.value;
-                        operation.addParameterString("end_point",value_end_point);
+                        op_averaging.addParameterString("end_point",value_end_point);
                         const param_end_point_value =  method_selected.params.find( e => e.name === 'end_point_value');
                         if(param_end_point_value.value.length >0){
                             const value_end_point_value = Number(param_end_point_value.value);
-                            operation.addParameterFloat("end_point_value",value_end_point_value);
+                            op_averaging.addParameterFloat("end_point_value",value_end_point_value);
                         }
+                        /*
+                        const op_averaging_id = macro_op.insertOperation(op_averaging);
+
+                        // create extrapolation operation
+                        const param_extrapolation = method_selected.params.find( e => e.name === 'extrapolation');
+                        const extrapolation_method = param_extrapolation.value;
+                        if(extrapolation_method==='none'){
+
+                        } else if (extrapolation_method==='based_on_curve'){
+                            const op_extrapolation = new Module.Operation(Module.ActionType.EXTRAPOLATING,Module.MethodType.BASED_ON_CURVE);
+                            const op_extrapolation_id = macro_op.insertOperation(op_extrapolation);
+                            op_extrapolation.delete();
+                            // operation links
+                            macro_op.linkOperation(op_extrapolation_id,Module.OperationType.EXTRAPOLATION_REFERENCE,op_none_id); 
+                            macro_op.linkOperation(op_extrapolation_id,Module.OperationType.EXTRAPOLATION_AVERAGING,op_averaging_id); 
+                        }
+                        */
                         // apply operation
                         try{
-                            check = dataprocess.apply(operation);
+                            //check = dataprocess.apply(macro_op);
+                            check = dataprocess.apply(op_averaging);
                         } catch (error) {
                             console.log("AVERAGING ERROR"+error);
+                            check=false;
                         }
+                        op_averaging.delete();
+                        //op_none.delete();    
+                        //macro_op.delete();
+
+                    }
+                    else if(type==='Spline'){
+                        // create macro operation
+                        const macro_op = new Module.Operation(Module.ActionType.MACRO, Module.MethodType.NONE);
+                        // create none operation
+                        const op_none = new Module.Operation(Module.ActionType.NONE, Module.MethodType.NONE);
+                        const op_none_id = macro_op.insertOperation(op_none);
+
+                        // create averaging operation
+                        const op_averaging = new Module.Operation(Module.ActionType.AVERAGING,Module.MethodType.SPLINE);
+                        const param_nb_nodes = method_selected.params.find( e => e.name === 'number_of_nodes');
+                        const value_nb_nodes = Number(param_nb_nodes.value);
+                        op_averaging.addParameterInt("number_of_nodes", value_nb_nodes);
+                        const param_reg = method_selected.params.find( e => e.name === 'regularization');
+                        const value_reg = Number(param_reg.value);
+                        op_averaging.addParameterInt("regularization",value_reg);
+                        const param_pts = method_selected.params.find( e => e.name === 'number_of_points');
+                        const value_pts = Number(param_pts.value);
+                        op_averaging.addParameterInt("number_of_points",value_pts); 
+                        const param_end_point = method_selected.params.find( e => e.name === 'end_point');
+                        const value_end_point = param_end_point.value;
+                        op_averaging.addParameterString("end_point",value_end_point);
+                        const param_end_point_value =  method_selected.params.find( e => e.name === 'end_point_value');
+                        if(param_end_point_value.value.length >0){
+                            const value_end_point_value = Number(param_end_point_value.value);
+                            op_averaging.addParameterFloat("end_point_value",value_end_point_value);
+                        }
+                        const op_averaging_id = macro_op.insertOperation(op_averaging);
+
+                        // create extrapolation operation
+                        const param_extrapolation = method_selected.params.find( e => e.name === 'extrapolation');
+                        const extrapolation_method = param_extrapolation.value;
+                        if(extrapolation_method==='none'){
+
+                        } else if (extrapolation_method==='based_on_curve'){
+                            const op_extrapolation = new Module.Operation(Module.ActionType.EXTRAPOLATING,Module.MethodType.BASED_ON_CURVE);
+                            // param
+                            const param_extra_end_point = method_selected.params.find( e => e.name === 'extrapolating_end_point');
+                            const value_extra_end_point = param_extra_end_point.value;
+                            op_extrapolation.addParameterString("extrapolating_end_point",value_extra_end_point);
+                            const op_extrapolation_id = macro_op.insertOperation(op_extrapolation);
+                            op_extrapolation.delete();
+                            // operation links
+                            macro_op.linkOperation(op_extrapolation_id,Module.OperationType.EXTRAPOLATION_REFERENCE,op_none_id); 
+                            macro_op.linkOperation(op_extrapolation_id,Module.OperationType.EXTRAPOLATION_AVERAGING,op_averaging_id); 
+                        } else if (extrapolation_method==='tangent'){
+                            const op_extrapolation = new Module.Operation(Module.ActionType.EXTRAPOLATING,Module.MethodType.TANGENT);
+                            const param_extra_end_point = method_selected.params.find( e => e.name === 'extrapolating_end_point');
+                            const value_extra_end_point = param_extra_end_point.value;
+                            op_extrapolation.addParameterString("extrapolating_end_point",value_extra_end_point);
+                            const op_extrapolation_id = macro_op.insertOperation(op_extrapolation);
+                            op_extrapolation.delete();
+                            // operation links
+                            macro_op.linkOperation(op_extrapolation_id,Module.OperationType.EXTRAPOLATION_REFERENCE,op_none_id); 
+                            macro_op.linkOperation(op_extrapolation_id,Module.OperationType.EXTRAPOLATION_AVERAGING,op_averaging_id);
+                        }
+                        
+                        // apply operation
+                        try{
+                            check = dataprocess.apply(macro_op);
+                        } catch (error) {
+                            console.log("AVERAGING ERROR"+error);
+                            check=false;
+                        }
+                        op_averaging.delete();
+                        op_none.delete();    
+                        macro_op.delete();
+
+                    } else if(type==='Engineering_to_true'){
+                        // create operation
+                        const operation = new Module.Operation(Module.ActionType.CONVERT,Module.MethodType.ENGINEERING_TO_TRUE);
+                        console.log(operation);
+                        check = dataprocess.apply(operation);
                         operation.delete();
-                    } 
+                    }
                     else if(type==='Template'){
                         let template_tensile_no_extraplation = require('../../data/template_tensile_no_extrapolation.json');
                         let s = JSON.stringify(template_tensile_no_extraplation);
@@ -496,37 +599,39 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                 // get data anaytics
                 let data_analytics: any[] = [{label:'', value:0}];
                 // get curves
-                for(let curve_idx=0;curve_idx<newCurves.length;curve_idx++){
-                    const curve_out = dataset_out.getCurve(newCurves[curve_idx].name);
-                    // get Xs, Ys
-                    console.log("new points");
-                    let vecX_out = curve_out.getX();
-                    let vecY_out = curve_out.getY();
-                    console.log("new size: "+vecX_out.size());
-        
-                    // update newCurves
-                    const x_new = [];
-                    const y_new = [];
-                    for(let i=0; i< vecX_out.size(); i++){
-                        x_new.push(vecX_out.get(i));
-                        y_new.push(vecY_out.get(i));
+                if(!dataset_out.hasCurve('averaging')){ // do not replace the curve when an averaging curve is generated, we would like to see the ref curves
+                    for(let curve_idx=0;curve_idx<newCurves.length;curve_idx++){
+                        const curve_out = dataset_out.getCurve(newCurves[curve_idx].name);
+                        // get Xs, Ys
+                        console.log("new points");
+                        let vecX_out = curve_out.getX();
+                        let vecY_out = curve_out.getY();
+                        console.log("new size: "+vecX_out.size());
+            
+                        // update newCurves
+                        const x_new = [];
+                        const y_new = [];
+                        for(let i=0; i< vecX_out.size(); i++){
+                            x_new.push(vecX_out.get(i));
+                            y_new.push(vecY_out.get(i));
+                        }
+                        console.log("----------new X,Y-------------");
+                        console.log("new size:"+x_new.length);
+                    
+                        // update selected curves
+                        if(newCurves[curve_idx].selected){
+                            // reset x and y
+                            newCurves[curve_idx].x.length = 0;
+                            newCurves[curve_idx].y.length = 0;
+                            // update x and y array
+                            newCurves[curve_idx].x = x_new;
+                            newCurves[curve_idx].y = y_new;
+                        }
+                        // delete C++ object
+                        curve_out.delete();
+                        vecX_out.delete();
+                        vecY_out.delete();
                     }
-                    console.log("----------new X,Y-------------");
-                    console.log("new size:"+x_new.length);
-                
-                    // update selected curves
-                    if(newCurves[curve_idx].selected){
-                         // reset x and y
-                        newCurves[curve_idx].x.length = 0;
-                        newCurves[curve_idx].y.length = 0;
-                        // update x and y array
-                        newCurves[curve_idx].x = x_new;
-                        newCurves[curve_idx].y = y_new;
-                    }
-                    // delete C++ object
-                    curve_out.delete();
-                    vecX_out.delete();
-                    vecY_out.delete();
                 }
                 if(dataset_out.hasCurve('averaging')){
                     const curve_out = dataset_out.getCurve('averaging');
@@ -612,7 +717,8 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                 // flag status operation
                 const operationsUpdate = [...operations];
                 operationsUpdate.find( (el) => el.action === action).status = 'failed';
-                operationsUpdate.find( (el) => el.action === action).error = dataprocess.getErrorMessage();
+                const error_msg = "Operation FAILED.\n" + dataprocess.getErrorMessage();
+                operationsUpdate.find( (el) => el.action === action).error = error_msg;
                 setOperations(operationsUpdate);
             }
 
@@ -636,10 +742,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
     };
 
     return (
-        <> 
-            <Row>
-                <Button size="small" type="primary" onClick={() => initHandler()}>Init</Button>
-            </Row>
+        <>
             <Row justify="space-around">
                 <Col flex="300px">
                     <Steps operations={operations}
@@ -648,6 +751,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                            updatedCurve={updatedCurveHandler}
                            resetCurve={resetOperationHandler}
                            resetAll={initHandler}
+                           setOperations={setOperations}
                     />
                     {/* <OperationControls
                          operations={operations}

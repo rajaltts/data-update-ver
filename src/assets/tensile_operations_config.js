@@ -91,17 +91,42 @@ export const tensile_operations_config = [
             {
                 label: 'spline',
                 type: 'Spline',
-                params: [{label: 'end point', name: 'end_point',  selection: [{label:'strain',name:'x_value'},{label:'mean max strain', name:'mean_max_x'}], value: 'mean_max_x'},
-                         {label:'end point value', name: 'end_point_value',  value: ''},
-                         {label:'number of points', name: 'number_of_points',  value: '30'},
+                params: [{label:'number of points', name: 'number_of_points',  value: '30'},
                          {label:'number of nodes', name: 'number_of_nodes', value: '10'},
-                         {label:'regularization', name: 'regularization', value: '-4'} ]
+                         {label:'regularization', name: 'regularization', value: '-4'},
+                         {label:'Averaging end point method', name: 'end_point',  selection: [{label:'strain',name:'x_value'},
+                                                                                              {label:'mean max strain', name:'mean_max_x'},
+                                                                                              {label:'min max strain', name:'min_max_x'}
+                                                                                             ],
+                                                                                             value: 'min_max_x'},
+                         {label:'end point value', name: 'end_point_value',  value: ''},
+                         {label:'Extrapolation method', name: 'extrapolation', selection:[{label:'none',name:'none'},
+                                                                                          {label:'based on specific curve', name:'based_on_curve'},
+                                                                                          {label:'tangent', name:'tangent'}
+                                                                                         ],
+                                                                                         value: 'tangent'},
+                        {label: 'extrapolation end point', name: 'extrapolating_end_point', selection:[{label:'mean max strain', name:'mean_max_x'},
+                                                                                                        {label:'max max strain', name:'max_max_x'}
+                                                                                                      ],
+                                                                                                      value: 'max_max_x'}
+                         ]
             },
             {
                 label: 'polynomial',
                 type: 'Polynomial',
                 params: [{label:'number of points', name: 'number_of_points', value: '30'},
-                         {label:'order', name: 'order', value: '6'}]
+                         {label:'order', name: 'order', value: '6'},
+                         {label:'Averaging end point method', name: 'end_point',  selection: [{label:'strain',name:'x_value'},
+                                                                                              {label:'mean max strain', name:'mean_max_x'},
+                                                                                              {label:'min max strain', name:'min_max_x'}
+                                                                                            ], value: 'min_max_x'},
+                         {label:'end point value', name: 'end_point_value',  value: ''},
+                         {label:'Extrapolation method', name: 'extrapolation', selection:[{label:'none',name:'none'},
+                                                                                          {label:'based on specific curve', name:'based_on_curve'},
+                                                                                          {label:'tangent', name:'tangent'}
+                                                                                        ],
+                                                                                        value: 'none'}
+                        ]
             }
         ],
         selected_method: 'None',

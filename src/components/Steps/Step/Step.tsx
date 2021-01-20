@@ -1,5 +1,6 @@
 import React, {useState, useRef, useEffect, useReducer} from 'react'
 import {Select, Button, Space, Input, Alert } from 'antd';
+import { Operation } from '../../../template.model';
 
 interface StepProps {
     index: Number;
@@ -13,9 +14,10 @@ interface StepProps {
     resetButton: any;
     status: string;
     error_msg: string;
+    setOperations(ops: Operation[]): void; 
+    operations: Operation[];
+    action: string;
 };
-
-
 
 const Step: React.FC<StepProps> = (props) => {
    
@@ -26,16 +28,23 @@ const Step: React.FC<StepProps> = (props) => {
         props.changeSelectedMethod(selectedMethod);
     }
 
-    const changeParameterHandler =  (e: any, name: string) => {
+    
+    const  changeParameterHandler = (e: any, name: string) => {
+        const operationsUpdate = [...props.operations];
+        const a = operationsUpdate.find( (el) => el.action === props.action);
+        const sm = a.selected_method;
+        const m = a.methods.find( e => e.type === sm);
+        const p = m.params.find( e => e.name === name);
         const value: string = e.target.value;
-        return props.changeParameter(name,value);
+        p.value = value;
+        props.setOperations(operationsUpdate); // in order to keep the focus we need to set state in this component
     }
 
     const selectParamHandler = (value:any, name: string) => {
-        return props.changeParameter(name,value);
+        props.changeParameter(name,value);
     }
-    
-    function DisplaySelect(props) {
+        
+    const DisplaySelect = (props) => {
         return(
         <>
         <br/>
@@ -43,7 +52,7 @@ const Step: React.FC<StepProps> = (props) => {
         <Select placeholder="Default value"
                 size='small'
                 value={props.parameter.value}
-                style={{width: 150}}
+                style={{width: 200}}
                 onChange={ (e) => selectParamHandler(e,props.parameter.name)}>{
                     props.parameter.selection.map( (elm,index) => {
                          return(<Option value={elm.name} key={elm.name}>{elm.label}</Option>);
@@ -92,7 +101,7 @@ const Step: React.FC<StepProps> = (props) => {
      <Select value={props.selected_method} style={{ width: 200 }}  onChange={changeMethodHandler} >{
             props.methods.map( met => {
                 return(
-                        <Option value={met.type}>{met.label}</Option>
+                        <Option key={met.type} value={met.type}>{met.label}</Option>
                 );
             })
         }

@@ -1,14 +1,16 @@
 import React, {Fragment, useState} from 'react'
 import {Button, Space, Switch, Steps as AntSteps } from 'antd';
 import Step from './Step/Step';
+import { Operation } from '../../template.model';
 
 interface StepsProps {
-    operations: any;
+    operations: Operation[];
     changeSelectedMethod: any;
     changeParameter: any;
     updatedCurve: any;
     resetCurve: any;
     resetAll: any;
+    setOperations(ops: Operation[]): void;
 };
 
 const Steps: React.FC<StepsProps> = (props) => {
@@ -44,7 +46,9 @@ const Steps: React.FC<StepsProps> = (props) => {
     function DisplayStep(props)  {
         let steps = [];
         props.operations.map( (op,i) => {
-            steps.push( <Step index={i}
+            steps.push( 
+                        <Step 
+                              index={i}
                               action_label={op.action_label}
                               automatic_mode = {auto}
                               methods = {op.methods}
@@ -55,7 +59,11 @@ const Steps: React.FC<StepsProps> = (props) => {
                               resetButton = { (event: any) => resetCurveHandler(event,op.action)}
                               status = {op.status}
                               error_msg = { op.error}
-                        />);
+                              setOperations = { (op:Operation[]) => props.setOperations(op) }
+                              operations = {props.operations}
+                              action={op.action}
+                        />
+                        );
         });
         return steps[current];
     }
@@ -63,7 +71,7 @@ const Steps: React.FC<StepsProps> = (props) => {
    function DisplayProgress(props) {
        let items = [];
        for(let i=0;i<props.number;i++){
-        items.push(<AntSteps.Step />);
+        items.push(<AntSteps.Step key={i}/>);
        }
        return(
         <AntSteps style={{paddingBottom: '10px'}} current={props.current} size='small'>{items}</AntSteps>
