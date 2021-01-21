@@ -1,5 +1,5 @@
-import React, {Fragment, useState} from 'react'
-import {Button, Space, Switch, Steps as AntSteps } from 'antd';
+import React, {Fragment, useEffect, useState} from 'react'
+import {Button, Tooltip, Space, Switch, Steps as AntSteps } from 'antd';
 import Step from './Step/Step';
 import { Operation } from '../../template.model';
 
@@ -11,12 +11,22 @@ interface StepsProps {
     resetCurve: any;
     resetAll: any;
     setOperations(ops: Operation[]): void;
+    restoreInitdata: any;
+    resetStep: boolean;
+    resetOperations: any;
 };
 
 const Steps: React.FC<StepsProps> = (props) => {
+    //-----------STATE----------------------------------------
     const [current, setCurrent] = useState(0);
     const [auto, setAuto] = useState(false);
 
+    //---------EFFECT-----------------------------------------
+    useEffect(() => {
+        setCurrent(0);
+    },[props.resetStep]);
+
+    //---------HANDLER----------------------------------------
     const applyNextHandler = () => {
         if(current<props.operations.length-1)
             setCurrent(current+1);
@@ -43,6 +53,12 @@ const Steps: React.FC<StepsProps> = (props) => {
         return props.resetCurve(event,action);
     }
 
+    const switchChange = (checked: boolean, event: Event) => {
+        console.log('swtich to $(checked)');
+        setAuto(checked);
+        props.restoreInitdata();
+    }
+    //---------SUB-COMPONENTS------------------------------------
     function DisplayStep(props)  {
         let steps = [];
         props.operations.map( (op,i) => {
@@ -77,12 +93,8 @@ const Steps: React.FC<StepsProps> = (props) => {
         <AntSteps style={{paddingBottom: '10px'}} current={props.current} size='small'>{items}</AntSteps>
        );
     }
-   
-    const switchChange = (checked: boolean, event: Event) => {
-        console.log('swtich to $(checked)');
-        setAuto(checked);
-    }
 
+    //---------RENDER-----------------------------------------
     return(
     <Fragment>
         <div style={{borderStyle: 'solid', borderWidth: '2px', margin: 'auto', padding: '10px'}}>
@@ -101,21 +113,32 @@ const Steps: React.FC<StepsProps> = (props) => {
         <DisplayStep operations={props.operations}/>
 
         <Space style={{ width: '100%', justifyContent: 'flex-end', paddingTop: '10px'}}>
-            <Button size="small"  onClick={applyPreviousHandler}>Previous</Button>
-            <Button size="small"  onClick={applyNextHandler}>Next</Button>
+            {current>0 && <Button size="small"  onClick={applyPreviousHandler}>Previous</Button> }
+            {current<props.operations.length-1 && <Button size="small"  onClick={applyNextHandler}>Next</Button>}
         </Space>
         </div>
 
         <Space style={{paddingLeft: '15px', paddingTop: '15px'}}>
-            {/* <Button size="small" type="primary" onClick={props.resetAll}>Reset all</Button> */}
-            {auto && <Button size="small" type="primary" onClick={(event: any) => {props.updatedCurve(event,'Template')}}>Apply all</Button>}
+            <Tooltip title="Reinitialize with initial curves" placement="bottom" mouseEnterDelay={1.0}>
+                <Button size="small" type="primary" onClick={() => {props.restoreInitdata()}}>Cancel all</Button>
+            </Tooltip>
+            {auto && <Tooltip title="Apply all operations at one" placement="bottom" mouseEnterDelay={1.0}>
+                         <Button size="small" type="primary" onClick={(event: any) => {props.updatedCurve(event,'Template')}}>Apply all</Button>
+                     </Tooltip>}
         </Space>
 
         <br/>
         
         <Space style={{padding: '15px'}}>
-            <Button size="small" type="primary" onClick={() => {}}>Save results</Button>
+        {!auto &&
+            <Tooltip title="Reinitialize operations with initial template" placement="bottom" mouseEnterDelay={1.0}>
+                <Button size="small" type="primary" onClick={() => {props.resetOperations()}}>Reset operations</Button>
+            </Tooltip>
+        }
         </Space>
+        {/* <Space style={{padding: '15px'}}>
+            <Button size="small" type="primary" onClick={() => {}}>Save results</Button>
+        </Space> */}
 
     </Fragment>
     );

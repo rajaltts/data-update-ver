@@ -11,11 +11,11 @@ interface PlotCurveProps {
 };
 
 const PlotCurve: React.FC<PlotCurveProps> = (props) => {
-  console.log("Create in Plot");
+  //console.log("Create in Plot");
   let data: any = [];
   
   for(let i=0; i<props.curves.length; i++){
-    console.log(props.curves[i].name);
+    //console.log(props.curves[i].name);
     let line : any = {
       type: 'scatter',
       //mode: 'lines+markers',

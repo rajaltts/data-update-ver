@@ -85,13 +85,15 @@ const App: React.FC = () => {
       {showBrowser&&<FileLoader handleOnFileLoad={handleOnFileLoad}/>}
       {!showBrowser&&<PlotBuilder  
                   data_input = {input}
-                  template_input = {tensile_template}/>}
+                  template_input = {tensile_template}
+                  parentCallback = {""}/>}
     </Content>
     </Layout>
   )
   */
 
    // App with local file loading
+   
   let data_file = require('./data/data.json');
   return (
     <Layout style={{height:"90%"}}>
@@ -102,6 +104,7 @@ const App: React.FC = () => {
       </Content>
     </Layout>
  );
+ 
  
 
 

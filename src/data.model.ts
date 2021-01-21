@@ -5,6 +5,8 @@ export type Curve = {
     name: string;
     selected: boolean;
     opacity: number;
+    x0: number[];
+    y0: number[];
 };
 
 

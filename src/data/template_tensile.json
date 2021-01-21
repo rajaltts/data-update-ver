@@ -23,6 +23,9 @@
 },
 {"action":"Extrapoling",
   "method":"Based_on_curve",
+  "parameters":[
+    {"extrapolating_end_point": "mean_max_x"}
+  ],
   "links":[
     {"averaging": 1},
     {"reference": 2}
