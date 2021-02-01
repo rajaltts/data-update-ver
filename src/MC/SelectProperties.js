@@ -138,7 +138,7 @@ class SelectProperties extends React.Component {
                     return(<tr key={'mattr'+index}>
                        <td  key={'mattd'+index} className="MatData"> <span className={strikeout  ?"EmptyPropDef":""}> {matObj.label }</span></td>
                        { this.state.selectedPropDef.map((prop, index1)=>{
-                             return(<td key={'mattdcol'+index+""+index1} style={{textAlign: 'center'}} >{matObj.propObject[prop]!==undefined  ?<CheckOutlined style={{fontSize: '24px'}}/>:"" }</td>)
+                             return(<td key={'mattdcol'+index+""+index1} style={{textAlign: 'center'}} >{matObj.propObject[prop]!==undefined  ?<CheckOutlined style={{ color:'green' ,fontSize: '24px'}}/>:"" }</td>)
                         })}
                     </tr>)
                 })}

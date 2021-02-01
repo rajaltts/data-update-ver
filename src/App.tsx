@@ -11,8 +11,8 @@ import PlotBuilder from './containers/PlotBuilder/PlotBuilder'
 import ReactDOM from 'react-dom';
 //<PlotBuilder  data_input = {data_file} template_input = {tensile_template}/>
 //<DRContainer modelState={modelState}/>
-//const modelState={url:"http://localhost:7050/MaterialCenter",query:"3;AdlUUQ:AIY,AcehFw:AIY;this"};
-const modelState={url:"http://localhost:7050/MaterialCenter",query:"3;AdlUUQ:AIY,jLgAAPvPA:elM,AcehFw:AIY,jLgAAPviw:elM;this"};
+const modelState={url:"http://localhost:7050/MaterialCenter",query:"3;AG6N9w:AGlxTw,AG6N6A:AGlxTw,AG6N8Q:AGlxTw,AG6Ntg:AGlxTw,AG6N3g:AGlxTw;this"};
+//const modelState={url:"http://localhost:7050/MaterialCenter",query:"3;AdlUUQ:AIY,jLgAAPvPA:elM,AcehFw:AIY,jLgAAPviw:elM;this"};
 /*<Layout>
     <Header> </Header>
     <Layout>
@@ -20,7 +20,12 @@ const modelState={url:"http://localhost:7050/MaterialCenter",query:"3;AdlUUQ:AIY
       <DRContainer modelState={modelState}/>
       </Content>
     </Layout>
-  </Layout>*/
+  </Layout>
+  <PlotBuilder 
+            data_input = {data_file}
+            template_input = {tensile_template} parentCallback = {""}/>
+  
+  */
 
 const App: React.FC = () => {
   const { Header, Footer, Sider, Content } = Layout;
@@ -101,6 +106,7 @@ const App: React.FC = () => {
       <PlotBuilder 
             data_input = {data_file}
             template_input = {tensile_template} parentCallback = {""}/>
+
       </Content>
     </Layout>
  );

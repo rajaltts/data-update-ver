@@ -6,6 +6,7 @@ import ReactDOM from "react-dom";
 import SelectProperties from '../../MC/SelectProperties.js'
 import DefineGroups from '../../MC/DefineGroups.js';
 import PlotBuilder from './PlotBuilder';
+import SaveResults from '../../MC/SaveResults.js';
 
 const { Step } = Steps;
 
@@ -56,6 +57,10 @@ class DRContainer extends React.Component {
              groups : childData.groups,
              selectedCurves: childData.selectedCurves,
              plotBuildModel : childData,
+             groupSelected:childData.groupSelected,		
+            selectedCriteria:childData.selectedCriteria,
+            groupsCriteria:childData.groupsCriteria,
+            criteria:childData.criteria,
        });
     }
 
@@ -64,6 +69,7 @@ class DRContainer extends React.Component {
       this.setState({
           current: childData.current,
            previous: childData.previous,
+           reloadStep2 : childData.stateChanged
      });
   }
 
@@ -94,8 +100,27 @@ class DRContainer extends React.Component {
             groups:this.state.groups,
             selectedCurves:this.state.selectedCurves,
             selectedPropDef:this.state.selectedPropDef,
+            selectedAnalysisType:this.state.selectedAnalysisType,
+            groupSelected:this.state.groupSelected,		
+            selectedCriteria:this.state.selectedCriteria,
+            groupsCriteria:this.state.groupsCriteria,
+            criteria:this.state.criteria,
             reload:this.state.reloadStep2
         }
+
+        let saveResultsJson ={
+          query:this.props.modelState.query,
+          url:this.props.modelState.url,
+          previous:this.state.previous,
+          groups:this.state.groups,
+          selectedCurves:this.state.selectedCurves,
+          selectedPropDef:this.state.selectedPropDef,
+          selectedAnalysisType:this.state.selectedAnalysisType,
+          groupSelected:this.state.groupSelected,		
+          selectedCriteria:this.state.selectedCriteria,
+          groupsCriteria:this.state.groupsCriteria,
+          criteria:this.state.criteria,
+      }
 
         let tensile_template = require('../../data/tensile_template.json');
 
@@ -114,7 +139,7 @@ class DRContainer extends React.Component {
             },
             {
               title: 'Save Results',
-              content: 'Last-Content'
+              content: <SaveResults propState={saveResultsJson} parentCallback = {this.callbackFunctionStep4}/>
             },
           ];
         const  current  = this.state.current;

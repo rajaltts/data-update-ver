@@ -197,3 +197,16 @@
 span.EmptyPropDef{
   text-decoration: line-through;
 }
+
+div.criteriaDiv .ant-checkbox-group-item{
+  display: block;
+  margin-right: 0px;
+}
+
+.dnd-item.DNDSelect{
+  background-color: #666666;
+}
+
+.AnalysisResultLabel{
+  font-weight: bold;
+}

@@ -97,7 +97,7 @@ function DragNDrop({data,parentCallback}) {
 
     const createGroup = () =>{
         let size = list.length;
-        let row = {label:'Group '+(size+1),isSelected: true, isEditable:false,curves: [] , id:size};
+        let row = {label:'Group '+(size),isSelected: true, isEditable:false,curves: [] , id:size};
         setList(list =>[...list,row]);
     }
     
@@ -152,12 +152,12 @@ function DragNDrop({data,parentCallback}) {
     }
 
     if (list) {
-        const addGroup = <PlusOutlined onClick={createGroup}/>;
+        //const addGroup = <PlusOutlined onClick={createGroup}/>;
         return (                
             <div className="drag-n-drop">
             {list.map((grp, grpI) => (
                 <><div>
-              <Row className='GroupLabel'><Col><Checkbox key={"checkbox"+grpI} checked={grp.isSelected} onChange={(e)=>onCheckBoxChange(e.target.checked,grpI)}/>{grp.isEditable?<><Input value={grp.label} onChange={(e)=>updateGroupLabel(e.target.value,grpI)} hidden={!grp.isEditable} style={{width:'60%'}} placeholder="Group Name" /><CheckOutlined onClick={(e)=>makeGroupLabelEditable(grpI)}/></>:<span style={{color:colors[grpI]}} hidden={grp.isEditable} onClick={(e)=>makeGroupLabelEditable(grpI)}>{grp.label}</span>}  <span value={grpI} >{grpI===0?addGroup :<DeleteOutlined onClick={()=>removeGroup(grpI)}/>}</span></Col>
+              <Row className='GroupLabel'><Col><Checkbox key={"checkbox"+grpI} checked={grp.isSelected} onChange={(e)=>onCheckBoxChange(e.target.checked,grpI)}/>{grp.isEditable?<><Input value={grp.label} onChange={(e)=>updateGroupLabel(e.target.value,grpI)} hidden={!grp.isEditable} style={{width:'60%'}} placeholder="Group Name" /><CheckOutlined onClick={(e)=>makeGroupLabelEditable(grpI)}/></>:<span style={{color:colors[grpI]}} hidden={grp.isEditable} onClick={(e)=>makeGroupLabelEditable(grpI)}>{grp.label}</span>}  <span value={grpI} >{grpI===0?"" :<DeleteOutlined onClick={()=>removeGroup(grpI)}/>}</span></Col>
               </Row> <div key={grp.id} onDragEnter={dragging && !grp.curves.length?(e) => handleDragEnter(e,{grpI, itemI: 0}):null} className="dnd-group">
                 {grp.curves.map((item, itemI) => (
                   <div draggable key={item.id}  onClick={()=>handleOnNodeClick({grpI, itemI})} onDragStart={(e) => handletDragStart(e, {grpI, itemI})} onDragEnter={dragging?(e) => {handleDragEnter(e, {grpI, itemI})}:null} className={dragging?getStyles({grpI, itemI}):item.opacity ===1 ? "dnd-item DNDSelect" :"dnd-item"}>

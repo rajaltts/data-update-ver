@@ -293,6 +293,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         let json = {
             current: 1,
             previous: true,
+            stateChanged: false
         }
         sendData(json);
     }
