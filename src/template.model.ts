@@ -4,11 +4,17 @@ export type Selection = {
   name: string;
 };
 
+export type Range = {
+  min: number;
+  max: number;
+};
+
 export type Parameter = {
     label: string;
     name: string;
     selection?: Selection[];
-    value: string;
+    range?: Range;
+    value: number;
    };
    
    export type Method = {

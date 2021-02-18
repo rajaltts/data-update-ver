@@ -6,5 +6,5 @@
                                                                          {"name": "end_point", "value": "mean_max_x"},
                                                                          {"name": "end_point_value", "value": ""},
                                                                          {"name": "number_of_nodes", "value": 10},
-                                                                         {"name": "regularization", "value": -4}]}
+                                                                         {"name": "regularization", "value": 5}]}
 ]

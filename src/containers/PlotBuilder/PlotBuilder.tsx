@@ -163,6 +163,8 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
     );    
    
     // operations represent the state related to actions/methods/parameters
+    // Each action has:
+    // status: 'waiting' (initial value), 'failed', 'success' depending on the success of the action  
     const [operations, setOperations] = useState<Operation[]>([{ action: 'None', 
                                                                 action_label: 'None',
                                                                  methods: [{label: 'None', type: 'None', params: []}],
@@ -170,7 +172,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                                                                 status: 'waiting',
                                                                 error: ''}]);
 
-      // a template represent a particular set of action/method/parameter initialize by a json file
+      // template is an input json file for dataclean library 
     const [template, setTemplate] = useState({"operations": []});
 
     const [resetstep, setResetstep] = useState(false);
@@ -182,7 +184,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         // TODO init Operations with the right congig (tensile, compression, ...) depending on analysis_type given by props.analysisType 
         setOperations(tensile_operations_config); // init operations state with the tensile structure (default values)
         setTemplate(props.template_input); // init template from props
-    },[]);
+    },[props.data_input]);
 
     // use to update operations state from template state
     // update operations state from template state (componentDidUpdate)
@@ -193,8 +195,11 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
             console.log("ERROR: Input template not valid."+e.message+" Operations are set to default value");
         }
     },[template]);
-
     //------------FUNCTIONS-------------------------------------
+    // initialize the Operations state with a dataclean input json file
+    // Several diffences between structure of Operations and template file
+    // - in Operations value is always a number, for string value the value is a index in a selection array
+    // - no Extrapolation action in Operations, it is inside Averaging
     const initOperationsFromTemplate = () => {
         if(template.operations.length>1){
             // manage Averaging to put extrapolation parameters
@@ -224,7 +229,11 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                                 const name_c = param_cur[i].name;
                                 const param_temp = params_input.find( p => Object.keys(p)[0]===name_c);
                                 if(param_temp !== undefined ){ // param found in the input template
-                                    const new_param ={...param_cur[i], value: Object.values(param_temp)[0].toString()};
+                                    let param_value = Object.values(param_temp)[0];
+                                    if(param_cur[i].selection){
+                                        param_value = param_cur[i].selection.findIndex( e => e.name===param_value)
+                                    }
+                                    const new_param ={...param_cur[i], value: param_value};
                                     param_new.push(new_param);
                                 } else { // keep the default
                                     const default_param={...param_cur[i]};
@@ -311,7 +320,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         props.parentCallback(result);
     }
 
-    const changeParameterHandler = (name: string, value: string, action: string) => {
+    const changeParameterHandler = (name: string, value: number, action: string) => {
         const operationsUpdate = [...operations];
         const a = operationsUpdate.find( (el) => el.action === action);
         const sm = a.selected_method;
@@ -428,7 +437,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                         // create operation
                         const operation = new Module.Operation(Module.ActionType.CLEANING_ENDS,Module.MethodType.MAX_X);
                         const param = method_selected.params.find( e => e.name === 'value');
-                        const value = Number(param.value);
+                        const value = param.value;
                         operation.addParameterFloat("value",value);
                         console.log(operation);
                          // apply operation
@@ -439,7 +448,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                         // create operation
                         const operation = new Module.Operation(Module.ActionType.CLEANING_ENDS,Module.MethodType.MAX_Y);
                         const param = method_selected.params.find( e => e.name === 'value');
-                        const value = Number(param.value);
+                        const value = param.value;
                         operation.addParameterFloat("value",value);
                         console.log(operation);
                          // apply operation
@@ -450,7 +459,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                         // create operation
                         const operation = new Module.Operation(Module.ActionType.SHIFTING,Module.MethodType.X_SHIFT_DEFINED);
                         const param = method_selected.params.find( e => e.name === 'value');
-                        const value = Number(param.value);
+                        const value = param.value;
                         operation.addParameterFloat("max", value); 
                         // apply operation
                          check = dataprocess.apply(operation);
@@ -460,10 +469,10 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                         // create operation
                         const operation = new Module.Operation(Module.ActionType.SHIFTING,Module.MethodType.X_TANGENT_YRANGE);
                         const param_min = method_selected.params.find( e => e.name === 'min');
-                        const value_min = Number(param_min.value);
+                        const value_min = param_min.value;
                         operation.addParameterFloat("min", value_min);
                         const param_max = method_selected.params.find( e => e.name === 'max');
-                        const value_max = Number(param_max.value);
+                        const value_max = param_max.value;
                         operation.addParameterFloat("max", value_max); 
                         // apply operation
                          check = dataprocess.apply(operation);
@@ -473,10 +482,10 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                         // create operation
                         const operation = new Module.Operation(Module.ActionType.SHIFTING,Module.MethodType.X_TANGENT_XRANGE);
                         const param_min = method_selected.params.find( e => e.name === 'min');
-                        const value_min = Number(param_min.value);
+                        const value_min = param_min.value;
                         operation.addParameterFloat("min", value_min);
                         const param_max = method_selected.params.find( e => e.name === 'max');
-                        const value_max = Number(param_max.value);
+                        const value_max = param_max.value;
                         operation.addParameterFloat("max", value_max); 
                         // apply operation
                          check = dataprocess.apply(operation);
@@ -487,23 +496,22 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                         const macro_op = new Module.Operation(Module.ActionType.MACRO, Module.MethodType.NONE);
                         // create none operation
                         const op_none = new Module.Operation(Module.ActionType.NONE, Module.MethodType.NONE);
-                        const op_none_id = macro_op.insertOperation(op_none);
 
                         // create averaging operation
                         const op_averaging = new Module.Operation(Module.ActionType.AVERAGING,Module.MethodType.POLYNOMIAL);
                         const param_order = method_selected.params.find( e => e.name === 'order');
-                        const value_order = Number(param_order.value);
+                        const value_order = param_order.value;
                         op_averaging.addParameterInt("order", value_order);
+
                         const param_end_point = method_selected.params.find( e => e.name === 'end_point');
-                        const value_end_point = param_end_point.value;
+                        const value_end_point = param_end_point.selection[param_end_point.value].name;
                         op_averaging.addParameterString("end_point",value_end_point);
+
                         const param_end_point_value =  method_selected.params.find( e => e.name === 'end_point_value');
-                        if(param_end_point_value.value.length >0){
-                            const value_end_point_value = Number(param_end_point_value.value);
+                        if(param_end_point_value.value){
+                            const value_end_point_value = param_end_point_value.value;
                             op_averaging.addParameterFloat("end_point_value",value_end_point_value);
                         }
-                        
-                        const op_averaging_id = macro_op.insertOperation(op_averaging);
 
                         // create extrapolation operation
                         const param_extrapolation = method_selected.params.find( e => e.name === 'extrapolation');
@@ -514,9 +522,6 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                             const op_extrapolation = new Module.Operation(Module.ActionType.EXTRAPOLATING,Module.MethodType.BASED_ON_CURVE);
                             const op_extrapolation_id = macro_op.insertOperation(op_extrapolation);
                             op_extrapolation.delete();
-                            // operation links
-                            macro_op.linkOperation(op_extrapolation_id,Module.OperationType.EXTRAPOLATION_REFERENCE,op_none_id); 
-                            macro_op.linkOperation(op_extrapolation_id,Module.OperationType.EXTRAPOLATION_AVERAGING,op_averaging_id); 
                         }
                         
                         // apply operation
@@ -535,28 +540,26 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                         const macro_op = new Module.Operation(Module.ActionType.MACRO, Module.MethodType.NONE);
                         // create none operation
                         const op_none = new Module.Operation(Module.ActionType.NONE, Module.MethodType.NONE);
-                        const op_none_id = macro_op.insertOperation(op_none);
 
                         // create averaging operation
                         const op_averaging = new Module.Operation(Module.ActionType.AVERAGING,Module.MethodType.SPLINE);
                         const param_nb_nodes = method_selected.params.find( e => e.name === 'number_of_nodes');
-                        const value_nb_nodes = Number(param_nb_nodes.value);
+                        const value_nb_nodes = param_nb_nodes.value;
                         op_averaging.addParameterInt("number_of_nodes", value_nb_nodes);
                         const param_reg = method_selected.params.find( e => e.name === 'regularization');
-                        const value_reg = Number(param_reg.value);
+                        let value_reg = param_reg.value;
                         op_averaging.addParameterInt("regularization",value_reg);
                         const param_pts = method_selected.params.find( e => e.name === 'number_of_points');
-                        const value_pts = Number(param_pts.value);
+                        const value_pts = param_pts.value;
                         op_averaging.addParameterInt("number_of_points",value_pts); 
                         const param_end_point = method_selected.params.find( e => e.name === 'end_point');
                         const value_end_point = param_end_point.value;
                         op_averaging.addParameterString("end_point",value_end_point);
                         const param_end_point_value =  method_selected.params.find( e => e.name === 'end_point_value');
-                        if(param_end_point_value.value.length >0){
-                            const value_end_point_value = Number(param_end_point_value.value);
+                        if(param_end_point_value.value){
+                            const value_end_point_value = param_end_point_value.value;
                             op_averaging.addParameterFloat("end_point_value",value_end_point_value);
                         }
-                        const op_averaging_id = macro_op.insertOperation(op_averaging);
 
                         // create extrapolation operation
                         const param_extrapolation = method_selected.params.find( e => e.name === 'extrapolation');
@@ -565,15 +568,11 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
 
                         } else if (extrapolation_method==='based_on_curve'){
                             const op_extrapolation = new Module.Operation(Module.ActionType.EXTRAPOLATING,Module.MethodType.BASED_ON_CURVE);
-                            // param
                             const param_extra_end_point = method_selected.params.find( e => e.name === 'extrapolating_end_point');
                             const value_extra_end_point = param_extra_end_point.value;
                             op_extrapolation.addParameterString("extrapolating_end_point",value_extra_end_point);
                             const op_extrapolation_id = macro_op.insertOperation(op_extrapolation);
                             op_extrapolation.delete();
-                            // operation links
-                            macro_op.linkOperation(op_extrapolation_id,Module.OperationType.EXTRAPOLATION_REFERENCE,op_none_id); 
-                            macro_op.linkOperation(op_extrapolation_id,Module.OperationType.EXTRAPOLATION_AVERAGING,op_averaging_id); 
                         } else if (extrapolation_method==='tangent'){
                             const op_extrapolation = new Module.Operation(Module.ActionType.EXTRAPOLATING,Module.MethodType.TANGENT);
                             const param_extra_end_point = method_selected.params.find( e => e.name === 'extrapolating_end_point');
@@ -581,9 +580,6 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                             op_extrapolation.addParameterString("extrapolating_end_point",value_extra_end_point);
                             const op_extrapolation_id = macro_op.insertOperation(op_extrapolation);
                             op_extrapolation.delete();
-                            // operation links
-                            macro_op.linkOperation(op_extrapolation_id,Module.OperationType.EXTRAPOLATION_REFERENCE,op_none_id); 
-                            macro_op.linkOperation(op_extrapolation_id,Module.OperationType.EXTRAPOLATION_AVERAGING,op_averaging_id);
                         }
                         
                         // apply operation
@@ -605,12 +601,8 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                         operation.delete();
                     }
                     else if(type==='Template'){
-
                         // create a template file from operations and run 
                         let ops: object[] = [];
-                        const index_averaging = operations.findIndex( e => e.action === 'Averaging');
-                        const index_shifting = operations.findIndex( e => e.action === 'Shifting');
-
                         operations.forEach( (op,index) => {
                             const action = op.action;
                             const method = op.methods.find( e => e.type === op.selected_method);
@@ -619,40 +611,42 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                             method.params.forEach( e => {
                                 // do not add parameter for extrapolation, manage after
                                 const extra_index = e.label.toLowerCase().indexOf('extrapolation')
-                                if(e.value.length>0 && extra_index === -1){
+                                if( extra_index === -1){
                                     const name = e.name;
-                                    if(e.selection) {
-                                        par.push( {[name] : e.value});
-                                    } else {
-                                        par.push( {[name] : Number(e.value)});
+                                    if(e.value){
+                                        if(e.selection){
+                                            par.push( {[name] : e.selection[e.value].name});
+                                        } else {
+                                            par.push( {[name] : e.value});
+                                        }
+                                       
                                     }
                                 }
                             });
-                            ops.push({action: action, method: op.selected_method, parameters: par, id: index});
+                            ops.push({action: action, method: op.selected_method, parameters: par});
                         });
 
                         // manage Extrapolation action in Averaging
                         const avg_op =  operations.find( e => e.action === 'Averaging');
                         const avg_method = avg_op.methods.find( e => e.type === avg_op.selected_method);
                         const extrapolation_parm = avg_method.params.find( e => e.name === 'extrapolation');
-                        const extrapolation_method = extrapolation_parm.value;
-                        if(extrapolation_method !== 'none'){
+                        const extrapolation_method = extrapolation_parm.selection[extrapolation_parm.value].name;
+                        if(extrapolation_method !== 'none'){ // !none
                             const params: object[] = [];
                             avg_method.params.forEach( param => {
                                 const extra_index = param.label.toLowerCase().indexOf('extrapolation')
                                 if(extra_index !== -1 && param.name !== 'extrapolation'){
-                                    if(param.value.length>0){
+                                    if(typeof param.value !== 'undefined'){
                                         const name = param.name;
                                         if(param.selection) {
-                                            params.push( {[name] : param.value});
+                                            params.push( {[name] : param.selection[param.value].name});
                                         } else {
-                                            params.push( {[name] : Number(param.value)});
+                                            params.push( {[name] : param.value});
                                         }
                                     }
                                 }
                             });
-                            const links = { links:  [ { averaging: index_averaging }, { reference: index_shifting }] };
-                            ops.push({action: 'Extrapoling' , method: extrapolation_method, parameters: params, ...links  })
+                            ops.push({action: 'Extrapoling' , method: extrapolation_method, parameters: params})
                         }
 
                         const template = {operations: ops};
@@ -667,6 +661,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                             console.log("Error with template");
                         }
                     }
+                    
                     
                     if(check) {
                         success(dataprocess);
@@ -845,7 +840,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
     return (
         <>
             <Row justify="space-around">
-                <Col flex="300px">
+                <Col flex="500px">
                     <Steps operations={operations}
                            changeSelectedMethod={changeSelectedMethodHandler}
                            changeParameter= {changeParameterHandler}

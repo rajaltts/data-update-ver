@@ -55,7 +55,7 @@ class FileLoader extends Component {
                     borderRadius: 0,
                     marginLeft: 0,
                     marginRight: 0,
-                    width: '20%',
+                    width: '10%',
                     paddingLeft: 0,
                     paddingRight: 0
                 }}
@@ -73,7 +73,7 @@ class FileLoader extends Component {
                     marginBottom: 5,
                     paddingLeft: 13,
                     paddingTop: 3,
-                    width: '80%'
+                    width: '20%'
                 }}
                 >
                 {file && file.name}

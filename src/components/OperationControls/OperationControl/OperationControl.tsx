@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useState } from 'react';
-import { Select, Button, Input, Space, Alert, Typography, Divider  } from 'antd';
+import { Select, Button, Input, Space, Alert, Typography, Divider } from 'antd';
 
 
 interface OperationControlProps {
@@ -53,7 +53,7 @@ const OperationControl: React.FC<OperationControlProps> = (props) => {
                     </>
                 );
 
-              } else {
+              } else { 
                 items.push(
                     <Input size='small' type="text" addonBefore={par.label} defaultValue={par.value.toString() } onChange={ e => changePamaterHandler(e,par.name)} />
                   )

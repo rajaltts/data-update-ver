@@ -1,5 +1,5 @@
 import React, {useState } from 'react';
-import { Layout, Col, Row} from 'antd';
+import { Layout, Button, Col, Row} from 'antd';
 import 'antd/dist/antd.css';
 import DRContainer from './containers/PlotBuilder/DRContainer'
 //import PlotlyChart from 'react-plotlyjs-ts';
@@ -32,10 +32,10 @@ const App: React.FC = () => {
 
   let tensile_template = require('./data/template_tensile.json');
   //let tensile_template = require('./data/template_tensile_no_extrapolation.json');
+  let data_file = require('./data/data.json');
 
+ /* 
   // App with file from disk
-  /*
-  const [showBrowser,setShowBrowser ] = useState(true);
   const [input,setInput] = useState(
     {
       "type": "tensile",
@@ -53,6 +53,7 @@ const App: React.FC = () => {
                   ]
     }
   );
+  const [curves,setCurves] = useState([]);
 
   const handleOnFileLoad = (result) => {
     console.log("----CSV handler ----");
@@ -76,30 +77,38 @@ const App: React.FC = () => {
         curves_.push(curve);
     } 
 
-    const group_ = [{ label: 'browse', curves: curves_ }];
-    const input_updated = {...input, groups: group_};
-    setInput(input_updated);
-   
-    setShowBrowser(false);
+    setCurves(curves_);
+  }
+
+  const addDataHandler = () => {
+    if(curves.length > 0) {
+      const group_ = [{ label: 'browse', curves: curves }];
+      const input_updated = {...input, groups: group_};
+      setInput(input_updated);
+    } else {
+      setInput(data_file);
+    }
   }
 
   return (
     <Layout style={{height:"100vh"}}>
     <Content >
       <h1>Data Reduction App</h1>
-      {showBrowser&&<FileLoader handleOnFileLoad={handleOnFileLoad}/>}
-      {!showBrowser&&<PlotBuilder  
+      <p>Select a strain-stress csv file (comma separated, no headers) </p>
+      <FileLoader handleOnFileLoad={handleOnFileLoad}/>
+      <Button type="primary" onClick={addDataHandler}>Init</Button>
+      <hr style={{width:"100%"}}/>
+      <PlotBuilder  
                   data_input = {input}
                   template_input = {tensile_template}
-                  parentCallback = {""}/>}
+                  parentCallback = {""}/>
     </Content>
     </Layout>
   )
-  */
-
+  
+*/
    // App with local file loading
    
-  let data_file = require('./data/data.json');
   return (
     <Layout style={{height:"90%"}}>
       <Content >
@@ -110,6 +119,8 @@ const App: React.FC = () => {
       </Content>
     </Layout>
  );
+ 
+ 
  
  
 
