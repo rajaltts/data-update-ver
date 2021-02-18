@@ -122,7 +122,7 @@ class DRContainer extends React.Component {
           criteria:this.state.criteria,
       }
 
-        let tensile_template = require('../../data/tensile_template.json');
+        let tensile_template = require('../../data/template_tensile.json');
 
         this.steps = [
             {

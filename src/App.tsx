@@ -9,7 +9,6 @@ import FileLoader from './components/FileLoader/FileLoader.js';
 
 import PlotBuilder from './containers/PlotBuilder/PlotBuilder'
 import ReactDOM from 'react-dom';
-//<PlotBuilder  data_input = {data_file} template_input = {tensile_template}/>
 //<DRContainer modelState={modelState}/>
 const modelState={url:"http://localhost:7050/MaterialCenter",query:"3;AG6N9w:AGlxTw,AG6N6A:AGlxTw,AG6N8Q:AGlxTw,AG6Ntg:AGlxTw,AG6N3g:AGlxTw;this"};
 //const modelState={url:"http://localhost:7050/MaterialCenter",query:"3;AdlUUQ:AIY,jLgAAPvPA:elM,AcehFw:AIY,jLgAAPviw:elM;this"};
@@ -31,7 +30,6 @@ const App: React.FC = () => {
   const { Header, Footer, Sider, Content } = Layout;
 
   let tensile_template = require('./data/template_tensile.json');
-  //let tensile_template = require('./data/template_tensile_no_extrapolation.json');
   let data_file = require('./data/data.json');
 
  /* 
