@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react';
 
-const physicalMeasurementForm = (props) =>  {
+const PhysicalMeasurementForm = (props) =>  {
     const variable = props.variable;
     
     if(variable==='x'){
@@ -9,9 +9,9 @@ const physicalMeasurementForm = (props) =>  {
                 <form>
                     <label>
                     Select X type: 
-                    <select value={props.value} onChange={props.handleChange}>
-                        <option value="strain_true">Strain true</option>
+                    <select value={props.value} onChange={ e => props.handleChange(e,variable)}>
                         <option value="strain_engineering">Strain engineering</option>
+                        <option value="strain_true">Strain true</option>
                     </select>
                     </label>
                 </form>
@@ -24,9 +24,9 @@ const physicalMeasurementForm = (props) =>  {
                 <form>
                     <label>
                     Select Y type: 
-                    <select value={props.value} onChange={props.handleChange}>
-                        <option value="stress_true">Stress true</option>
+                    <select value={props.value} onChange={e => props.handleChange(e,variable)}>
                         <option value="stress_engineering">Stress engineering</option>
+                        <option value="stress_true">Stress true</option>
                     </select>
                     </label>
                 </form>
@@ -42,4 +42,4 @@ const physicalMeasurementForm = (props) =>  {
     
 
 
-export default physicalMeasurementForm;
+export default PhysicalMeasurementForm;

@@ -494,9 +494,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                     else if(type==='Polynomial'){
                         // create macro operation
                         const macro_op = new Module.Operation(Module.ActionType.MACRO, Module.MethodType.NONE);
-                        // create none operation
-                        const op_none = new Module.Operation(Module.ActionType.NONE, Module.MethodType.NONE);
-
+                        
                         // create averaging operation
                         const op_averaging = new Module.Operation(Module.ActionType.AVERAGING,Module.MethodType.POLYNOMIAL);
                         const param_order = method_selected.params.find( e => e.name === 'order');
@@ -508,18 +506,29 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                         op_averaging.addParameterString("end_point",value_end_point);
 
                         const param_end_point_value =  method_selected.params.find( e => e.name === 'end_point_value');
-                        if(param_end_point_value.value){
+                        if(param_end_point_value.value!==undefined){
+                            const param_end_point_value =  method_selected.params.findIndex( e => e.name === 'end_point_value');
                             const value_end_point_value = param_end_point_value.value;
                             op_averaging.addParameterFloat("end_point_value",value_end_point_value);
                         }
-
+                        const op_averaging_id = macro_op.insertOperation(op_averaging);
                         // create extrapolation operation
                         const param_extrapolation = method_selected.params.find( e => e.name === 'extrapolation');
-                        const extrapolation_method = param_extrapolation.value;
+                        const extrapolation_method =  param_extrapolation.selection[param_extrapolation.value].name;
                         if(extrapolation_method==='none'){
 
                         } else if (extrapolation_method==='based_on_curve'){
                             const op_extrapolation = new Module.Operation(Module.ActionType.EXTRAPOLATING,Module.MethodType.BASED_ON_CURVE);
+                            const param_extra_end_point = method_selected.params.find( e => e.name === 'extrapolating_end_point');
+                            const value_extra_end_point = param_extra_end_point.selection[param_extra_end_point.value].name;
+                            op_extrapolation.addParameterString("extrapolating_end_point",value_extra_end_point);
+                            const op_extrapolation_id = macro_op.insertOperation(op_extrapolation);
+                            op_extrapolation.delete();
+                        } else if (extrapolation_method==='tangent'){
+                            const op_extrapolation = new Module.Operation(Module.ActionType.EXTRAPOLATING,Module.MethodType.TANGENT);
+                            const param_extra_end_point = method_selected.params.find( e => e.name === 'extrapolating_end_point');
+                            const value_extra_end_point = param_extra_end_point.selection[param_extra_end_point.value].name;
+                            op_extrapolation.addParameterString("extrapolating_end_point",value_extra_end_point);
                             const op_extrapolation_id = macro_op.insertOperation(op_extrapolation);
                             op_extrapolation.delete();
                         }
@@ -531,16 +540,13 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                             console.log("AVERAGING ERROR"+error);
                             check=false;
                         }
-                        op_averaging.delete();
-                        op_none.delete();    
+                        op_averaging.delete();  
                         macro_op.delete();
                     }
                     else if(type==='Spline'){
                         // create macro operation
                         const macro_op = new Module.Operation(Module.ActionType.MACRO, Module.MethodType.NONE);
-                        // create none operation
-                        const op_none = new Module.Operation(Module.ActionType.NONE, Module.MethodType.NONE);
-
+                    
                         // create averaging operation
                         const op_averaging = new Module.Operation(Module.ActionType.AVERAGING,Module.MethodType.SPLINE);
                         const param_nb_nodes = method_selected.params.find( e => e.name === 'number_of_nodes');
@@ -553,30 +559,31 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                         const value_pts = param_pts.value;
                         op_averaging.addParameterInt("number_of_points",value_pts); 
                         const param_end_point = method_selected.params.find( e => e.name === 'end_point');
-                        const value_end_point = param_end_point.value;
+                        const value_end_point = param_end_point.selection[param_end_point.value].name;
                         op_averaging.addParameterString("end_point",value_end_point);
-                        const param_end_point_value =  method_selected.params.find( e => e.name === 'end_point_value');
-                        if(param_end_point_value.value){
+                        const param_end_point_value = method_selected.params.find( e => e.name === 'end_point_value');
+                        if(param_end_point_value.value!==undefined){
+                            const param_end_point_value =  method_selected.params.findIndex( e => e.name === 'end_point_value');
                             const value_end_point_value = param_end_point_value.value;
                             op_averaging.addParameterFloat("end_point_value",value_end_point_value);
                         }
-
+                        const op_averaging_id = macro_op.insertOperation(op_averaging);
                         // create extrapolation operation
                         const param_extrapolation = method_selected.params.find( e => e.name === 'extrapolation');
-                        const extrapolation_method = param_extrapolation.value;
+                        const extrapolation_method =  param_extrapolation.selection[param_extrapolation.value].name;
                         if(extrapolation_method==='none'){
 
                         } else if (extrapolation_method==='based_on_curve'){
                             const op_extrapolation = new Module.Operation(Module.ActionType.EXTRAPOLATING,Module.MethodType.BASED_ON_CURVE);
                             const param_extra_end_point = method_selected.params.find( e => e.name === 'extrapolating_end_point');
-                            const value_extra_end_point = param_extra_end_point.value;
+                            const value_extra_end_point = param_extra_end_point.selection[param_extra_end_point.value].name;
                             op_extrapolation.addParameterString("extrapolating_end_point",value_extra_end_point);
                             const op_extrapolation_id = macro_op.insertOperation(op_extrapolation);
                             op_extrapolation.delete();
                         } else if (extrapolation_method==='tangent'){
                             const op_extrapolation = new Module.Operation(Module.ActionType.EXTRAPOLATING,Module.MethodType.TANGENT);
                             const param_extra_end_point = method_selected.params.find( e => e.name === 'extrapolating_end_point');
-                            const value_extra_end_point = param_extra_end_point.value;
+                            const value_extra_end_point = param_extra_end_point.selection[param_extra_end_point.value].name;
                             op_extrapolation.addParameterString("extrapolating_end_point",value_extra_end_point);
                             const op_extrapolation_id = macro_op.insertOperation(op_extrapolation);
                             op_extrapolation.delete();
@@ -590,7 +597,6 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                             check=false;
                         }
                         op_averaging.delete();
-                        op_none.delete();    
                         macro_op.delete();
 
                     } else if(type==='Engineering_to_true'){

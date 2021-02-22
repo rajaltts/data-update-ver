@@ -82,17 +82,17 @@ const Step: React.FC<StepProps> = (props) => {
         props.changeParameter(name,value);
     }
         
-    const DisplaySelect = (props) => {
+    const DisplaySelect = ({parameter}) => {
         return(
         <Row>
-            <Col span={10}>{props.parameter.label}</Col>
+            <Col span={10}>{parameter.label}</Col>
             <Col span={10}>
                 <Select placeholder="Default value"
                         size='small'
-                        value={props.parameter.value}
+                        value={parameter.value}
                         style={{width: 200}}
-                        onChange={ (e) => selectParamHandler(e,props.parameter.name)}>{
-                            props.parameter.selection.map( (elm,index) => {
+                        onChange={ (e) => selectParamHandler(e,parameter.name)}>{
+                            parameter.selection.map( (elm,index) => {
                                 return(<Option value={elm.name} key={elm.name}>{elm.label}</Option>);
                             })
                         }
@@ -102,35 +102,20 @@ const Step: React.FC<StepProps> = (props) => {
         );
     }
 
-    const DisplayParameters = (props) => {
-        const sm = props.methods.find( e => e.type===props.selected_method );
+    const DisplayParameters = ({methods,selected_method}) => {
+        const sm = methods.find( e => e.type===selected_method );
         let items = [];
         if(sm.params.length>0){
             sm.params.map( par => {
                 if( 'selection' in par){  
                     items.push(
-                        <DisplaySelect size='small' parameter={par} key={par.label}/>
+                        <DisplaySelect key={par.label} parameter={par}/>
                     );
                 } else {
-                  // defaultValue={par.value}
-                  //onChange={ e => changeParameterHandler(e,par.name)}
-                  /*
-                  <InputNumber
-                                    readOnly={true}
-                                    key={par.label}
-                                    size='small'
-                                    min= {par.range.min}
-                                    max= {par.range.max}
-                                    defaultValue= {value}
-                                    onChange={e => onChangeParameter(e,par.name)}
-                                />
-                  */
                   if('range' in par){
                     const value = getValue(par.name);
-                    //defaultValue= {value}
-                    //onChange={ e => onChangeParameter(e,par.name)}
                     items.push(
-                        <Row>
+                        <Row key={par.label}>
                             <Col span={10}> {par.label}</Col>
                             <Col span={10}>
                                 <Slider
@@ -147,32 +132,26 @@ const Step: React.FC<StepProps> = (props) => {
                       );
 
                   } else {
-                      items.push(
-                        <Row>
+                    if(par.value!==undefined){
+                        const step =  (par.value!==0?Math.pow(10,(Math.floor(Math.log10(Math.abs(par.value)))-1)):1);
+                        console.log(`${par.label} ${par.value} step=${step}`);
+    
+                        items.push(
+                          <Row key={par.label}>
                             <Col span={10}> {par.label}</Col>
                             <Col span={10}>
                                 <InputNumber
-                                    key={par.label}
                                     size='small'
                                     defaultValue={par.value}
-                                    step={Math.pow(10,(Math.floor(Math.log10(par.value))-1))}
+                                    step={step}
                                     onChange={ e => changeParameterHandler(e,par.name)}
                                 />
                             </Col>
                             <Col span={4}></Col>
-                        </Row>
-                      );
+                          </Row>
+                        );
+                    }
                   }  
-                //   items.push(
-                //       <Row>
-
-                //           <Input   key={par.label}
-                //                         size='small' type="text"
-                //                         addonBefore={par.label}
-                //                         defaultValue={par.value.toString()}
-                //                         onChange={ e => changeParameterHandler(e,par.name)} />
-                //       </Row>
-                //   )
                 }
             });    
          

@@ -63,7 +63,7 @@ const Steps: React.FC<StepsProps> = (props) => {
         props.setOperations(op);
     }
     //---------SUB-COMPONENTS------------------------------------
-    function DisplayStep(props)  {
+    function DisplayStep()  {
         let steps = [];
         props.operations.map( (op,i) => {
             let status_previous = 'success';
@@ -87,7 +87,7 @@ const Steps: React.FC<StepsProps> = (props) => {
                               status_previous = {status_previous}
                               status_next = {status_next}
                               error_msg = { op.error}
-                              setOperations = { (op) => props.setOperation(op) }
+                              setOperations = { (op) => props.setOperations(op) }
                               operations = {props.operations}
                               action={op.action}
                         />
@@ -96,16 +96,16 @@ const Steps: React.FC<StepsProps> = (props) => {
         return steps[current];
     }
 
-   function DisplayProgress(props2) {
+   function DisplayProgress({current}) {
        let items = [];
-       for(let i=0;i<props2.number;i++){
+       for(let i=0;i<props.operations.length;i++){
         const description = props.operations[i].action_label;
         const label = i;
         const status =  (props.operations[i].status==='success'?true:false);
         items.push(<AntSteps.Step icon={status? <CheckCircleOutlined/> : <RightCircleOutlined/> } title={description} key={i} />);
        }
        return(
-        <AntSteps style={{paddingBottom: '10px'}} current={props2.current} size='small' >{items}</AntSteps>
+        <AntSteps style={{paddingBottom: '10px'}} current={current} size='small' >{items}</AntSteps>
        );
     }
 
@@ -122,7 +122,7 @@ const Steps: React.FC<StepsProps> = (props) => {
                 Auto
             </Space>
             
-            <DisplayProgress current={current} number={props.operations.length}/>
+            <DisplayProgress current={current}/>
             
             {!auto&&
             <Space style={{ width: '100%', justifyContent: 'space-between', paddingTop: '0px', paddingBottom: '10px'}}>
@@ -131,7 +131,7 @@ const Steps: React.FC<StepsProps> = (props) => {
             </Space>
             }
 
-            {!auto&&<DisplayStep operations={props.operations}/>}
+            {!auto&&<DisplayStep/>}
 
             {auto&&
             <Space style={{paddingLeft: '15px', paddingTop: '15px'}}>
