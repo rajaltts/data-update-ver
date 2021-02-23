@@ -1,6 +1,6 @@
 import React, {Fragment, useEffect, useState} from 'react'
 import {Button, Tooltip, Space, Switch, Steps as AntSteps } from 'antd';
-import { CheckCircleOutlined, RightCircleOutlined , CaretRightFilled, CaretLeftFilled } from '@ant-design/icons';
+import { CheckCircleFilled, RightCircleOutlined , CaretRightFilled, CaretLeftFilled } from '@ant-design/icons';
 import Step from './Step/Step';
 import { Operation } from '../../template.model';
 
@@ -45,9 +45,13 @@ const Steps: React.FC<StepsProps> = (props) => {
     const changeParameter =  (name: string, value: number, action: string) => {
         return props.changeParameter(name, value, action);
     }
-
-    const updatedCurveHandler = (event:any, action: string) => {
-        return props.updatedCurve(event,action);
+    // aplly button for a step
+    const updatedCurveHandler = (event:any, action: string,status: string) => {
+        if(status==='success'){
+            return props.updatedCurve(event,action,'restore_previous_curves');
+        } else {
+            return props.updatedCurve(event,action,'no_restore');
+        }    
     }
 
     const resetCurveHandler = (event:any, action: string) => {
@@ -62,6 +66,7 @@ const Steps: React.FC<StepsProps> = (props) => {
     const fctHandle = (op:Operation[]) => {
         props.setOperations(op);
     }
+    
     //---------SUB-COMPONENTS------------------------------------
     function DisplayStep(props)  {
         let steps = [];
@@ -81,7 +86,7 @@ const Steps: React.FC<StepsProps> = (props) => {
                               selected_method = {op.selected_method}
                               changeSelectedMethod = {(select: string) => changeSelectedMethod2(select,op.action)}
                               changeParameter = { (name: string, value: number) => changeParameter(name, value, op.action)}
-                              applyButton = { (event: any) => updatedCurveHandler(event,op.action)}
+                              applyButton = { (event: any) => updatedCurveHandler(event,op.action,op.status)}
                               resetButton = { (event: any) => resetCurveHandler(event,op.action)}
                               status = {op.status}
                               status_previous = {status_previous}
@@ -103,7 +108,7 @@ const Steps: React.FC<StepsProps> = (props) => {
         const description = props.operations[i].action_label;
         const label = i;
         const status =  (props.operations[i].status==='success'?true:false);
-        items.push(<AntSteps.Step icon={status? <CheckCircleOutlined/> : <RightCircleOutlined/> } title={description} key={i} />);
+        items.push(<AntSteps.Step icon={status? <CheckCircleFilled/> : <RightCircleOutlined/> } title={description} key={i} />);
        }
        return(
         <AntSteps style={{paddingBottom: '10px'}} current={current} size='small' >{items}</AntSteps>
@@ -123,7 +128,7 @@ const Steps: React.FC<StepsProps> = (props) => {
                 Auto
             </Space>
             
-            <DisplayProgress current={current}/>
+            <DisplayProgress current={(!auto?current:props.operations.length-1)}/>
             
             {!auto&&
             <Space style={{ width: '100%', justifyContent: 'space-between', paddingTop: '0px', paddingBottom: '10px'}}>
@@ -131,16 +136,22 @@ const Steps: React.FC<StepsProps> = (props) => {
                 <Button disabled={!(current<props.operations.length-1 && props.operations[current].status==='success')} size="small"  type="primary" icon={<CaretRightFilled />} onClick={applyNextHandler}>Next</Button>
             </Space>
             }
+            {auto&&
+            <Space style={{ width: '100%', justifyContent: 'space-between', paddingTop: '0px', paddingBottom: '10px'}}>
+                <Button size="small" type="primary"  icon={<CaretLeftFilled />} onClick={applyPreviousHandler}>Previous</Button> 
+                <Button size="small"  type="primary" icon={<CaretRightFilled />} onClick={applyNextHandler}>Next</Button>
+            </Space>
+            }
 
-            {!auto&&<DisplayStep  operations={props.operations}/>}
+            <DisplayStep  operations={props.operations}/>
 
             {auto&&
             <Space style={{paddingLeft: '15px', paddingTop: '15px'}}>
-                <Tooltip title="Reinitialize with initial curves" placement="bottom" mouseEnterDelay={1.0}>
+                {/* <Tooltip title="Reinitialize with initial curves" placement="bottom" mouseEnterDelay={1.0}>
                 <Button size="small" type="primary" onClick={() => {props.restoreInitdata()}}>Cancel</Button>
-                </Tooltip>
+                </Tooltip> */}
                 <Tooltip title="Apply all operations at one" placement="bottom" mouseEnterDelay={1.0}>
-                         <Button size="small" type="primary" onClick={(event: any) => {props.updatedCurve(event,'Template')}}>Apply</Button>
+                    <Button size="small" type="primary" onClick={(event: any) => {props.updatedCurve(event,'Template')}}>Apply</Button>      
                 </Tooltip>
             </Space>
             }

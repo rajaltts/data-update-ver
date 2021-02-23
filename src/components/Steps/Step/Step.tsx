@@ -186,8 +186,8 @@ const Step: React.FC<StepProps> = (props) => {
 
     <br/>
     {(!props.automatic_mode ) &&<Space style={{ paddingTop: '10px'}}>
-        <Button size="small" type="primary" disabled={props.status_next==='success'} onClick={props.resetButton}>Cancel</Button>
-        <Button size="small" type="primary" disabled={props.status==='success' || props.status_previous!=='success'} onClick={props.applyButton}>Apply</Button>
+        {/* <Button size="small" type="primary" disabled={props.status_next==='success'} onClick={props.resetButton}>Cancel</Button> */}
+        <Button size="small" type="primary" disabled={props.status_previous!=='success'} onClick={props.applyButton}>Apply</Button>
    </Space>}
 
     {!props.automatic_mode && <DisplayAlert/>}

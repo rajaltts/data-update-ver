@@ -336,7 +336,12 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         setOperations(operationsUpdate);
     }
     //Operation Handler
-    const updatedCurveHandler = (event,action) => {
+    const updatedCurveHandler = (event,action, preaction='restore_init_curves') => {
+        if(preaction==='restore_init_curves'){
+            restoreInitdataHandler();
+        } else if(preaction==='restore_previous_curves'){
+            resetOperationHandler(event,action);
+        }
         const group_id = data.tree.selectedGroup;
         let action_selected: any;
         let type: string; // name of the method selected
@@ -744,7 +749,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                     // create DataProcess
                     const dp_data = new Module.DataProcess(dataset_out);
                     // create operation                   
-                   const op_slope = new Module.Operation(Module.ActionType.DATA_ANALYTICS,Module.MethodType.SLOPE_POINT);
+                    const op_slope = new Module.Operation(Module.ActionType.DATA_ANALYTICS,Module.MethodType.SLOPE_POINT);
                     // apply operation
                     const check = dp_data.apply(op_slope);
                     const dp_data_out = dp_data.getOutputDataset();
@@ -756,6 +761,30 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                     data_analytics.push({label: "Young's Modulus", value: young});
                     op_slope.delete();
                     dp_data.delete();
+
+                    /*
+                    // create DataProcess
+                    const dp_data_slope = new Module.DataProcess(dataset_out);
+                    // create operation                   
+                    const op_slope_range = new Module.Operation(Module.ActionType.DATA_ANALYTICS,Module.MethodType.SLOPE_RANGE_POINT);
+                    op_slope_range.addParameterFloat("x_begin",0.0005);
+                    //op_slope_range.addParameterFloat("x_end",0.0025);
+                    op_slope_range.addParameterFloat("x_end",0.005);
+                    // apply operation
+                    const check_slope_range = dp_data_slope.apply(op_slope_range);
+                    console.log("ERROR KO"+dp_data_slope.getErrorMessage());
+                    console.log("LOG OK:"+dp_data_slope.logfile());
+                    const dp_data_slope_range_out = dp_data_slope.getOutputDataset();
+                    const curve_data_slope_out = dp_data_slope_range_out.getCurve('averaging');
+                    let vecX_data_slope_out = curve_data_slope_out.getY();
+                    let vecY_data_slope_out = curve_data_slope_out.getY();
+                    const young_range = vecX_data_slope_out.get(0);
+                    console.log("Young Range ="+young_range);
+                    data_analytics.length = 0;
+                    data_analytics.push({label: "Young's Modulus 2", value: young_range});
+                    op_slope_range.delete();
+                    dp_data_slope.delete();
+                    */
 
                     // create DataProcess
                     const dp_data_end = new Module.DataProcess(dataset_out);                 
@@ -794,10 +823,14 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                 dispatch({type: 'UPDATE_CURVES', curves: newCurves, data: data_analytics});
                 // flag status operation
                 const operationsUpdate = [...operations];
-                const ind = operationsUpdate.findIndex( (el) => el.action === action);
-                operationsUpdate[ind].status = 'success';
-                if(ind<operationsUpdate.length-1)
-                    operationsUpdate[ind+1].status = 'waiting';
+                if(action==='Template'){
+                    operationsUpdate.forEach( e => e.status='success');
+                } else {
+                    const ind = operationsUpdate.findIndex( (el) => el.action === action);
+                    operationsUpdate[ind].status = 'success';
+                    if(ind<operationsUpdate.length-1)
+                        operationsUpdate[ind+1].status = 'waiting';
+                }
                // operationsUpdate.find( (el) => el.action === action).status = 'success';
                 setOperations(operationsUpdate);
             }
@@ -828,8 +861,6 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         const operationsUpdate = [...operations];
         const ind = operationsUpdate.findIndex( (el) => el.action === action);
         operationsUpdate[ind].status = 'waiting';
-        if(ind<operationsUpdate.length)
-            operationsUpdate[ind+1].status = '';
         setOperations(operationsUpdate);
     };
 
