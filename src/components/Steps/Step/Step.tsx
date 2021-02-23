@@ -78,8 +78,9 @@ const Step: React.FC<StepProps> = (props) => {
 
  
 
-    const selectParamHandler = (value:any, name: string) => {
-        props.changeParameter(name,value);
+    const selectParamHandler = (value:any, name: string, param: any) => {
+        const value_num = param.selection.findIndex( e => e.name===value);
+        props.changeParameter(name,value_num);
     }
         
     const DisplaySelect = ({parameter}) => {
@@ -89,9 +90,9 @@ const Step: React.FC<StepProps> = (props) => {
             <Col span={10}>
                 <Select placeholder="Default value"
                         size='small'
-                        value={parameter.value}
+                        value={parameter.selection[parameter.value].name}
                         style={{width: 200}}
-                        onChange={ (e) => selectParamHandler(e,parameter.name)}>{
+                        onChange={ (e) => selectParamHandler(e,parameter.name,parameter)}>{
                             parameter.selection.map( (elm,index) => {
                                 return(<Option value={elm.name} key={elm.name}>{elm.label}</Option>);
                             })
@@ -132,25 +133,21 @@ const Step: React.FC<StepProps> = (props) => {
                       );
 
                   } else {
-                    if(par.value!==undefined){
-                        const step =  (par.value!==0?Math.pow(10,(Math.floor(Math.log10(Math.abs(par.value)))-1)):1);
-                        console.log(`${par.label} ${par.value} step=${step}`);
-    
-                        items.push(
-                          <Row key={par.label}>
-                            <Col span={10}> {par.label}</Col>
-                            <Col span={10}>
-                                <InputNumber
-                                    size='small'
-                                    defaultValue={par.value}
-                                    step={step}
-                                    onChange={ e => changeParameterHandler(e,par.name)}
-                                />
-                            </Col>
-                            <Col span={4}></Col>
-                          </Row>
-                        );
-                    }
+                    const step =  ((par.value!==undefined&&par.value!==0)?Math.pow(10,(Math.floor(Math.log10(Math.abs(par.value)))-1)):1);
+                    items.push(
+                        <Row key={par.label}>
+                        <Col span={10}> {par.label}</Col>
+                        <Col span={10}>
+                            <InputNumber
+                                size='small'
+                                defaultValue={par.value}
+                                step={step}
+                                onChange={ e => changeParameterHandler(e,par.name)}
+                            />
+                        </Col>
+                        <Col span={4}></Col>
+                        </Row>
+                    );
                   }  
                 }
             });    

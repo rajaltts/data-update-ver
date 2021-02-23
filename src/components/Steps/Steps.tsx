@@ -63,7 +63,7 @@ const Steps: React.FC<StepsProps> = (props) => {
         props.setOperations(op);
     }
     //---------SUB-COMPONENTS------------------------------------
-    function DisplayStep()  {
+    function DisplayStep(props)  {
         let steps = [];
         props.operations.map( (op,i) => {
             let status_previous = 'success';
@@ -97,6 +97,7 @@ const Steps: React.FC<StepsProps> = (props) => {
     }
 
    function DisplayProgress({current}) {
+        
        let items = [];
        for(let i=0;i<props.operations.length;i++){
         const description = props.operations[i].action_label;
@@ -131,7 +132,7 @@ const Steps: React.FC<StepsProps> = (props) => {
             </Space>
             }
 
-            {!auto&&<DisplayStep/>}
+            {!auto&&<DisplayStep  operations={props.operations}/>}
 
             {auto&&
             <Space style={{paddingLeft: '15px', paddingTop: '15px'}}>
