@@ -51,25 +51,35 @@ class DRContainer extends React.Component {
 
     callbackFunctionStep2 = (childData) => {
         console.log("Parent recieved Selector Data: "+JSON.stringify(childData),childData.sections);
+        let groups1 = childData.groups;
+        let newGroups = childData.groups.slice(1);
+        childData.groups = newGroups;
         this.setState({
             current: childData.current,
              previous: childData.previous,
-             groups : childData.groups,
+             groups : groups1,
              selectedCurves: childData.selectedCurves,
              plotBuildModel : childData,
              groupSelected:childData.groupSelected,		
             selectedCriteria:childData.selectedCriteria,
             groupsCriteria:childData.groupsCriteria,
             criteria:childData.criteria,
+            targetType: childData.targetType,
+            res_curve: childData.res_curve,
+            res_var1: childData.res_var1
        });
+
     }
 
     callbackFunctionStep3 = (childData) => {
-      console.log("Parent recieved Selector Data: "+JSON.stringify(childData));
+
+     console.log("Parent recieved Selector Data: "+JSON.stringify(childData));
       this.setState({
           current: childData.current,
            previous: childData.previous,
-           reloadStep2 : childData.stateChanged
+           reloadStep2 : childData.stateChanged,
+           plotBuildModel : childData
+
      });
   }
 
@@ -78,7 +88,6 @@ class DRContainer extends React.Component {
     this.setState({
         current: childData.current,
          previous: childData.previous,
-         plotBuildModel : childData,
    });
 }
 
@@ -120,6 +129,10 @@ class DRContainer extends React.Component {
           selectedCriteria:this.state.selectedCriteria,
           groupsCriteria:this.state.groupsCriteria,
           criteria:this.state.criteria,
+          plotBuildModel:this.state.plotBuildModel,
+          targetType: this.state.targetType,
+          res_curve: this.state.res_curve,
+          res_var1: this.state.res_var1
       }
 
         let tensile_template = require('../../data/template_tensile.json');
@@ -154,12 +167,7 @@ class DRContainer extends React.Component {
         </Steps>
         <div className="steps-content" >{this.steps[current].content}</div>
         <div className="steps-action">
-          {current < this.steps.length - 1 }
-          {current === this.steps.length - 1 && (
-            <Button type="primary" >
-              Submit
-            </Button>
-          )}
+
         </div>
 
             </div>

@@ -53,13 +53,16 @@ const dataReducer = (currentData: Data, action: Action) => {
                                 };
            
             action.input.groups.forEach( (g,index_g) => {
-                const group_c: Group = { id: index_g, curves: [], data: []};
+                const group_c: Group = { id: index_g, curves: [], data: [], label:g.label};
                 const group_d: GroupData = { title: g.label, treeData: []};
 
                 g.curves.forEach( (c, index_c) => {
                     const curve_d: Curve = { id: index_c,
                                              x: [...c.x], y: [...c.y],
-                                             name: c.label,
+                                             name: c.name,
+                                             label: c.label,
+                                             matDataLabel: c.matDataLabel,
+                                             oid: c.oid,
                                              selected: true, opacity: 1,
                                              x0: [...c.x], y0: [...c.y]};
                     
@@ -141,8 +144,9 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         {
             type: 'tensile', xtype: '', ytype: '', xunit: '', yunit: '',
             groups: [{id: -1,
-                      curves: [ {id: -1, x: [], y: [], name: 'toto', selected: false, opacity: 0, x0: [], y0: []} ],
-                      data: [ {label: '', value: 0} ]
+                      curves: [ {id: -1, x: [], y: [], name: 'toto', selected: false, opacity: 0, x0: [], y0: [], oid:'', matDataLabel:'', label:''} ],
+                      data: [ {label: '', value: 0} ],
+                      label:''
                      }
                     ],
             tree: { groupData: [ {title:'group1',
@@ -302,7 +306,8 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         let json = {
             current: 1,
             previous: true,
-            stateChanged: false
+            stateChanged: false,
+            groups: data.groups
         }
         sendData(json);
     }
@@ -312,6 +317,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         let json = {
             current: 3,
             previous: false,
+            groups: data.groups
         }
         sendData(json);
     }

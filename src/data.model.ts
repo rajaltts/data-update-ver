@@ -7,6 +7,9 @@ export type Curve = {
     opacity: number;
     x0: number[];
     y0: number[];
+    oid: string;
+    matDataLabel: string;
+    label: string;
 };
 
 
@@ -14,6 +17,7 @@ export type Group = {
     id: number;
     curves: Curve[]; 
     data: any[];
+    label: string;
 };
 
 export type Data = {

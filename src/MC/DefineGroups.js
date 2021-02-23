@@ -90,6 +90,9 @@ class DefineGroups extends React.Component {
             selectedCriteria:this.state.selectedCriteria,
             groupsCriteria:this.state.groupsCriteria,
             criteria:this.state.criteria,
+            targetType: this.state.targetType,
+            res_curve: this.state.res_curve,
+            res_var1: this.state.res_var1
         }
         this.sendData(json);
     }
@@ -127,6 +130,9 @@ class DefineGroups extends React.Component {
             selectedCriteria:this.state.selectedCriteria,
             groupsCriteria:this.state.groupsCriteria,
             criteria:this.state.criteria,
+            targetType: this.state.targetType,
+            res_curve: this.state.res_curve,
+            res_var1: this.state.res_var1
         }
         this.sendData(json);
     }
@@ -179,6 +185,9 @@ class DefineGroups extends React.Component {
             selectedCriteria:this.state.selectedCriteria,
             groupsCriteria:this.state.groupsCriteria,
             criteria:this.state.criteria,
+            targetType: this.state.targetType,
+            res_curve: this.state.res_curve,
+            res_var1: this.state.res_var1
         }
         this.sendData(json);
     }
@@ -214,6 +223,30 @@ class DefineGroups extends React.Component {
 
                })
             })
+            
+        })
+        Object.keys(this.state.criteria).map((param,index)=>{
+            if(!checkedValues.includes(param)){
+            let obj = this.state.criteria[param];
+            let values = obj.value;
+            Object.keys(values).map((key, i) => {
+               let curves =  values[key];
+               curves.map((curve)=>{
+                let c1 = curveCriteriaMap[curve];
+                if(c1 === undefined){
+                    let criObj = new Object();
+                    criObj[param] = key;
+                    curveCriteriaMap[curve] = criObj;
+                }
+                else{
+                    let criObj = curveCriteriaMap[curve];
+                    criObj[param] = key;
+                    curveCriteriaMap[curve] = criObj;
+                }
+
+               })
+            })
+        }
             
         })
         let groupsCriteria = {};
@@ -295,6 +328,9 @@ class DefineGroups extends React.Component {
                     tree: res.tree,
                     keys: res.keys,
                     criteria: res.criteria,
+                    targetType: res.targetType,
+                    res_curve: res.res_curve,
+                    res_var1: res.res_var1
                 })
 
 
@@ -392,7 +428,7 @@ class DefineGroups extends React.Component {
             this.state.showGroupCriteria = true;
        })
        if(this.state.groups.length > 1){
-        this.state.groups[0].label = "Unassigned Group";
+        this.state.groups[0].label = "Unassigned Curve";
        }
        
        this.setState({
@@ -480,7 +516,7 @@ this.state.groups.map((group, index)=>{
     {
         this.state.selectedCriteria.map((cr, index) =>{
             let crObj = this.state.criteria[cr];
-            let leftHeaderLabel = crObj.name +" - "+crObj.targetName;
+            let leftHeaderLabel = crObj.label +" - "+crObj.targetLabel;
             let values = criteriaGrp[cr];
             return(
                 <tr key={'proptr'+index}>
@@ -509,7 +545,7 @@ this.state.groups.map((group, index)=>{
                     <Col>
                     <Skeleton loading={!this.state.loaded}>
                          <PlotCurve
-                        curves={allCurves} showLegend={false} 
+                        curves={allCurves} showLegend={false} isThumbnail={false} showOnlyAverage={false}
                     />
                     </Skeleton>
                     </Col>
@@ -556,7 +592,7 @@ this.state.groups.map((group, index)=>{
                         <Button  onClick={e => { this.handlePrevious() }}>Previous</Button>
                     </div>
                     <div className="ButtonNext">
-                        <Button type="primary" onClick={e => { this.handleNext() }}>Next</Button>
+                        <Button type="primary" disabled={this.state.groups.length>1?false:true} onClick={e => { this.handleNext() }}>Next</Button>
                     </div>
                 </div>
 

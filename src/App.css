@@ -51,7 +51,19 @@
   }
   div.ButtonNext{
     float: right;
+    padding-right: 10px;
   }
+
+  div.ButtonSave{
+    float: right;
+    padding-right: 10px;
+  }
+
+  div.ButtonCancel{
+    float: right;
+    padding-right: 10px;
+  }
+
   div.DefineGroupsDiv{
     width:max-content;
   }
@@ -193,6 +205,7 @@
   padding-bottom: 12px;
   text-align: left;
   color: #666666;
+  white-space: nowrap;
 }
 span.EmptyPropDef{
   text-decoration: line-through;
