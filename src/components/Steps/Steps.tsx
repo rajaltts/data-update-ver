@@ -1,5 +1,5 @@
 import React, {Fragment, useEffect, useState} from 'react'
-import {Button, Tooltip, Space, Switch, Steps as AntSteps } from 'antd';
+import {Button, Tooltip, Space, Switch, Steps as AntSteps, Checkbox } from 'antd';
 import { CheckCircleFilled, RightCircleOutlined , CaretRightFilled, CaretLeftFilled } from '@ant-design/icons';
 import Step from './Step/Step';
 import { Operation } from '../../template.model';
@@ -13,7 +13,6 @@ interface StepsProps {
     resetAll: any;
     setOperations(ops: Operation[]): void;
     restoreInitdata: any;
-    resetStep: boolean;
     resetOperations: any;
 };
 
@@ -22,10 +21,7 @@ const Steps: React.FC<StepsProps> = (props) => {
     const [current, setCurrent] = useState(0);
     const [auto, setAuto] = useState(true);
 
-    //---------EFFECT-----------------------------------------
-    useEffect(() => {
-        setCurrent(0);
-    },[props.resetStep]);
+    //---------EFFECT------------------------------------------
 
     //---------HANDLER----------------------------------------
     const applyNextHandler = () => {
@@ -36,6 +32,10 @@ const Steps: React.FC<StepsProps> = (props) => {
     const applyPreviousHandler = () => {
         if(current>0)
             setCurrent(current-1);
+    }
+
+    const stepsOnChangeHnadler = (current) => {
+        setCurrent(current);
     }
 
     const changeSelectedMethod2 = (select:string, action: string) => {
@@ -63,8 +63,17 @@ const Steps: React.FC<StepsProps> = (props) => {
         setAuto(checked);
         props.restoreInitdata();
     }
-    const fctHandle = (op:Operation[]) => {
-        props.setOperations(op);
+    const manualModeHandler = (event: any) => {
+        const status = event.target.checked;
+        // if status is check(true) -> auto=false
+        setAuto(!status);
+        setCurrent(0);
+        props.restoreInitdata();
+    }
+
+    const resetButtonHandle = () => {
+        setCurrent(0);
+        props.resetOperations()
     }
     
     //---------SUB-COMPONENTS------------------------------------
@@ -101,7 +110,7 @@ const Steps: React.FC<StepsProps> = (props) => {
         return steps[current];
     }
 
-   function DisplayProgress({current}) {
+   function DisplayProgress() {
         
        let items = [];
        for(let i=0;i<props.operations.length;i++){
@@ -110,10 +119,17 @@ const Steps: React.FC<StepsProps> = (props) => {
         const status =  (props.operations[i].status==='success'?true:false);
         items.push(<AntSteps.Step icon={status? <CheckCircleFilled/> : <RightCircleOutlined/> } title={description} key={i} />);
        }
-       return(
-        <AntSteps style={{paddingBottom: '10px'}} current={current} size='small' >{items}</AntSteps>
-       );
+       if(auto){
+           return(
+            <AntSteps style={{paddingBottom: '10px'}} current={current} size='small' onChange={stepsOnChangeHnadler}>{items}</AntSteps>
+           );
+       } else {
+        return(
+            <AntSteps style={{paddingBottom: '10px'}} current={current} size='small'>{items}</AntSteps>
+           );
+       }
     }
+
 
     //---------RENDER-----------------------------------------
     return(
@@ -122,13 +138,14 @@ const Steps: React.FC<StepsProps> = (props) => {
             <h1 style={{textAlign: 'center'}}>
                 Analysis type: Tensile
             </h1>
-            <Space style={{width: '100%', justifyContent: 'center', padding: '10px'}}>
+            {/* <Space style={{width: '100%', justifyContent: 'center', padding: '10px'}}>
                 Manual
                 <Switch defaultChecked style={{backgroundColor: "grey"}} onChange={switchChange} />
                 Auto
-            </Space>
-            
-            <DisplayProgress current={(!auto?current:props.operations.length-1)}/>
+            </Space> */}
+
+            {/* <DisplayProgress current={(!auto?current:props.operations.length-1)}/> */}
+            <DisplayProgress/>
             
             {!auto&&
             <Space style={{ width: '100%', justifyContent: 'space-between', paddingTop: '0px', paddingBottom: '10px'}}>
@@ -136,36 +153,38 @@ const Steps: React.FC<StepsProps> = (props) => {
                 <Button disabled={!(current<props.operations.length-1 && props.operations[current].status==='success')} size="small"  type="primary" icon={<CaretRightFilled />} onClick={applyNextHandler}>Next</Button>
             </Space>
             }
-            {auto&&
+            {/* {auto&&
             <Space style={{ width: '100%', justifyContent: 'space-between', paddingTop: '0px', paddingBottom: '10px'}}>
                 <Button size="small" type="primary"  icon={<CaretLeftFilled />} onClick={applyPreviousHandler}>Previous</Button> 
                 <Button size="small"  type="primary" icon={<CaretRightFilled />} onClick={applyNextHandler}>Next</Button>
             </Space>
-            }
+            } */}
 
             <DisplayStep  operations={props.operations}/>
 
             {auto&&
-            <Space style={{paddingLeft: '15px', paddingTop: '15px'}}>
+            <Space style={{paddingLeft: '10px', paddingTop: '15px'}}>
                 {/* <Tooltip title="Reinitialize with initial curves" placement="bottom" mouseEnterDelay={1.0}>
                 <Button size="small" type="primary" onClick={() => {props.restoreInitdata()}}>Cancel</Button>
                 </Tooltip> */}
                 <Tooltip title="Apply all operations at one" placement="bottom" mouseEnterDelay={1.0}>
-                    <Button size="small" type="primary" onClick={(event: any) => {props.updatedCurve(event,'Template')}}>Apply</Button>      
+                    <Button size="small" type="primary" onClick={(event: any) => {props.updatedCurve(event,'Template')}}>Apply</Button>       
                 </Tooltip>
             </Space>
             }
 
             {!auto&&
-            <Space style={{paddingLeft: '15px', paddingTop: '15px'}}>
+            <Space style={{paddingLeft: '10px', paddingTop: '15px'}}>
                 {/* <Tooltip title="Reinitialize with initial curves" placement="bottom" mouseEnterDelay={1.0}>
                 <Button size="small" type="primary" onClick={() => {props.restoreInitdata()}}>Reset curves</Button>
                 </Tooltip> */}
                 <Tooltip title="Reinitialize with initial curves and default parameters" placement="bottom" mouseEnterDelay={1.0}>
-                <Button size="small" type="primary" onClick={() => {props.resetOperations()}}>Cancel All</Button>
+                <Button size="small" type="primary" onClick={resetButtonHandle}>Reset</Button>
                 </Tooltip>
             </Space>
             }
+            <br/>
+            <Checkbox style={{paddingTop: '10px', paddingBottom: '10px'}} onChange={manualModeHandler}>Manual mode</Checkbox>
 
         </div>
     </Fragment>

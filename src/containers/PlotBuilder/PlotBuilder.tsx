@@ -48,13 +48,12 @@ const dataReducer = (currentData: Data, action: Action) => {
                                 yunit: action.input.yunit,
                                 groups: [],
                                 tree: { groupData: [],
-                                        keys: [],
                                         selectedGroup: 0}
                                 };
            
             action.input.groups.forEach( (g,index_g) => {
                 const group_c: Group = { id: index_g, curves: [], data: [], label:g.label};
-                const group_d: GroupData = { title: g.label, treeData: []};
+                const group_d: GroupData = { title: g.label, treeData: [], keys: [] };
 
                 g.curves.forEach( (c, index_c) => {
                     const curve_d: Curve = { id: index_c,
@@ -73,8 +72,7 @@ const dataReducer = (currentData: Data, action: Action) => {
                     curve_data.key = index_g.toString()+'-'+index_c.toString();
 
                     group_d.treeData.push(curve_data);
-                    if(index_g===0)
-                        data.tree.keys.push(curve_data.key);
+                    group_d.keys.push(curve_data.key);
                 });
                 data.groups.push(group_c);
                 data.tree.groupData.push(group_d);
@@ -86,15 +84,17 @@ const dataReducer = (currentData: Data, action: Action) => {
             // input: keys is the array of selected curves
             // output: modify current curves selected and opacity properties
             newData.groups[action.groupid].curves.forEach( (item,i) => {
-                item.selected = false;
-                item.opacity = 0.2;
+                if(item.name&&item.name.indexOf('average')===-1){
+                    item.selected = false;
+                    item.opacity = 0.2;
+                }
             });
             action.keys.forEach( (item,i) => {
                const index_curve = parseInt(item.charAt(item.length-1)); // TODO do not work more than 10 curves
                newData.groups[action.groupid].curves[index_curve].selected = true;
                newData.groups[action.groupid].curves[index_curve].opacity = 1; 
             });
-            newData.tree.keys = action.keys;
+            newData.tree.groupData[action.groupid].keys = action.keys;
             newData.tree.selectedGroup = action.groupid;
             return newData;
         }
@@ -150,10 +150,10 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                      }
                     ],
             tree: { groupData: [ {title:'group1',
-                                  treeData: [{title: 'curve1', key: '0-0', icon: <LineOutlined/>}]
+                                  treeData: [{title: 'curve1', key: '0-0', icon: <LineOutlined/>}],
+                                  keys: []
                                   }
                                 ],
-                    keys: [],
                     selectedGroup: 0}
         }
         );
@@ -179,7 +179,6 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
       // template is an input json file for dataclean library 
     const [template, setTemplate] = useState({"operations": []});
 
-    const [resetstep, setResetstep] = useState(false);
 
     //---------EFFECT-----------------------------------------
     // initialize the states (componentDidMount)
@@ -828,8 +827,9 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                 } else {
                     const ind = operationsUpdate.findIndex( (el) => el.action === action);
                     operationsUpdate[ind].status = 'success';
-                    if(ind<operationsUpdate.length-1)
-                        operationsUpdate[ind+1].status = 'waiting';
+                    for(let i = ind+1; i<operationsUpdate.length; i++){
+                        operationsUpdate[i].status = 'waiting';
+                    }
                 }
                // operationsUpdate.find( (el) => el.action === action).status = 'success';
                 setOperations(operationsUpdate);
@@ -872,7 +872,6 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         const operationsUpdate = [...operations];
         operationsUpdate.forEach( (val,index,arr) => {arr[index].status='waiting'});
         setOperations(operationsUpdate);
-        setResetstep(!resetstep);
     }
 
     const resetOperationsHandler = () => {
@@ -892,7 +891,6 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                            resetAll={initHandler}
                            setOperations={setOperations}
                            restoreInitdata={restoreInitdataHandler}
-                           resetStep={resetstep}
                            resetOperations={resetOperationsHandler}
                     />
                     {/* <OperationControls
@@ -913,8 +911,8 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                 <Col flex="auto">
                     <CurveControls 
                         groupData={data.tree.groupData}
-                        checkedKeys={data.tree.keys}
-                        onCheck={checkDataTreeHandler} />
+                        onCheck={checkDataTreeHandler}
+                        />
                         
                 </Col>
             </Row>

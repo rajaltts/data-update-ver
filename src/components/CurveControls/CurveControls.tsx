@@ -6,7 +6,6 @@ import CurveSelection from './CurveSelection/CurveSelection'
 
 interface CurveControlsProps {
    groupData: GroupData[];
-   checkedKeys: string[];
    onCheck: any;
 };
 
@@ -17,11 +16,7 @@ const CurveControls: React.FC<CurveControlsProps> = (props) => {
         console.log('radio checked', e.target.value);
         const group_index = e.target.value;
         setGroup(group_index);
-        const keys = [];
-        props.groupData[group_index].treeData.forEach( (c,index) => {
-            const key = group_index.toString()+'-'+index;
-            keys.push(key);
-        })
+        const keys = [...props.groupData[group_index].keys];
         props.onCheck(keys,group_index)
     };
 
@@ -53,7 +48,7 @@ const CurveControls: React.FC<CurveControlsProps> = (props) => {
             }</Radio.Group>
                 <CurveSelection 
                     treeData = {props.groupData[group].treeData}
-                    checkedKeys = {props.checkedKeys}
+                    checkedKeys = {props.groupData[group].keys}
                     onCheck = {onCheckCurve}
                 />
           </Space>

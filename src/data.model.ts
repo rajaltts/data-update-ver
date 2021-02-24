@@ -40,11 +40,11 @@ export type CurveData = {
 export type GroupData = {
     title: string; // group name
     treeData: CurveData[];
+    keys: string[];
 }
 
 export type Tree = {
     groupData: GroupData[] ;
-    keys: string[];
     selectedGroup: number;
 };
 
