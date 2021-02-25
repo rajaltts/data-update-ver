@@ -41,12 +41,12 @@ export const tensile_operations_config = [
             {
                 label: 'Strain',
                 type: 'Max_X',
-                params: [{label: 'value', name: 'value',  value: 0.05}]
+                params: [{label: 'value', name: 'value',  value: 0.05, float: true }]
             },
             {
                 label: 'Stress',
                 type: 'Max_Y',
-                params: [{label: 'value', name: 'value',  value: 1000}]
+                params: [{label: 'value', name: 'value',  value: 1000, float: true}]
             }
         ],
         selected_method: 'None',
@@ -65,19 +65,19 @@ export const tensile_operations_config = [
             {
                 label: 'Defined strain',
                 type: 'X_shift_defined',
-                params: [{label: 'value', name: 'value',  value: -0.01}]
+                params: [{label: 'value', name: 'value',  value: 0, float: true}]
             },
             {
                 label: 'Stiffness stress based',
                 type: 'X_tangent_yrange',
-                params: [{label: 'min stress', name: 'min', value: 0},
-                         {label: 'max stress', name: 'max', value: 100}]
+                params: [{label: 'min stress', name: 'min', value: 0, float: true},
+                         {label: 'max stress', name: 'max', value: undefined, float: true}]
             },
             {
                 label: 'Stiffness strain based',
                 type: 'X_tangent_xrange',
-                params: [{label: 'min strain', name: 'min', value: 0},
-                         {label: 'max strain',  name: 'max',value: 0.001}]
+                params: [{label: 'min strain', name: 'min', value: 0, float: true},
+                         {label: 'max strain',  name: 'max',value: 0.001, float: true}]
             }
         ],
         selected_method: 'None',

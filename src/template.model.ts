@@ -15,6 +15,7 @@ export type Parameter = {
     selection?: Selection[];
     range?: Range;
     value: number;
+    float?: boolean;
    };
    
    export type Method = {

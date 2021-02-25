@@ -16,7 +16,7 @@ interface StepProps {
     status_previous: string;
     status_next: string;
     error_msg: string;
-    setOperations(ops: Operation[]): void; 
+    changeOperations: (a: Operation[]) => void;
     operations: Operation[];
     action: string;
 };
@@ -48,7 +48,7 @@ const Step: React.FC<StepProps> = (props) => {
         const m = a.methods.find( e => e.type === sm);
         const p = m.params.find( e => e.name === name);
         p.value = value;
-        props.setOperations(operationsUpdate); 
+        props.changeOperations(operationsUpdate); 
         
     }
 
@@ -73,7 +73,7 @@ const Step: React.FC<StepProps> = (props) => {
         const p = m.params.find( e => e.name === name);
         const value = e; //e.target.value;  
         p.value = value;
-        props.setOperations(operationsUpdate); // in order to keep the focus we need to set state in this component
+        props.changeOperations(operationsUpdate); 
     }
 
  
@@ -140,7 +140,7 @@ const Step: React.FC<StepProps> = (props) => {
                         <Col span={10}>
                             <InputNumber
                                 size='small'
-                                defaultValue={par.value}
+                                defaultValue={(par.value===undefined||par.value===null?'default':par.value)}
                                 step={step}
                                 onChange={ e => changeParameterHandler(e,par.name)}
                             />

@@ -11,7 +11,7 @@ interface StepsProps {
     updatedCurve: any;
     resetCurve: any;
     resetAll: any;
-    setOperations(ops: Operation[]): void;
+    changeOperations: (a: Operation[]) => void;
     restoreInitdata: any;
     resetOperations: any;
 };
@@ -75,6 +75,10 @@ const Steps: React.FC<StepsProps> = (props) => {
         setCurrent(0);
         props.resetOperations()
     }
+
+    const changeOperationsHandler = (new_ops: Operation[]) => { 
+        props.changeOperations(new_ops);
+     }
     
     //---------SUB-COMPONENTS------------------------------------
     function DisplayStep(props)  {
@@ -101,7 +105,7 @@ const Steps: React.FC<StepsProps> = (props) => {
                               status_previous = {status_previous}
                               status_next = {status_next}
                               error_msg = { op.error}
-                              setOperations = { (op) => props.setOperations(op) }
+                              changeOperations= { op => props.changeOperations(op) }
                               operations = {props.operations}
                               action={op.action}
                         />

@@ -267,8 +267,11 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
     }
 
     //---------HANDLER-------------------------------------------
+    const changeOperationsHandler = (new_ops: Operation[]) => { 
+        setOperations(new_ops);
+     }
      // fct called by  resetAll button 
-     const initHandler = () => { 
+    const initHandler = () => { 
         dispatch({type: 'SET', input: props.data_input}); // init curves
         setTemplate(props.template_input); // init operations
     };
@@ -624,18 +627,21 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                             const method = op.methods.find( e => e.type === op.selected_method);
                             const params = method.params;
                             let par: object[] = [];
-                            method.params.forEach( e => {
+                            method.params.forEach( param => {
                                 // do not add parameter for extrapolation, manage after
-                                const extra_index = e.label.toLowerCase().indexOf('extrapolation')
+                                const extra_index = param.label.toLowerCase().indexOf('extrapolation')
                                 if( extra_index === -1){
-                                    const name = e.name;
-                                    if(e.value){
-                                        if(e.selection){
-                                            par.push( {[name] : e.selection[e.value].name});
-                                        } else {
-                                            par.push( {[name] : e.value});
+                                    if(typeof param.value !== 'undefined'&& param.value!==null){ 
+                                        const name = param.name;
+                                        if(param.selection){
+                                            par.push( {[name] : param.selection[param.value].name});
+                                        } else { 
+                                            let val = param.value;
+                                            if(param.float){ // if the float is an integer number we need to add decimal separator in order to well interpreted by dataclean.lib
+                                                val = (val===0?1e-15:val*(1+1e-15));
+                                            } 
+                                            par.push( {[name] : val})
                                         }
-                                       
                                     }
                                 }
                             });
@@ -657,7 +663,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                                         if(param.selection) {
                                             params.push( {[name] : param.selection[param.value].name});
                                         } else {
-                                            params.push( {[name] : param.value});
+                                            (param.float?    params.push( {[name] : (param.value+1e-8/param.value)}):params.push( {[name] : param.value}));
                                         }
                                     }
                                 }
@@ -667,6 +673,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
 
                         const template = {operations: ops};
                         let s = JSON.stringify(template);
+                        console.log('Template '+s);
                         try{
                             const op = new Module.Operation(s);
                             // apply operation
@@ -889,7 +896,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                            updatedCurve={updatedCurveHandler}
                            resetCurve={resetOperationHandler}
                            resetAll={initHandler}
-                           setOperations={setOperations}
+                           changeOperations={changeOperationsHandler}
                            restoreInitdata={restoreInitdataHandler}
                            resetOperations={resetOperationsHandler}
                     />
