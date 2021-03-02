@@ -24,15 +24,49 @@ class SaveResults extends React.Component {
         this.sendData = this.sendData.bind(this);
         this.handlePrevious = this.handlePrevious.bind(this);
         this.onCheckBoxChange = this.onCheckBoxChange.bind(this);
+        this.onResultCurve = this.onResultCurve.bind(this);
+        this.onResultVar = this.onResultVar.bind(this);
         this.updateAttribute = this.updateAttribute.bind(this);
+        this.handleSave = this.handleSave.bind(this);
      }
+
+     onResultCurve(checkedValues, oldValue) {
+        let res = this.props.propState.res_curve[checkedValues].name;
+        this.setState({
+            selected_res_curve : res,
+       })
+
+       let json = {
+        current: 4,
+        previous: false,
+        selected_res_curve: this.state.selected_res_curve,
+    }
+    this.sendData(json);
+        
+    }
+
+      onResultVar(checkedValues, oldValue) {
+        let propdef = this.props.propState.res_var1;
+        let res = this.props.propState.res_var1[checkedValues].name;
+        this.setState({
+            selected_res_var : res,
+       })
+
+       let json = {
+        current: 4,
+        previous: false,
+        selected_res_var: this.state.selected_res_var
+        }
+    this.sendData(json);
+        
+    }
 
      updateAttribute = (value,crname,index) =>{
         let group = this.state.groups[index+1];
         group.criteria[crname] = value;
         this.state.groups[index+1] = group;
         let json = {
-            current: 1,
+            current: 4,
             previous: false,
             selectedCurves: this.state.selectedCurves,
             groups: this.state.groups,
@@ -65,7 +99,7 @@ class SaveResults extends React.Component {
             groups:upDatedGroups
         })
         let json = {
-            current: 3,
+            current: 4,
             previous: true,
             selectedCurves: this.state.selectedCurves,
             groups: this.state.groups,
@@ -83,9 +117,23 @@ class SaveResults extends React.Component {
         }
      this.sendData(json);
  }
+    handleSave(){
+        const url = this.props.propState.url;
+        const saltId = this.props.propState.salt;
+        let json = {
+            propState: this.props.propState,
+            currentState: this.state,
+        }
+        console.log(json);
+        axios.post(url +'/servlet/rest/dr/save',{data:json},{headers:{'Content-Type': 'application/json',clientAppType:'REST_API', salt:saltId}})
+            .then(response => {
+                console.log(response);
+                const res = response.data;
+            })
+    }
     handlePrevious() {
         let json = {
-            current: 2,
+            current: 3,
             previous: true,
             selectedCurves: this.state.selectedCurves,
             groups: this.state.groups,
@@ -281,7 +329,7 @@ this.state.groups.map((group, index)=>{
 
         <tr key={'proptr_Curve'}> <td  key={'proptdColCurve'} className="MatData"> <span> {'Curve Preview' }</span></td>{
         this.props.propState.plotBuildModel.groups.map((group, index1) =>{
-            return(<td style={{textAlign: 'center'}}  key={'propColCurve'+index1+1}> <Select size='small' value={this.props.propState.res_curve[0].label} style={{width: '60%'}} onChange={(e)=>this.onResultCurve(e,this.state.selectedAnalysisType)}>
+            return(<td style={{textAlign: 'center'}}  key={'propColCurve'+index1+1}> <Select size='small' value={this.props.propState.res_curve[0].name} style={{width: '60%'}} onChange={(e)=>this.onResultCurve(e,this.state.selectedAnalysisType)}>
             {
              this.props.propState.res_curve.map( (resc,index) => {
                  return(<Select.Option key={'propOption'+index} value={resc.name}>{resc.label}</Select.Option>);
@@ -302,7 +350,7 @@ this.state.groups.map((group, index)=>{
 
         <tr key={'proptr_Curve'}> <td  key={'proptdColCurve'} className="MatData"> <span> {'Curve Preview' }</span></td>{
         this.props.propState.plotBuildModel.groups.map((group, index1) =>{
-            return(<td style={{textAlign: 'center'}}  key={'propColCurve'+index1+1}> <Select size='small' value={this.props.propState.res_var1[0].label} style={{width: '60%'}} onChange={(e)=>this.onResultCurve(e,this.state.selectedAnalysisType)}>
+            return(<td style={{textAlign: 'center'}}  key={'propColCurve'+index1+1}> <Select size='small' value={this.props.propState.res_var1[0].name} style={{width: '60%'}} onChange={(e)=>this.onResultVar(e,this.state.selectedAnalysisType)}>
             {
              this.props.propState.res_var1.map( (resc,index) => {
                  return(<Select.Option key={'propOption'+index} value={resc.name}>{resc.label}</Select.Option>);
@@ -376,7 +424,7 @@ this.state.groups.map((group, index)=>{
                         <Button>Cancel</Button>
                     </div>
                     <div className="ButtonSave">
-                        <Button type="primary">Save</Button>
+                        <Button type="primary"  onClick={e => { this.handleSave() }}>Save</Button>
                     </div>
                 </div>
 

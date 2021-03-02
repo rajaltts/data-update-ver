@@ -41,9 +41,7 @@ const App: React.FC = () => {
   return (
     <Layout style={{height:"90%"}}>
       <Content >
-      <PlotBuilder 
-            data_input = {data_file}
-            template_input = {tensile_template} parentCallback = {""}/>
+      <DRContainer modelState={modelState}/>
 
       </Content>
     </Layout>

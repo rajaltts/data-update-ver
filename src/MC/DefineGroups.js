@@ -542,20 +542,20 @@ this.state.groups.map((group, index)=>{
             <> 
                 <Layout className="DRLayout">
                     <Row className="DefineGroupsDiv">
-                    <Col>
+                    <Col className="DefineGroupPlot">
                     <Skeleton loading={!this.state.loaded}>
                          <PlotCurve
                         curves={allCurves} showLegend={false} isThumbnail={false} showOnlyAverage={false}
                     />
                     </Skeleton>
                     </Col>
-                        <Col>
+                        <Col className="DefineGroupLayout">
                 
 
                     <Skeleton loading={!this.state.loaded}>
                 <div id='DefineGroup' className="DefineGroup">
                     <div className="DropContainer">
-                        <header className="DropContainer-header" >
+                        <header className="DefineDropContainer-header" >
                         <Space><Button type="primary" onClick={this.openSelectCriteria}>Select Criteria</Button><Button type="primary" onClick={this.createGroup}>Create Group</Button></Space>
                         <Modal title="Select Attributes"  visible={this.state.isModalVisible} okText="Create Groups"  onOk={e => { this.handleCreateGroup() }} width={1000} onCancel={e => { this.handleCancelCriteria() } }>
                         <div className="criteriaDiv">

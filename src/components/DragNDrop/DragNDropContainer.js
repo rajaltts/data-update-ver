@@ -23,7 +23,7 @@ function DragNDropContainer() {
   return (
     <div className="DropContainer">
       <header className="DropContainer-header" >
-      <DragNDrop data={data} parentCallback = {callbackFunction}/>
+      <DragNDrop key="DragNDrop" data={data} parentCallback = {callbackFunction}/>
      
       </header>
     </div>

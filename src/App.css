@@ -32,13 +32,9 @@
   }
 
     .DefineGroup{
-    margin: 20px;
-    border-style: solid;
-    border-width: 1px;
-    border-color: rgb(231, 230, 230);
+    margin: 30px;
     padding: 20px;
-    margin-top: 40px;
-    width:110vh;
+    width:100%;
   }
 
   div.ButtonPanel{
@@ -65,7 +61,27 @@
   }
 
   div.DefineGroupsDiv{
-    width:max-content;
+    width:100%;
+  }
+
+  div.DefineGroupLayout{
+    width:55%;
+  }
+
+  div.DefineGroupPlot{
+    width:40%;
+  }
+
+  div.DefineGroupOuterRow{
+    width:100%;
+  }
+
+  div.DefineGroupOuterCol1{
+    width:30%;
+  }
+
+  div.DefineGroupOuterCol2{
+    width:70%;
   }
 
   div.steps-content{
@@ -96,6 +112,17 @@
     /*font-size: calc(1px + 2vmin);*/
     /*color: white;*/
   }
+  .DefineDropContainer-header {
+    /*background-color: #282c34;*/
+    min-height: 90%;
+    display: flex;
+    padding-left: 30px;
+    /* flex-direction: column;
+    align-items: center;
+    justify-content: center; */
+    /*font-size: calc(1px + 2vmin);*/
+    /*color: white;*/
+  }
   .drag-n-drop {
     padding: .5rem;
     display: grid;
@@ -107,6 +134,14 @@
   }
   .dnd-group {
 
+    border-radius: 5px;
+    padding: 1px;
+    min-height: 90px;
+    box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.3);
+    max-height: 150px;
+    overflow: auto;
+  }
+  .dnd-group-unAssigned{
     border-radius: 5px;
     padding: 1px;
     min-height: 90px;

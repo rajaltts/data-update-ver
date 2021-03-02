@@ -88,6 +88,8 @@ class DRContainer extends React.Component {
     this.setState({
         current: childData.current,
          previous: childData.previous,
+         selected_res_curve: childData.selected_res_curve,
+         selected_res_var: childData.selected_res_var,
    });
 }
 
@@ -116,7 +118,14 @@ class DRContainer extends React.Component {
             criteria:this.state.criteria,
             reload:this.state.reloadStep2
         }
-
+        if(this.state.res_var1!==undefined && this.state.res_curve!==undefined){
+          if(this.state.selected_res_var === undefined){
+            this.state.selected_res_var = this.state.res_var1[0]
+          }
+          if(this.state.selected_res_curve === undefined){
+            this.state.selected_res_curve = this.state.res_curve[0]
+          }
+        }
         let saveResultsJson ={
           query:this.props.modelState.query,
           url:this.props.modelState.url,
@@ -132,7 +141,9 @@ class DRContainer extends React.Component {
           plotBuildModel:this.state.plotBuildModel,
           targetType: this.state.targetType,
           res_curve: this.state.res_curve,
-          res_var1: this.state.res_var1
+          res_var1: this.state.res_var1,
+          selected_res_var: this.state.selected_res_var,
+          selected_res_curve: this.state.selected_res_curve,
       }
 
         let tensile_template = require('../../data/template_tensile.json');
