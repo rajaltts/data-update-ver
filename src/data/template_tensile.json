@@ -1,14 +1,14 @@
 {
 "operations":[
 {"action":"Convert",
- "method":"Engineering_to_true"
+ "method":"None"
 },
 {"action":"Cleaning_ends",
   "method":"Y_Max"
 },
 {"action":"Shifting",
-  "method":"X_tangent_xrange",
-  "parameters":[ {"max": 0.01 } ],
+  "method":"X_tangent_yrange",
+  "parameters":[ {"min": 0.0 } ],
   "id": 2
 },
 {"action":"Averaging",
@@ -22,7 +22,7 @@
   "id": 1
 },
 {"action":"Extrapoling",
-  "method":"Based_on_curve",
+  "method":"None",
   "parameters":[
     {"extrapolating_end_point": "mean_max_x"}
   ],
