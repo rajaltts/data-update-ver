@@ -11,7 +11,6 @@ interface StepProps {
     changeSelectedMethod: any;
     changeParameter: any;
     applyButton: any;
-    resetButton: any;
     status: string;
     status_previous: string;
     status_next: string;
@@ -59,12 +58,14 @@ const Step: React.FC<StepProps> = (props) => {
         } else { return 0; }
     }
 
-   
     const changeMethodHandler = (selectedMethod: string) => {
         props.changeSelectedMethod(selectedMethod);
+        const operationsUpdate = [...props.operations];
+        operationsUpdate.find((el) => el.action === props.action).status='waiting';
+        props.changeOperations(operationsUpdate);
+
     }
 
-    
     const  changeParameterHandler = (e: any, name: string) => {
         const operationsUpdate = [...props.operations];
         const a = operationsUpdate.find( (el) => el.action === props.action);
@@ -73,14 +74,16 @@ const Step: React.FC<StepProps> = (props) => {
         const p = m.params.find( e => e.name === name);
         const value = e; //e.target.value;  
         p.value = value;
+        a.status = 'waiting';
         props.changeOperations(operationsUpdate); 
     }
-
- 
 
     const selectParamHandler = (value:any, name: string, param: any) => {
         const value_num = param.selection.findIndex( e => e.name===value);
         props.changeParameter(name,value_num);
+        const operationsUpdate = [...props.operations];
+        operationsUpdate.find((el) => el.action === props.action).status='waiting';
+        props.changeOperations(operationsUpdate); 
     }
         
     const DisplaySelect = ({parameter}) => {
@@ -102,7 +105,7 @@ const Step: React.FC<StepProps> = (props) => {
         </Row>
         );
     }
-
+    
     const DisplayParameters = ({methods,selected_method}) => {
         const sm = methods.find( e => e.type===selected_method );
         let items = [];
@@ -119,16 +122,23 @@ const Step: React.FC<StepProps> = (props) => {
                         <Row key={par.label}>
                             <Col span={10}> {par.label}</Col>
                             <Col span={10}>
-                                <Slider
+                                <InputNumber
+                                    size='small'
+                                    min= {par.range.min}
+                                    max= {par.range.max}
+                                    defaultValue={par.value}
+                                    onChange={ e => changeParameterHandler(e,par.name)}
+                                />
+                                {/* <Slider
                                  min= {par.range.min}
                                  max= {par.range.max}
                                  defaultValue={par.value}
                                  onChange={ e => onChangeParameter(e,par.name)}
-                                />
+                                /> */}
                             </Col>
-                            <Col span={4}>
+                            {/* <Col span={4}>
                                 <p style={{margin: '0 16px'}} >{value}</p>
-                            </Col>
+                            </Col> */}
                         </Row>
                       );
 
@@ -154,6 +164,7 @@ const Step: React.FC<StepProps> = (props) => {
          
         } 
         return <>{items}</>;
+        
     }
 
     const DisplayAlert = () => {
@@ -186,8 +197,7 @@ const Step: React.FC<StepProps> = (props) => {
 
     <br/>
     {(!props.automatic_mode ) &&<Space style={{ paddingTop: '10px'}}>
-        {/* <Button size="small" type="primary" disabled={props.status_next==='success'} onClick={props.resetButton}>Cancel</Button> */}
-        <Button size="small" type="primary" disabled={props.status_previous!=='success'} onClick={props.applyButton}>Apply</Button>
+        <Button size="small" type="primary" disabled={props.status==='success'} onClick={props.applyButton}>Apply</Button>
    </Space>}
 
     {!props.automatic_mode && <DisplayAlert/>}

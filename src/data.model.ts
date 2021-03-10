@@ -18,6 +18,7 @@ export type Group = {
     curves: Curve[]; 
     data: any[];
     label: string;
+    result: boolean; // true if we have a result (averaging curve)
 };
 
 export type Data = {
