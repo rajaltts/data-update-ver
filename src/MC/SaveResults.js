@@ -570,12 +570,15 @@ this.state.groups.map((group, index)=>{
                     <div className="ButtonPrevious">
                         <Button  onClick={e => { this.handlePrevious() }}>Previous</Button>
                     </div>
-                    
+                    <div className="ButtonSave">
+                        <Button type="primary"  onClick={e => { this.handleSave() }}>Save</Button>
+                    </div>                
                     <div className="ButtonCancel">
                         <Button>Cancel</Button>
                     </div>
+
                     <div className="ButtonSave">
-                        <Button type="primary"  onClick={e => { this.handleSave() }}>Save</Button>
+                        <Button>Export Excel</Button>
                     </div>
                 </div>
 
