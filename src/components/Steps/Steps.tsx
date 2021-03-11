@@ -98,7 +98,7 @@ const Steps: React.FC<StepsProps> = (props) => {
                               status_previous = {status_previous}
                               status_next = {status_next}
                               error_msg = { op.error}
-                              changeOperations= { /*changeOperationsHandler*/ op => props.changeOperations(op) }
+                              changeOperations= { changeOperationsHandler }
                               operations = {props.operations}
                               action={op.action}
                         />

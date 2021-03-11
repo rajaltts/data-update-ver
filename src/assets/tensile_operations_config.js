@@ -104,7 +104,7 @@ export const tensile_operations_config = [
                                                                                               {label:'min max strain', name:'min_max_x'}
                                                                                              ],
                                                                                              value: 2},
-                         {label:'end point value', name: 'end_point_value',  value: undefined},
+                         {label:'end point value', name: 'end_point_value',  value: undefined, float: true},
                          {label:'Extrapolation method', name: 'extrapolation', selection:[{label:'none',name:'none'},
                                                                                           {label:'based on specific curve', name:'based_on_curve'},
                                                                                           {label:'tangent', name:'tangent'}

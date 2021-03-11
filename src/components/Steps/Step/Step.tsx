@@ -1,6 +1,8 @@
 import React, {useState, useRef, useEffect, useReducer, Fragment} from 'react'
 import {Select, Button, Space, Input, Alert,  Row, Col, Slider, InputNumber, Divider  } from 'antd';
 import { Operation } from '../../../template.model';
+import DisplayParametersForms from './DisplayParametersForms'
+import { Parameter as parameter_type } from '../../../template.model';
 
 interface StepProps {
     index: Number;
@@ -25,146 +27,32 @@ const Step: React.FC<StepProps> = (props) => {
     const [buttonDisabled,setButtonDisabled] = useState(false);
     const { Option } = Select;
     const [sliderValue,setSliderValue] = useState([]);
+    const [applyStatus,setApplyStatus] = useState(false);
 
     useEffect( () => {
-        const a = props.operations.find( el => el.action === props.action);
-        const m = a.methods.find( e => e.type === a.selected_method);
-        let sliderValue = [];
-        m.params.forEach( p => {
-            sliderValue.push({name: p.name, value: p.value});
-        });
-        setSliderValue(sliderValue);
+        const status = props.operations.find((el) => el.action === props.action).status;
+        if(status==='waiting')
+          setApplyStatus(true);
     },[props.operations]);
 
-    const onChangeParameter = (value: any, name: string) => {
-        const sliderValueUpdate = [...sliderValue];
-        const el = sliderValueUpdate.find( el => el.name===name);
-        el.value = (typeof value === 'number' ? value : 0); // should be min and not 0
-        setSliderValue(sliderValueUpdate);
-        const operationsUpdate = [...props.operations];
-        const a = operationsUpdate.find( (el) => el.action === props.action);
-        const sm = a.selected_method;
-        const m = a.methods.find( e => e.type === sm);
-        const p = m.params.find( e => e.name === name);
-        p.value = value;
-        props.changeOperations(operationsUpdate); 
-        
-    }
-
-    const getValue  = (name: string) => {
-        const v = sliderValue.find( e => e.name === name);
-        if(v) {
-            return (typeof v.value === 'number'? v.value : 0);
-        } else { return 0; }
-    }
-
     const changeMethodHandler = (selectedMethod: string) => {
+        setApplyStatus(true);
         props.changeSelectedMethod(selectedMethod);
         const operationsUpdate = [...props.operations];
         operationsUpdate.find((el) => el.action === props.action).status='waiting';
         props.changeOperations(operationsUpdate);
-
     }
 
-    const  changeParameterHandler = (e: any, name: string) => {
+    const changeParametersHandler = (params_: parameter_type[]) => {
         const operationsUpdate = [...props.operations];
+        //const operationsUpdate = JSON.parse(JSON.stringify(props.operations)); // it is a deep copy
         const a = operationsUpdate.find( (el) => el.action === props.action);
         const sm = a.selected_method;
         const m = a.methods.find( e => e.type === sm);
-        const p = m.params.find( e => e.name === name);
-        const value = e; //e.target.value;  
-        p.value = value;
-        a.status = 'waiting';
-        props.changeOperations(operationsUpdate); 
-    }
-
-    const selectParamHandler = (value:any, name: string, param: any) => {
-        const value_num = param.selection.findIndex( e => e.name===value);
-        props.changeParameter(name,value_num);
-        const operationsUpdate = [...props.operations];
-        operationsUpdate.find((el) => el.action === props.action).status='waiting';
-        props.changeOperations(operationsUpdate); 
-    }
-        
-    const DisplaySelect = ({parameter}) => {
-        return(
-        <Row>
-            <Col span={10}>{parameter.label}</Col>
-            <Col span={10}>
-                <Select placeholder="Default value"
-                        size='small'
-                        value={parameter.selection[parameter.value].name}
-                        style={{width: 200}}
-                        onChange={ (e) => selectParamHandler(e,parameter.name,parameter)}>{
-                            parameter.selection.map( (elm,index) => {
-                                return(<Option value={elm.name} key={elm.name}>{elm.label}</Option>);
-                            })
-                        }
-                </Select>
-            </Col>
-        </Row>
-        );
-    }
-    
-    const DisplayParameters = ({methods,selected_method}) => {
-        const sm = methods.find( e => e.type===selected_method );
-        let items = [];
-        if(sm.params.length>0){
-            sm.params.map( par => {
-                if( 'selection' in par){  
-                    items.push(
-                        <DisplaySelect key={par.label} parameter={par}/>
-                    );
-                } else {
-                  if('range' in par){
-                    const value = getValue(par.name);
-                    items.push(
-                        <Row key={par.label}>
-                            <Col span={10}> {par.label}</Col>
-                            <Col span={10}>
-                                <InputNumber
-                                    size='small'
-                                    min= {par.range.min}
-                                    max= {par.range.max}
-                                    defaultValue={par.value}
-                                    onChange={ e => changeParameterHandler(e,par.name)}
-                                />
-                                {/* <Slider
-                                 min= {par.range.min}
-                                 max= {par.range.max}
-                                 defaultValue={par.value}
-                                 onChange={ e => onChangeParameter(e,par.name)}
-                                /> */}
-                            </Col>
-                            {/* <Col span={4}>
-                                <p style={{margin: '0 16px'}} >{value}</p>
-                            </Col> */}
-                        </Row>
-                      );
-
-                  } else {
-                    const step =  ((par.value!==undefined&&par.value!==0)?Math.pow(10,(Math.floor(Math.log10(Math.abs(par.value)))-1)):1);
-                    items.push(
-                        <Row key={par.label}>
-                        <Col span={10}> {par.label}</Col>
-                        <Col span={10}>
-                            <InputNumber
-                                size='small'
-                                defaultValue={(par.value===undefined||par.value===null?'default':par.value)}
-                                step={step}
-                                onChange={ e => changeParameterHandler(e,par.name)}
-                            />
-                        </Col>
-                        <Col span={4}></Col>
-                        </Row>
-                    );
-                  }  
-                }
-            });    
-         
-        } 
-        return <>{items}</>;
-        
+        m.params.length = 0;
+        m.params = params_;
+        props.changeOperations(operationsUpdate);
+        props.applyButton();
     }
 
     const DisplayAlert = () => {
@@ -191,16 +79,14 @@ const Step: React.FC<StepProps> = (props) => {
         }
     </Select>
 
-    <DisplayParameters
-        methods={props.methods}
-        selected_method={props.selected_method}/>
+    <DisplayParametersForms 
+        initParams={props.methods.find( e => e.type===props.selected_method ).params}
+        onChangeParameter={changeParametersHandler}
+        mode={props.automatic_mode}
+        apply={applyStatus}
+    />   
 
-    <br/>
-    {(!props.automatic_mode ) &&<Space style={{ paddingTop: '10px'}}>
-        <Button size="small" type="primary" disabled={props.status==='success'} onClick={props.applyButton}>Apply</Button>
-   </Space>}
-
-    {!props.automatic_mode && <DisplayAlert/>}
+    <DisplayAlert/>
      
     </div>
     </>);

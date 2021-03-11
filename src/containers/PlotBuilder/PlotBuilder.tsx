@@ -357,18 +357,19 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
             op_target = operations.findIndex( (el) => el.action === action);
         }
         
-        console.log("----------transform curves-------------");
-        const newCurves = []; // do not use newCurves = curves because it will a reference because curves must be unchanged to activate the update, newCurves = [...curves] or curves.slice() are not a deep copy but a shallow copy -> does not work
-        // perform a hard copy by hand -> use rfdc
-        const curves = data.groups[group_id].curves;
-        for(let ic=0; ic<data.groups[group_id].curves.length; ic++){
-            const curve = { x: curves[ic].x, y: curves[ic].y, name: 'curve'+ic, selected: curves[ic].selected, opacity: curves[ic].opacity, x0: curves[ic].x0, y0: curves[ic].y0};
-            newCurves.push(curve);
-        }
-
          // use dataClean C++ lib 
         const Module: EmscriptenModule  = {};
         ReactWasm(Module).then( () => {    
+            console.log("----------transform curves-------------");
+            const newCurves = []; // do not use newCurves = curves because it will a reference because curves must be unchanged to activate the update, newCurves = [...curves] or curves.slice() are not a deep copy but a shallow copy -> does not work
+            // perform a hard copy by hand -> use rfdc
+            const curves = data.groups[group_id].curves;
+            for(let ic=0; ic<data.groups[group_id].curves.length; ic++){
+                if(curves[ic].name!=='average'){
+                    const curve = { x: curves[ic].x, y: curves[ic].y, name: 'curve'+ic, selected: curves[ic].selected, opacity: curves[ic].opacity, x0: curves[ic].x0, y0: curves[ic].y0};
+                    newCurves.push(curve);
+                }
+            }
             // create a datase
             const dataset = new Module.Dataset();
             // create Curves and add into dataset
