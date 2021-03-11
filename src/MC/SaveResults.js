@@ -1,5 +1,5 @@
 import React from 'react';
-import { Col, Row, Descriptions, Button, Checkbox ,Skeleton, Layout, Modal, Input, Space, Select} from 'antd';
+import { Col, Row, Descriptions, Button, Checkbox ,Skeleton, Layout, Modal, Input, Space, Select, Transfer } from 'antd';
 import 'antd/dist/antd.css';
 import axios from '../axios-orders';
 import PlotCurve from '../components/PlotCurveComponent/PlotCurve';
@@ -20,6 +20,12 @@ class SaveResults extends React.Component {
             selectedCriteria:[],
             groupsCriteria:{},
             showGroupCriteria: false,
+            showAttributeDialog: false,
+            targetClass:[],
+            sourceData:[],
+            targetKeys:[],
+            targetClassMap:{},
+            selected_resProp:{}
         }
         this.sendData = this.sendData.bind(this);
         this.handlePrevious = this.handlePrevious.bind(this);
@@ -28,36 +34,108 @@ class SaveResults extends React.Component {
         this.onResultVar = this.onResultVar.bind(this);
         this.updateAttribute = this.updateAttribute.bind(this);
         this.handleSave = this.handleSave.bind(this);
+        this.onClassificationChange = this.onClassificationChange.bind(this);
+        this.addClassificationAttribute = this.addClassificationAttribute.bind(this);
+        this.openClassificationAttribute = this.openClassificationAttribute.bind(this);
+        this.handleAttributeChange = this.handleAttributeChange.bind(this);
      }
 
-     onResultCurve(checkedValues, oldValue) {
-        let res = this.props.propState.res_curve[checkedValues].name;
-        this.setState({
-            selected_res_curve : res,
-       })
+     handleAttributeChange = (targetKeys, direction, moveKeys) => {
+        console.log(targetKeys, direction, moveKeys);
+        this.state.showAttributeDialog = false;
+        if(direction === 'left'){
+            moveKeys.forEach(attr1 => {
+                this.state.targetClass.map((attr,index)=> {
+                    if(attr1 === attr.name){
+                        this.state.targetClass.splice(index,1);
+                    }
+                });
+            });
+        }else if(direction === 'right'){
+            this.state.schemaAttributes.forEach(attr => {               
+                moveKeys.forEach(attr1 => {
+                    if(attr1 === attr.name)
+                        this.state.targetClass.push(attr);
+                });
+            });
+        }
+        this.setState({showAttributeDialog:true});
+      };
 
-       let json = {
-        current: 4,
+     openClassificationAttribute = () =>{
+        let selectedAnalysisType = this.props.propState.selectedAnalysisType.title;
+        const url = this.props.propState.url;
+        this.state.classificationLoaded = false;
+        axios.get(url + '/servlet/rest/dr/get_Attribute?analysisType='+selectedAnalysisType+'&format=json&user=smroot&passwd=sdm')
+            .then(response => {
+                console.log(response);
+                const res = response.data;
+                this.setState({
+                    schemaAttributes: res.schemaAttributes,
+                    classificationLoaded:true,
+                    showAttributeDialog: true
+                })
+            })
+     }
+     addClassificationAttribute = () =>{
+
+     }
+
+
+     onClassificationChange = (value,attribute,index) =>{
+        //let group = this.state.groups[index+1];
+        this.state.targetClass[index]["value"] = value;
+        //this.state.groups[index+1] = group;
+        let json = {
+            current: 3,
+            previous: false,
+            selectedCurves: this.state.selectedCurves,
+            groups: this.state.groups,
+            type: this.state.xyDisplayScale,
+            xtype: this.state.xtype,
+            xunit: this.state.xunit,
+            ytype: this.state.ytype,
+            yunit: this.state.yunit,
+            groupSelected:this.state.groupSelected,		
+            selected_group: 0,
+            tree: [],
+            keys: [],
+            selectedCriteria:this.state.selectedCriteria,
+            groupsCriteria:this.state.groupsCriteria,
+            criteria:this.state.criteria,
+        }
+        this.sendData(json);
+    }
+
+     onResultCurve(checkedValues) {
+        this.props.propState.res_curve.map((val,index)=>{
+            if(val.property === checkedValues){
+                this.state.selected_resProp["res_curve"] = val;
+            }
+        })
+        let json = {
+        current: 3,
         previous: false,
-        selected_res_curve: this.state.selected_res_curve,
+        selected_resProp: this.state.selected_resProp,
     }
     this.sendData(json);
         
     }
 
-      onResultVar(checkedValues, oldValue) {
-        let propdef = this.props.propState.res_var1;
-        let res = this.props.propState.res_var1[checkedValues].name;
-        this.setState({
-            selected_res_var : res,
-       })
-
+      onResultVar(checkedValues, data) {
+        let valArray = this.props.propState.res_var1[data];
+        valArray.map((val,index)=>{
+            if(val.property === checkedValues){
+                this.state.selected_resProp[data] = val;
+            }
+        })
+        
        let json = {
-        current: 4,
+        current: 3,
         previous: false,
-        selected_res_var: this.state.selected_res_var
+        selected_resProp: this.state.selected_resProp
         }
-    this.sendData(json);
+        this.sendData(json);
         
     }
 
@@ -133,7 +211,7 @@ class SaveResults extends React.Component {
     }
     handlePrevious() {
         let json = {
-            current: 3,
+            current: 2,
             previous: true,
             selectedCurves: this.state.selectedCurves,
             groups: this.state.groups,
@@ -148,12 +226,17 @@ class SaveResults extends React.Component {
             criteria:this.state.criteria,
             targetType: this.state.targetType,
             res_curve: this.state.res_curve,
-            res_var1: this.state.res_var1
+            res_var1: this.state.res_var1,
+            targetClass: this.state.targetClass,
+            unitSystem: this.state.unitSystem,
+            xQuantityType: this.state.xQuantityType,
+            yQuantityType:this.state.yQuantityType,
         }
         this.sendData(json);
     } 
 
     componentDidMount() {       
+        this.state.targetClass = this.props.propState.targetClass;
         if(this.props.propState.selectedCriteria.length>0){
             this.state.showGroupCriteria = true;
         }
@@ -176,7 +259,11 @@ class SaveResults extends React.Component {
             plotBuildModel: this.props.propState.plotBuildModel,
             targetType: this.props.propState.targetType,
             res_curve: this.props.propState.res_curve,
-            res_var1: this.props.propState.res_var1
+            res_var1: this.props.propState.res_var1,
+            targetClass: this.props.propState.targetClass,
+            unitSystem: this.props.propState.unitSystem,
+            xQuantityType: this.props.propState.xQuantityType,
+            yQuantityType:this.props.propState.yQuantityType,
         })
     
 
@@ -225,7 +312,7 @@ let criteriaGrp = {};
                  })}
 })
 
-let outputLabelsSet = new Set();
+let outputLabels = {};
 
 let outputGrp = {};
               
@@ -233,18 +320,18 @@ let outputGrp = {};
                  let outputs = group.data;
                  if(outputs !== undefined){
                     outputs.map((data, i) => {
-                    let valObj = outputGrp[data.label];
+                    let valObj = outputGrp[data.name];
                     if(valObj === undefined){
                         valObj = {};
                     }
-                    outputLabelsSet.add(data.label);
-                    valObj[group.label] = data.label===undefined?"":data.value;
-                    outputGrp[data.label] = valObj;
+                    outputLabels[data.name] = data.label;
+                    valObj[group.label] = data;
+                    outputGrp[data.name] = valObj;
                  })}
                 })
                  
 
-let outputLabels = Array.from(outputLabelsSet);
+
 
 
 let unSelectedCriteriaSet = new Set();
@@ -269,7 +356,27 @@ let unSelectedCriteriaGrp = {};
     
 let unSelectedCriteria = Array.from(unSelectedCriteriaSet)
 
-          
+let attributeTable = !(this.props.propState.targetClass && this.props.propState.targetClass.length>0)?"":<table className="Grid">
+    <thead><tr key={'attr01'}><th key='attpropCol0'>{'Attribute'}</th><th>{'Value'}</th></tr>
+    </thead>
+    <tbody>
+    {
+        this.props.propState.targetClass.map((attr, index) =>{
+            return(
+                <tr key={'proptr'+index}>
+                     <td  key={'proptd'+index} className="MatData"> <span> {attr.label }</span></td>
+                     <td>
+                         <Input size='small' className='InputAttribute' key={'attd'+index} onChange={(e)=>this.onClassificationChange(e.target.value, attr.attribute, index)}>                      
+                        </Input>
+                    </td>
+                </tr>
+            )
+
+        })
+    }
+    </tbody>            
+</table>
+
 let table = !(this.state.showGroupCriteria && this.state.selectedCriteria.length>0)?"":<table className="Grid">
 <thead><tr key={'mattr01'}><th key='propCol0'></th>{
     
@@ -281,7 +388,7 @@ this.state.groups.map((group, index)=>{
     {
         this.state.selectedCriteria.map((cr, index) =>{
             let crObj = this.state.criteria[cr];
-            let leftHeaderLabel = crObj.label +" - "+crObj.targetLabel;
+            let leftHeaderLabel = crObj.label;
             let values = criteriaGrp[cr];
             return(
                 <tr key={'proptr'+index}>
@@ -301,7 +408,7 @@ this.state.groups.map((group, index)=>{
 
         unSelectedCriteria.map((cr, index) => {
             let crObj = this.state.criteria[cr];
-            let leftHeaderLabel = crObj.label +" - "+crObj.targetLabel;
+            let leftHeaderLabel = crObj.label;
             let values = unSelectedCriteriaGrp[cr];
             return(
                 <tr key={'proptr'+index}>
@@ -326,51 +433,52 @@ this.state.groups.map((group, index)=>{
     return(index!==0?<td style={{textAlign: 'center'}}  key={'propCol'+index+1}></td>:"")
 })}</tr>
 
-
-        <tr key={'proptr_Curve'}> <td  key={'proptdColCurve'} className="MatData"> <span> {'Curve Preview' }</span></td>{
-        this.props.propState.plotBuildModel.groups.map((group, index1) =>{
-            return(<td style={{textAlign: 'center'}}  key={'propColCurve'+index1+1}> <Select size='small' value={this.props.propState.res_curve[0].name} style={{width: '60%'}} onChange={(e)=>this.onResultCurve(e,this.state.selectedAnalysisType)}>
+        <tr key={'proptr_Curve'}> <td  key={'proptdColCurve'} className="MatData"> <span> {'Curve Result' }</span>
+            <br></br>
+           {this.props.propState.res_curve.length >1 ?   
+            <Select size='small' value={this.state.selected_resProp["res_curve"].name} style={{width: '100%'}} onChange={(e)=>this.onResultCurve(e)}>
             {
              this.props.propState.res_curve.map( (resc,index) => {
-                 return(<Select.Option key={'propOption'+index} value={resc.name}>{resc.label}</Select.Option>);
+                 return(<Select.Option key={'propOption'+index} value={resc.property}>{resc.label}</Select.Option>);
              })
-         }
-         </Select></td>)
-        })}
-        </tr>
-
-        <tr key={'proptr_Curve'}> <td  key={'proptdColCurve'} className="MatData"> <span> {'Curve Preview' }</span></td>{
-        this.props.propState.plotBuildModel.groups.map((group, index1) =>{
-            return(<td style={{textAlign: 'center'}}  key={'propColCurve'+index1+1}> <PlotCurve onClick={e => { this.handleCurveClick(index1) }}
-            curves={group.curves} showLegend={false} isThumbnail={true} showOnlyAverage={true} groupIndex={group.id}
-        /></td>)
-        })}
-        </tr>
-
-
-        <tr key={'proptr_Curve'}> <td  key={'proptdColCurve'} className="MatData"> <span> {'Curve Preview' }</span></td>{
-        this.props.propState.plotBuildModel.groups.map((group, index1) =>{
-            return(<td style={{textAlign: 'center'}}  key={'propColCurve'+index1+1}> <Select size='small' value={this.props.propState.res_var1[0].name} style={{width: '60%'}} onChange={(e)=>this.onResultVar(e,this.state.selectedAnalysisType)}>
-            {
-             this.props.propState.res_var1.map( (resc,index) => {
-                 return(<Select.Option key={'propOption'+index} value={resc.name}>{resc.label}</Select.Option>);
-             })
-         }
-         </Select></td>)
-        })}
+            }
+            </Select>:this.props.propState.res_curve.length ===1?<Input size='small' value={this.props.propState.res_curve[0].label} className='InputAttribute' disabled='true' />:""}
+           
+            </td>{
+            this.props.propState.plotBuildModel.groups.map((group, index1) =>{
+                return(<td style={{textAlign: 'center'}}  key={'propColCurve'+index1+1}> <PlotCurve onClick={e => { this.handleCurveClick(index1) }}
+                curves={group.curves} showLegend={false} isThumbnail={true} showOnlyAverage={true} groupIndex={group.id}
+            /></td>)
+            })}
         </tr>
 
     {
         Object.keys(outputGrp).map((data, index) =>{
-            let leftHeaderLabel = data;
+            let leftHeaderLabel = outputLabels[data];
             let values = outputGrp[data];
             return(
                 leftHeaderLabel===''?'':
                 <tr key={'proptr'+index}>
-                     <td  key={'proptd'+index} className="MatData"> <span> {leftHeaderLabel }</span></td>
+                     <td  key={'proptd'+index} className="MatData"> <span> {leftHeaderLabel }</span>
+                     <br></br>
+                     {this.props.propState.res_var1[data].length >1 ?  
+                     <Select size='small' value={this.props.propState.selected_resProp[data]["property"]} style={{width: '100%'}} onChange={(e)=>this.onResultVar(e,data)}>
+                        {
+                        this.props.propState.res_var1[data].map( (resc,index) => {
+                            return(<Select.Option key={'propOption'+index} value={resc.property}>{resc.label}</Select.Option>);
+                        })
+                        }
+                    </Select>:this.props.propState.res_var1[data].length ===1?<Input size='small' value={this.props.propState.res_var1[data][0].label} className='InputAttribute' disabled='true' />:""
+
+                    }
+                     
+                     
+                     
+                     
+                     </td>
                      { 
                        values!==undefined?this.props.propState.plotBuildModel.groups.map((group,i)=>{
-                           let val = values[group.label]!==undefined?values[group.label]:""
+                           let val = values[group.label]!==undefined?values[group.label].value:""
                            return(<td><span className='AttributeValue' style={{width:'60%'}}>{val}</span></td>) 
 
                        }):""                         
@@ -386,6 +494,25 @@ this.state.groups.map((group, index)=>{
     </tbody>
     </table>  
 
+    if(this.state.showAttributeDialog){
+        this.state.targetClassMap = {};
+        this.state.sourceData = [];
+        this.state.targetKeys = [];
+        this.state.targetClass.forEach(attr => {
+            this.state.targetClassMap[attr.name] = attr;
+        });
+        this.state.schemaAttributes.forEach(attr => {
+            let obj = {};
+            obj.key = attr.name;
+            obj.title = attr.label;
+            obj.chosen = false;
+            if(this.state.targetClassMap[attr.name]!==undefined){
+                obj.chosen = true;
+                this.state.targetKeys.push(attr.name);
+            }
+            this.state.sourceData.push(obj);
+        });
+    }
 
 
         return (
@@ -399,9 +526,33 @@ this.state.groups.map((group, index)=>{
                     <Space direction='vertical'>
                     <div  className="AnalysisTypeContainer">
                     <span className='AnalysisResultLabel'> Analysis Result Type </span>
-                        <Input size='small' value={this.props.propState.targetType} style={{width: 150}} disabled='true' >                      
+                        <Input size='small' value={this.props.propState.targetType} style={{width:'60%'}} disabled='true' >                      
                         </Input>
                     </div>
+                    <div className="DropContainerButton">
+                    <Button type="primary" className='SingleButton' onClick={e => { this.openClassificationAttribute() }}>Add Attribute</Button>
+                        <Modal
+                            title="Add Attribute"
+                            centered
+                            visible={this.state.showAttributeDialog}
+                            onOk= {e => { this.addClassificationAttribute();this.setState({showAttributeDialog:false});  }}
+                            onCancel={() => this.setState({showAttributeDialog:false})}
+                            width={1000}
+                        >
+                            <Transfer
+                                dataSource={this.state.sourceData}
+                                targetKeys={this.state.targetKeys}
+                                render={item => item.title}
+                                oneWay={false}
+                                onChange={this.handleAttributeChange}
+                                false
+                            />
+                            <br />
+                        </Modal>
+                    </div>  
+                    <div className="DropContainer">
+                       { attributeTable}
+                    </div>  
                     <div className="DropContainer">
                        { table}
                     </div>  

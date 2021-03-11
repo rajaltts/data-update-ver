@@ -77,11 +77,11 @@
   }
 
   div.DefineGroupOuterCol1{
-    width:30%;
+    width:33%;
   }
 
   div.DefineGroupOuterCol2{
-    width:70%;
+    width:66%;
   }
 
   div.steps-content{
@@ -93,14 +93,18 @@
   }
 
 
-
+.InputAttribute{
+  width: 100%;
+}
 
 
 
   .DropContainer {
     text-align: center;
   }
-  
+  .DropContainerButton{
+    text-align: left;
+  }
   
   .DropContainer-header {
     /*background-color: #282c34;*/
@@ -138,7 +142,7 @@
     padding: 1px;
     min-height: 90px;
     box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.3);
-    max-height: 150px;
+    max-height: 200px;
     overflow: auto;
   }
   .dnd-group-unAssigned{
@@ -236,8 +240,7 @@
 }
 
 .Grid td.MatData {
-  padding-top: 12px;
-  padding-bottom: 12px;
+  padding: 12px;
   text-align: left;
   color: #666666;
   white-space: nowrap;

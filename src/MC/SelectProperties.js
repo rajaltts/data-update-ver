@@ -159,7 +159,7 @@ class SelectProperties extends React.Component {
                     }
                     </Select></Row><Row>
                     <Layout className="PropertyDefLayout">
-                          <Checkbox.Group options={propDefArray} onChange={this.onChangeCheckbox} defaultValue={this.state.selectedPropDef}/> 
+                          <Checkbox.Group options={propDefArray} onChange={this.onChangeCheckbox} value={this.state.selectedPropDef}/> 
                           </Layout>
                           </Row>
                           <Row>

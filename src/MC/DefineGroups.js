@@ -1,5 +1,5 @@
 import React from 'react';
-import { Col, Row, Descriptions, Button, Checkbox ,Skeleton, Layout, Modal, Input, Space} from 'antd';
+import { Col, Row, Button, Checkbox ,Skeleton, Layout, Modal, Input, Space} from 'antd';
 import 'antd/dist/antd.css';
 import axios from '../axios-orders';
 import PlotCurve from '../components/PlotCurveComponent/PlotCurve';
@@ -92,7 +92,11 @@ class DefineGroups extends React.Component {
             criteria:this.state.criteria,
             targetType: this.state.targetType,
             res_curve: this.state.res_curve,
-            res_var1: this.state.res_var1
+            res_var1: this.state.res_var1,
+            targetClass: this.state.targetClass,
+            unitSystem: this.state.unitSystem,
+            xQuantityType: this.state.xQuantityType,
+            yQuantityType:this.state.yQuantityType,
         }
         this.sendData(json);
     }
@@ -132,7 +136,11 @@ class DefineGroups extends React.Component {
             criteria:this.state.criteria,
             targetType: this.state.targetType,
             res_curve: this.state.res_curve,
-            res_var1: this.state.res_var1
+            res_var1: this.state.res_var1,
+            targetClass: this.state.targetClass,
+            unitSystem: this.state.unitSystem,
+            xQuantityType: this.state.xQuantityType,
+            yQuantityType:this.state.yQuantityType,
         }
         this.sendData(json);
     }
@@ -187,7 +195,11 @@ class DefineGroups extends React.Component {
             criteria:this.state.criteria,
             targetType: this.state.targetType,
             res_curve: this.state.res_curve,
-            res_var1: this.state.res_var1
+            res_var1: this.state.res_var1,
+            targetClass: this.state.targetClass,
+            unitSystem: this.state.unitSystem,
+            xQuantityType: this.state.xQuantityType,
+            yQuantityType:this.state.yQuantityType,
         }
         this.sendData(json);
     }
@@ -295,6 +307,8 @@ class DefineGroups extends React.Component {
             selectedCriteria:this.props.propState.selectedCriteria,
             groupsCriteria:this.props.propState.groupsCriteria,
             criteria:this.props.propState.criteria,
+            xQuantityType: this.props.propState.xQuantityType,
+            yQuantityType: this.props.propState.yQuantityType,
         })
     }
 
@@ -330,7 +344,11 @@ class DefineGroups extends React.Component {
                     criteria: res.criteria,
                     targetType: res.targetType,
                     res_curve: res.res_curve,
-                    res_var1: res.res_var1
+                    res_var1: res.res_var1,
+                    targetClass: res.targetClass,
+                    unitSystem: res.unitSystem,
+                    xQuantityType: res.xQuantityType,
+                    yQuantityType: res.yQuantityType
                 })
 
 
@@ -477,7 +495,7 @@ class DefineGroups extends React.Component {
    if(this.state.isModalVisible){
     Object.keys(this.state.criteria).map((key, i) => {
         let obj = new Object();
-        obj["label"] = key;
+        obj["label"] = this.state.criteria[key]["label"];
         obj["value"] = key;
         criteria.push(obj);
     })
@@ -516,7 +534,7 @@ this.state.groups.map((group, index)=>{
     {
         this.state.selectedCriteria.map((cr, index) =>{
             let crObj = this.state.criteria[cr];
-            let leftHeaderLabel = crObj.label +" - "+crObj.targetLabel;
+            let leftHeaderLabel = crObj.label;
             let values = criteriaGrp[cr];
             return(
                 <tr key={'proptr'+index}>
@@ -557,7 +575,7 @@ this.state.groups.map((group, index)=>{
                     <div className="DropContainer">
                         <header className="DefineDropContainer-header" >
                         <Space><Button type="primary" onClick={this.openSelectCriteria}>Select Criteria</Button><Button type="primary" onClick={this.createGroup}>Create Group</Button></Space>
-                        <Modal title="Select Attributes"  visible={this.state.isModalVisible} okText="Create Groups"  onOk={e => { this.handleCreateGroup() }} width={1000} onCancel={e => { this.handleCancelCriteria() } }>
+                        <Modal title="Select Attributes"  visible={this.state.isModalVisible} okText="Create Groups" centered onOk={e => { this.handleCreateGroup() }} width={1000} onCancel={e => { this.handleCancelCriteria() } }>
                         <div className="criteriaDiv">
                         <Checkbox.Group options={criteria} onChange={this.onSelectCriteria} value={this.state.selectedCriteria}/>
                         </div>

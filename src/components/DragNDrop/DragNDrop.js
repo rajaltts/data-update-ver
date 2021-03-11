@@ -85,7 +85,10 @@ function DragNDrop({data,parentCallback}) {
                 let newList = JSON.parse(JSON.stringify(oldList))
                 for (var i = 0; i <= dragIndexArray.length-1; i++)
                 {       
-                    newList[targetItem.grpI].curves.splice(newList[targetItem.grpI].curves.length,0,newList[dragItem.current.grpI].curves[dragIndexArray[i]]);
+                    let c = newList[dragItem.current.grpI].curves[dragIndexArray[i]];
+                    c.opacity = 0.3;
+                    newList[targetItem.grpI].curves.splice(newList[targetItem.grpI].curves.length,0,c);
+                    
                 }
                 for (var i = dragIndexArray.length -1; i >= 0; i--)
                 {       

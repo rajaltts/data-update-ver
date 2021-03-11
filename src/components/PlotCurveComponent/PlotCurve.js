@@ -66,7 +66,7 @@ const PlotCurve = (props) => {
   let width = props.isThumbnail === true?300:800;
   let height = props.isThumbnail === true?300:700;
 
-  const layout = { width: width, height: height, modebardisplay: false, showlegend: props.showLegend===undefined||props.showLegend?true:false};
+  const layout = { width: width, height: height, displaylogo:false, modebardisplay: true, showlegend: props.showLegend===undefined||props.showLegend?true:false};
  
   var config = {
     displaylogo: false, // remove plotly icon
@@ -91,9 +91,9 @@ const PlotCurve = (props) => {
         }
       }
     ],
-    displayModeBar: props.isThumbnail?true:false,
+    displayModeBar: !props.isThumbnail?true:false,
     staticPlot:  props.isThumbnail?true:false,
-    modeBarButtonsToRemove: [ 'hoverClosestCartesian', 'hoverCompareCartesian'] // 2D: zoom2d, pan2d, select2d, lasso2d, zoomIn2d, zoomOut2d, autoScale2d, resetScale2d
+    modeBarButtonsToRemove: [ 'hoverClosestCartesian', 'hoverCompareCartesian','toggleSpikelines'] // 2D: zoom2d, pan2d, select2d, lasso2d, zoomIn2d, zoomOut2d, autoScale2d, resetScale2d
                                                   //'Cartesian', hoverClosestCartesian, hoverCompareCartesian
                                                   //-'Other', hoverClosestGl2d, hoverClosestPie, toggleHover, resetViews, toImage, sendDataToCloud, toggleSpikelines, resetViewMapbox
   }

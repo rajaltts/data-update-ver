@@ -26,7 +26,8 @@ class DRContainer extends React.Component {
             selectedCurves:[],
             groups:[],
             plotBuildModel:{},
-            propLabelMap:{}
+            propLabelMap:{},
+            selected_resProp:{}
         }
         //this.getPropertyDef = this.getPropertyDef.bind(this);
         const { Step } = Steps;
@@ -54,6 +55,8 @@ class DRContainer extends React.Component {
         let groups1 = childData.groups;
         let newGroups = childData.groups.slice(1);
         childData.groups = newGroups;
+        console.log("Model for PlotBuilder");
+        console.log(childData);
         this.setState({
             current: childData.current,
              previous: childData.previous,
@@ -66,7 +69,15 @@ class DRContainer extends React.Component {
             criteria:childData.criteria,
             targetType: childData.targetType,
             res_curve: childData.res_curve,
-            res_var1: childData.res_var1
+            res_var1: childData.res_var1,
+            targetClass: childData.targetClass,
+            xtype: childData.xtype,
+            xunit: childData.xunit,
+            ytype: childData.ytype,
+            yunit: childData.yunit,
+            unitSystem: childData.unitSystem,
+            xQuantityType: childData.xQuantityType,
+            yQuantityType:childData.yQuantityType,
        });
 
     }
@@ -88,8 +99,7 @@ class DRContainer extends React.Component {
     this.setState({
         current: childData.current,
          previous: childData.previous,
-         selected_res_curve: childData.selected_res_curve,
-         selected_res_var: childData.selected_res_var,
+         selected_resProp: childData.selected_resProp,
    });
 }
 
@@ -119,11 +129,13 @@ class DRContainer extends React.Component {
             reload:this.state.reloadStep2
         }
         if(this.state.res_var1!==undefined && this.state.res_curve!==undefined){
-          if(this.state.selected_res_var === undefined){
-            this.state.selected_res_var = this.state.res_var1[0]
-          }
-          if(this.state.selected_res_curve === undefined){
-            this.state.selected_res_curve = this.state.res_curve[0]
+          if(JSON.stringify(this.state.selected_resProp) === JSON.stringify({})||(this.state.selected_resProp===undefined)){
+            this.state.selected_resProp = {};
+            this.state.selected_resProp["res_curve"] = this.state.res_curve[0]
+            Object.keys(this.state.res_var1).map((key, i) => {
+              let resArray =  this.state.res_var1[key];
+              this.state.selected_resProp[key] = resArray[0];
+           })
           }
         }
         let saveResultsJson ={
@@ -142,8 +154,15 @@ class DRContainer extends React.Component {
           targetType: this.state.targetType,
           res_curve: this.state.res_curve,
           res_var1: this.state.res_var1,
-          selected_res_var: this.state.selected_res_var,
-          selected_res_curve: this.state.selected_res_curve,
+          selected_resProp: this.state.selected_resProp,
+          targetClass: this.state.targetClass,
+          xtype: this.state.xtype,
+          xunit: this.state.xunit,
+          ytype: this.state.ytype,
+          yunit: this.state.yunit,
+          unitSystem: this.state.unitSystem,
+          xQuantityType: this.state.xQuantityType,
+          yQuantityType:this.state.yQuantityType,
       }
 
         let tensile_template = require('../../data/template_tensile.json');
