@@ -1,11 +1,10 @@
 import React, {useState, useRef, useEffect, useReducer, Fragment} from 'react'
-import {Select, Button, Space, Input, Alert,  Row, Col, Slider, InputNumber, Divider  } from 'antd';
+import {Select, Alert } from 'antd';
 import { Operation } from '../../../template.model';
 import DisplayParametersForms from './DisplayParametersForms'
 import { Parameter as parameter_type } from '../../../template.model';
 
 interface StepProps {
-    index: Number;
     action_label: string;
     automatic_mode: boolean;
     methods: any[];
@@ -14,8 +13,6 @@ interface StepProps {
     changeParameter: any;
     applyButton: any;
     status: string;
-    status_previous: string;
-    status_next: string;
     error_msg: string;
     changeOperations: (a: Operation[]) => void;
     operations: Operation[];
@@ -24,19 +21,18 @@ interface StepProps {
 
 const Step: React.FC<StepProps> = (props) => {
    
-    const [buttonDisabled,setButtonDisabled] = useState(false);
     const { Option } = Select;
-    const [sliderValue,setSliderValue] = useState([]);
     const [applyStatus,setApplyStatus] = useState(false);
 
     useEffect( () => {
+        // after a success, if method is changed, the status is waiting by changeMethodHandler
         const status = props.operations.find((el) => el.action === props.action).status;
         if(status==='waiting')
           setApplyStatus(true);
     },[props.operations]);
 
     const changeMethodHandler = (selectedMethod: string) => {
-        setApplyStatus(true);
+        //setApplyStatus(true);
         props.changeSelectedMethod(selectedMethod);
         const operationsUpdate = [...props.operations];
         operationsUpdate.find((el) => el.action === props.action).status='waiting';
@@ -66,11 +62,9 @@ const Step: React.FC<StepProps> = (props) => {
 
     return(
     <>
-    <div style={{borderStyle: 'solid', borderWidth: '1px', margin: 'auto', padding: '10px'}}>
+    <h1 style={{textAlign: 'center'}}>{props.action_label}</h1> 
 
-     <h1>{props.action_label}</h1> 
-
-     <Select value={props.selected_method} style={{ width: 200 }}  onChange={changeMethodHandler} >{
+    <Select value={props.selected_method} style={{ width: 200 }}  onChange={changeMethodHandler} >{
             props.methods.map( met => {
                 return(
                         <Option key={met.type} value={met.type}>{met.label}</Option>
@@ -82,13 +76,12 @@ const Step: React.FC<StepProps> = (props) => {
     <DisplayParametersForms 
         initParams={props.methods.find( e => e.type===props.selected_method ).params}
         onChangeParameter={changeParametersHandler}
-        mode={props.automatic_mode}
+        autoMode={props.automatic_mode}
         apply={applyStatus}
     />   
 
     <DisplayAlert/>
      
-    </div>
     </>);
 };
 

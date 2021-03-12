@@ -1,4 +1,4 @@
-import React  from 'react';
+import React, {useState, useEffect}  from 'react';
 import PlotlyChart from 'react-plotlyjs-ts';
 import {Table } from 'antd';
 
@@ -8,9 +8,35 @@ import { colors } from '../../assets/colors.js';
 interface PlotCurveProps {
    curves: Curve[];
    data: any[];
+   axisLabel: { xlabel: string, ylabel: string};
 };
 
 const PlotCurve: React.FC<PlotCurveProps> = (props) => {
+
+  // const [data,setData] = useState<any>([]);
+
+  // useEffect(() => {
+  //   for(let i=0; i<props.curves.length; i++){
+  //     //console.log(props.curves[i].name);
+  //     let line : any = {
+  //       type: 'scatter',
+  //       //mode: 'lines+markers',
+  //       mode: 'lines',
+  //       x: props.curves[i].x,
+  //       y: props.curves[i].y,
+  //       name: props.curves[i].name,
+  //       opacity: props.curves[i].opacity,
+  //       line: { color: colors[i] },
+  //     // visible: props.curves[i].selected,
+  //     };
+  //     if(props.curves[i].name==='average'){
+  //       line = {...line,  line: {color: 'rgb(0, 0, 0)', width: 4} };
+  //     }
+  //     data.push(line);
+  //   }
+
+  // },[]);
+
   //console.log("Create in Plot");
   let data: any = [];
   
@@ -36,7 +62,17 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
   //const layout = { width: 1000, height: 600, modebardisplay: false};
   const layout = { 
     modebardisplay: false,
-    showlegend: false
+    showlegend: false,
+    xaxis: {
+      title: {
+        text: props.axisLabel.xlabel
+      }
+    },
+    yaxis: {
+      title: {
+        text: props.axisLabel.ylabel
+      }
+    }
   };
   const config = {
     displaylogo: false, // remove plotly icon
@@ -82,8 +118,10 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
 
     let datasource: any[] = [];
     props.data.forEach( (e,index) => {
-      if(e.label !== '')
-        datasource.push({key: index.toString(), parameter: e.label, value: e.value});
+      if(e.label !== ''){
+        const fvalue = e.value.toExponential(3);
+        datasource.push({key: index.toString(), parameter: e.label, value: fvalue });
+      }
     });
 
     if(datasource.length>0){

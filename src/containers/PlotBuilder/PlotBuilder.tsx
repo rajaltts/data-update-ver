@@ -34,7 +34,8 @@ type Action =
     | {type: 'SET', input: any}
     | {type: 'UPDATE_CURVES', curves: Curve[], data: any[], result: boolean }
     | {type: 'RESET_CURVES', input: any}
-    | {type: 'RESET_CURVES_INIT', groupid: number};
+    | {type: 'RESET_CURVES_INIT', groupid: number}
+    ;
 
 const dataReducer = (currentData: Data, action: Action) => {
    switch (action.type) {
@@ -685,6 +686,15 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         setOperations(operationsUpdate);
     }
 
+    const getAxisLabel = () => {
+        let axis_label = { xlabel: data.xtype, ylabel: data.ytype };
+        if(data.xtype.split('_').length>1)
+            axis_label.xlabel = data.xtype.split('_')[0];
+        if(data.ytype.split('_').length>1)
+            axis_label.ylabel = data.ytype.split('_')[0];
+        return axis_label;
+    }
+
     return (
         <>
             <Row justify="space-around">
@@ -706,7 +716,9 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                 <Col flex="800px">
                     <PlotCurve
                        curves={data.groups[data.tree.selectedGroup].curves}
-                       data={data.groups[data.tree.selectedGroup].data}  />
+                       data={data.groups[data.tree.selectedGroup].data}
+                       axisLabel={getAxisLabel()}
+                      />
                 </Col>
                 <Col flex="auto">
                     <CurveControls 

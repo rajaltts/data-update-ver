@@ -52,7 +52,10 @@ const Steps: React.FC<StepsProps> = (props) => {
     }
     // aplly button for a step
     const updatedCurveHandler = (action: string) => {
-        return props.updatedCurve(action);
+        if(auto)
+            return props.updatedCurve('Template');
+        else
+            return props.updatedCurve(action);
     }
 
     const manualModeHandler = (event: any) => {
@@ -86,7 +89,6 @@ const Steps: React.FC<StepsProps> = (props) => {
                 status_next =  props.operations[i+1].status;    
             steps.push( 
                         <Step 
-                              index={i}
                               action_label={op.action_label}
                               automatic_mode = {auto}
                               methods = {op.methods}
@@ -95,8 +97,6 @@ const Steps: React.FC<StepsProps> = (props) => {
                               changeParameter = { (name: string, value: number) => changeParameter(name, value, op.action)}
                               applyButton = { () => updatedCurveHandler(op.action)}
                               status = {op.status}
-                              status_previous = {status_previous}
-                              status_next = {status_next}
                               error_msg = { op.error}
                               changeOperations= { changeOperationsHandler }
                               operations = {props.operations}
@@ -131,17 +131,9 @@ const Steps: React.FC<StepsProps> = (props) => {
             <DisplayProgress/>
             
             <DisplayStep  operations={props.operations}/>
-
-            {auto&&
-            <Space style={{paddingLeft: '10px', paddingTop: '15px'}}>
-                <Tooltip title="Apply all operations at one" placement="bottom" mouseEnterDelay={1.0}>
-                    <Button size="small" type="primary" onClick={() => {props.updatedCurve('Template')}}>Apply</Button>       
-                </Tooltip>
-            </Space>
-            }
             
             <br/>
-            <Checkbox style={{paddingTop: '10px', paddingBottom: '10px'}} checked={!auto} onChange={manualModeHandler}>Manual mode</Checkbox>
+            <Checkbox  checked={!auto} onChange={manualModeHandler}>Manual mode</Checkbox>
         </div>
     </Fragment>
     );

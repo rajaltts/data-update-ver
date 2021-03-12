@@ -4,11 +4,11 @@ import {Select, Button, Space, Input, Alert,  Row, Col, Slider, InputNumber, Div
 interface DisplayParameterProps {
     initParams: parameter_type[];
     onChangeParameter: (a: any) => any;
-    mode: boolean;
+    autoMode: boolean;
     apply: boolean;
 };
 
-const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, onChangeParameter,mode,apply}) => {
+const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, onChangeParameter,autoMode,apply}) => {
     const [params,setParams] = useState<parameter_type[]>([]);
     const [applyStatus,setApplyStatus] = useState(false);
     const { Option } = Select;
@@ -22,12 +22,12 @@ const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, on
     ,[initParams,apply]);
 
     const changeParamHandler = (event: any,name: string) => {
-        setApplyStatus(true);
         const new_params = [...params];
         const par = new_params.find( e => e.name===name);
         if(par)
             par.value=event;
         setParams(new_params);
+        setApplyStatus(true);
     }
 
     const selectParamHandler = (value:any, name: string, param: any) => {
@@ -111,9 +111,9 @@ const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, on
         <>
         {displayParameters}
         <br/>
-        {!mode&&<Space style={{ paddingTop: '10px'}}>
-            <Button size="small" type="primary" disabled={!applyStatus} onClick={submit}>Apply</Button>
-        </Space>}
+        <Space style={{ paddingTop: '10px', paddingBottom: '10px'}}>
+            <Button size="small" type="primary" disabled={!autoMode&&!applyStatus} onClick={submit}>Apply</Button>
+        </Space>
         </>
     );
 
