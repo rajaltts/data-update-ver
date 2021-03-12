@@ -59,7 +59,7 @@ const dataReducer = (currentData: Data, action: Action) => {
                 g.curves.forEach( (c, index_c) => {
                     const curve_d: Curve = { id: index_c,
                                              x: [...c.x], y: [...c.y],
-                                             name: c.name,
+                                             name: (c.name?c.name:c.label),
                                              label: c.label,
                                              matDataLabel: c.matDataLabel,
                                              oid: c.oid,
@@ -717,7 +717,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                     <PlotCurve
                        curves={data.groups[data.tree.selectedGroup].curves}
                        data={data.groups[data.tree.selectedGroup].data}
-                       axisLabel={getAxisLabel()}
+                        axisLabel={getAxisLabel()}
                       />
                 </Col>
                 <Col flex="auto">
