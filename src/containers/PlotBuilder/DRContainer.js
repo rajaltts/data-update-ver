@@ -94,7 +94,7 @@ class DRContainer extends React.Component {
     }
 
     callbackFunctionStep3 = (childData) => {
-
+      
      console.log("Parent recieved Selector Data: "+JSON.stringify(childData));
       this.setState({
           current: childData.current,
