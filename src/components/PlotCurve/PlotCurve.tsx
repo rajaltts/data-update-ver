@@ -1,5 +1,6 @@
 import React, {useState, useEffect}  from 'react';
 import PlotlyChart from 'react-plotlyjs-ts';
+import Plotly from 'plotly.js/dist/plotly';
 import {Table } from 'antd';
 
 import { Curve } from '../../data.model';
@@ -8,61 +9,52 @@ import { colors } from '../../assets/colors.js';
 interface PlotCurveProps {
    curves: Curve[];
    data: any[];
+   keys: string[];
    axisLabel: { xlabel: string, ylabel: string};
 };
 
 const PlotCurve: React.FC<PlotCurveProps> = (props) => {
 
-  // const [data,setData] = useState<any>([]);
+  const [data,setData] = useState<any>([]);
 
-  // useEffect(() => {
-  //   for(let i=0; i<props.curves.length; i++){
-  //     //console.log(props.curves[i].name);
-  //     let line : any = {
-  //       type: 'scatter',
-  //       //mode: 'lines+markers',
-  //       mode: 'lines',
-  //       x: props.curves[i].x,
-  //       y: props.curves[i].y,
-  //       name: props.curves[i].name,
-  //       opacity: props.curves[i].opacity,
-  //       line: { color: colors[i] },
-  //     // visible: props.curves[i].selected,
-  //     };
-  //     if(props.curves[i].name==='average'){
-  //       line = {...line,  line: {color: 'rgb(0, 0, 0)', width: 4} };
-  //     }
-  //     data.push(line);
-  //   }
-
-  // },[]);
-
-  //console.log("Create in Plot");
-  let data: any = [];
-  
-  for(let i=0; i<props.curves.length; i++){
-    //console.log(props.curves[i].name);
-    let line : any = {
-      type: 'scatter',
-      //mode: 'lines+markers',
-      mode: 'lines',
-      x: props.curves[i].x,
-      y: props.curves[i].y,
-      name: props.curves[i].name,
-      opacity: props.curves[i].opacity,
-      line: { color: colors[i] },
-    // visible: props.curves[i].selected,
-    };
-    if(props.curves[i].name==='average'){
-      line = {...line,  line: {color: 'rgb(0, 0, 0)', width: 4} };
+  useEffect(() => {
+    let data_: any = [];
+    for(let i=0; i<props.curves.length; i++){
+      //console.log(props.curves[i].name);
+      let line : any = {
+        type: 'scatter',
+        //mode: 'lines+markers',
+        mode: 'lines',
+        x: props.curves[i].x,
+        y: props.curves[i].y,
+        name: props.curves[i].name,
+        opacity: props.curves[i].opacity,
+        line: { color: colors[i] },
+      // visible: props.curves[i].selected,
+      };
+      if(props.curves[i].name==='average'){
+        line = {...line,  line: {color: 'rgb(0, 0, 0)', width: 4} };
+      }
+      data_.push(line);
     }
-    data.push(line);
-  }
+    setData(data_);
 
-  //const layout = { width: 1000, height: 600, modebardisplay: false};
+  },[props.curves,props.keys]);
+
   const layout = { 
     modebardisplay: false,
     showlegend: false,
+    autosize: false,
+    width: 800,
+    height: 600,
+    margin: {
+      l: 70,
+      r: 50,
+      b: 50,
+      t: 50,
+      pad: 4
+    },
+    plot_bgcolor: '#d0d5d9',
     xaxis: {
       title: {
         text: props.axisLabel.xlabel
@@ -76,7 +68,28 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
   };
   const config = {
     displaylogo: false, // remove plotly icon
-    reponsive: true
+    reponsive: true,
+    modeBarButtonsToRemove: [ 'hoverClosestCartesian', 'hoverCompareCartesian', 'resetScale2d', , 'toggleHover'],
+    modeBarButtonsToAdd: [
+      {
+        name: 'show markers',
+        icon: Plotly.Icons.drawcircle,
+        direction: 'up',
+        click: function(gd) {
+          var newMode = 'lines+markers';
+          Plotly.restyle(gd, 'mode', newMode);
+        }
+      },
+      {
+        name: 'hide markers',
+        icon: Plotly.Icons.eraseshape,
+        click: function(gd) {
+          console.log(gd);
+          var newMode = 'lines';
+          Plotly.restyle(gd, 'mode', newMode);
+        }
+      }
+    ]
   };
  /*
   var config = {
@@ -119,8 +132,7 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
     let datasource: any[] = [];
     props.data.forEach( (e,index) => {
       if(e.label !== ''){
-        const fvalue = e.value.toExponential(3);
-        datasource.push({key: index.toString(), parameter: e.label, value: fvalue });
+        datasource.push({key: index.toString(), parameter: e.label, value:  e.value });
       }
     });
 

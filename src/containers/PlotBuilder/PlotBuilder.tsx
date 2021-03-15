@@ -59,8 +59,8 @@ const dataReducer = (currentData: Data, action: Action) => {
                 g.curves.forEach( (c, index_c) => {
                     const curve_d: Curve = { id: index_c,
                                              x: [...c.x], y: [...c.y],
-                                             name: (c.name?c.name:c.label),
-                                             label: c.label,
+                                             name: (c.matDataLabel?c.matDataLabel:c.label),
+                                             label: (c.matDataLabel?c.matDataLabel:c.label),
                                              matDataLabel: c.matDataLabel,
                                              oid: c.oid,
                                              selected: true, opacity: 1,
@@ -69,7 +69,7 @@ const dataReducer = (currentData: Data, action: Action) => {
                     group_c.curves.push(curve_d);
                     group_c.data.push({label:'',value: 0});
 
-                    const curve_data: CurveData = { title: c.label,key: '',icon: <LineOutlined style={{fontSize: '24px', color: colors[index_c]}}/>};
+                    const curve_data: CurveData = { title: curve_d.label,key: '',icon: <LineOutlined style={{fontSize: '24px', color: colors[index_c]}}/>};
                     curve_data.key = index_g.toString()+'-'+index_c.toString();
 
                     group_d.treeData.push(curve_data);
@@ -367,7 +367,14 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
             const curves = data.groups[group_id].curves;
             for(let ic=0; ic<data.groups[group_id].curves.length; ic++){
                 if(curves[ic].name!=='average'){
-                    const curve = { x: curves[ic].x, y: curves[ic].y, name: 'curve'+ic, selected: curves[ic].selected, opacity: curves[ic].opacity, x0: curves[ic].x0, y0: curves[ic].y0};
+                    const curve = { x: curves[ic].x,
+                                    y: curves[ic].y,
+                                    name: 'curve'+ic,
+                                    label: curves[ic].label,
+                                    selected: curves[ic].selected,
+                                    opacity: curves[ic].opacity,
+                                    x0: curves[ic].x0,
+                                    y0: curves[ic].y0};
                     newCurves.push(curve);
                 }
             }
@@ -566,7 +573,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                     const dp_data_out = dp_data.getOutputDataset();
                     const curve_data_out = dp_data_out.getCurve('averaging');
                     let vecY_data_out = curve_data_out.getY();
-                    const young = vecY_data_out.get(0);
+                    const young = vecY_data_out.get(0).toExponential(3);
                     console.log("Young ="+young);
                     data_analytics.length = 0;
                     data_analytics.push({label: "Young's Modulus", value: young, name: "young"});
@@ -605,8 +612,8 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                     const curve_data_end_out = dp_data_end_out.getCurve('averaging');
                     const vecX_data_end_out = curve_data_end_out.getX();
                     const vecY_data_end_out = curve_data_end_out.getY();
-                    const strain_at_break = vecX_data_end_out.get(0);
-                    const stress_at_break = vecY_data_end_out.get(0);
+                    const strain_at_break = vecX_data_end_out.get(0).toExponential(3);
+                    const stress_at_break = vecY_data_end_out.get(0).toExponential(3);
                     data_analytics.push({label: "Strain at Break", value: strain_at_break, name: "strain_at_break"});
                     data_analytics.push({label: "Strength at Break", value: stress_at_break, name: "stress_at_break"});
                     op_end.delete();
@@ -620,8 +627,8 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                     const curve_data_max_out = dp_data_max_out.getCurve('averaging');
                     const vecX_data_max_out = curve_data_max_out.getX();
                     const vecY_data_max_out = curve_data_max_out.getY();
-                    const strain_at_ultimate_strength = vecX_data_max_out.get(0);
-                    const stress_at_ultimate_strength = vecY_data_max_out.get(0);
+                    const strain_at_ultimate_strength = vecX_data_max_out.get(0).toExponential(3);
+                    const stress_at_ultimate_strength = vecY_data_max_out.get(0).toExponential(3);
                     data_analytics.push({label: "Strain at Ultimate Strength", value: strain_at_ultimate_strength, name: "strain_at_ultimate_strength"});
                     data_analytics.push({label: "Strength at  Ultimate Strength", value: stress_at_ultimate_strength, name: "stress_at_ultimate_strength"});
                     op_max.delete();
@@ -652,9 +659,25 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                 console.log("LOG OK:"+dataprocess.logfile());
                 // flag status operation
                 const operationsUpdate = [...operations];
-                operationsUpdate.find( (el) => el.action === action).status = 'failed';
-                const error_msg = "Operation FAILED.\n" + dataprocess.getErrorMessage();
-                operationsUpdate.find( (el) => el.action === action).error = error_msg;
+                const error_msg = dataprocess.getErrorMessage();
+                let action_error = action;
+                if(action==='Template'){
+                    // find the action name from the error message,i f not found put on the last action
+                    const err =  dataprocess.getErrorMessage();
+                    const i0 = err.indexOf('[');
+                    const i1 = err.indexOf(']');
+                    let action: string="";
+                    if(i0!==-1&&i1!==-1) {
+                        action_error = err.substring(i0+1,i1);
+                    }
+                    else {
+                        action_error = operations[operations.length-1].action;
+                    }
+                }
+                operationsUpdate.find( (el) => el.action === action_error).status = 'failed';
+                operationsUpdate.find( (el) => el.action === action_error).error = error_msg;
+                
+                
                 setOperations(operationsUpdate);
             }
 
@@ -729,6 +752,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                     <PlotCurve
                        curves={data.groups[data.tree.selectedGroup].curves}
                        data={data.groups[data.tree.selectedGroup].data}
+                       keys={data.tree.groupData[data.tree.selectedGroup].keys}
                         axisLabel={getAxisLabel()}
                       />
                 </Col>
