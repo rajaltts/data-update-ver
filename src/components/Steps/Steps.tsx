@@ -1,6 +1,6 @@
 import React, {Fragment, useEffect, useState} from 'react'
 import {Button, Tooltip, Space, Steps as AntSteps, Checkbox } from 'antd';
-import { CheckCircleFilled, RightCircleOutlined , CaretRightFilled, CaretLeftFilled } from '@ant-design/icons';
+import { CheckCircleFilled, RightCircleOutlined , ExclamationCircleTwoTone, CaretRightFilled, CaretLeftFilled } from '@ant-design/icons';
 import Step from './Step/Step';
 import { Operation } from '../../template.model';
 
@@ -112,14 +112,19 @@ const Steps: React.FC<StepsProps> = (props) => {
        for(let i=0;i<props.operations.length;i++){
             const description = props.operations[i].action_label;
             const label = i;
-            const status =  (props.operations[i].status==='success'?true:false);
-            items.push(<AntSteps.Step icon={status? <CheckCircleFilled/> : <RightCircleOutlined/> } title={description} key={i} />);
+            let icon = <RightCircleOutlined/>; // for waiting
+            if(props.operations[i].status==='success')
+                icon = <CheckCircleFilled/>;
+            else if (props.operations[i].status==='failed')
+                icon = <ExclamationCircleTwoTone twoToneColor="#eb2f2f"/>;
+            items.push(<AntSteps.Step icon={icon} title={description} key={i} />);
         }
         return(
             <AntSteps style={{paddingBottom: '10px'}} current={current} size='small' onChange={stepsOnChangeHandler}>{items}</AntSteps>
         );
     }
 
+    
     //---------RENDER-----------------------------------------
     return(
     <Fragment>
@@ -135,6 +140,7 @@ const Steps: React.FC<StepsProps> = (props) => {
             <br/>
             <Checkbox  checked={!auto} onChange={manualModeHandler}>Manual mode</Checkbox>
         </div>
+        
     </Fragment>
     );
 
