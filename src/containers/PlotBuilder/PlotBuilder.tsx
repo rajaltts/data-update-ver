@@ -178,6 +178,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
     // should be better to use useContext hook to share these state with Steps component
     const [current, setCurrent] = useState(0);
     const [auto, setAuto] = useState(true);
+    const [precision,setPrecision] = useState(3);
 
 
     //---------EFFECT-----------------------------------------
@@ -187,6 +188,8 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         // TODO init Operations with the right congig (tensile, compression, ...) depending on analysis_type given by props.analysisType 
         setOperations(tensile_operations_config); // init operations state with the tensile structure (default values)
         setTemplate(props.template_input); // init template from props
+        if(props.data_input.precision)
+            setPrecision(props.data_input.precision);   
     },[props.data_input]);
 
     // use to update operations state from template state
@@ -573,7 +576,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                     const dp_data_out = dp_data.getOutputDataset();
                     const curve_data_out = dp_data_out.getCurve('averaging');
                     let vecY_data_out = curve_data_out.getY();
-                    const young = vecY_data_out.get(0).toExponential(3);
+                    const young = vecY_data_out.get(0).toExponential(precision);
                     console.log("Young ="+young);
                     data_analytics.length = 0;
                     data_analytics.push({label: "Young's Modulus", value: young, name: "young"});
@@ -612,8 +615,8 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                     const curve_data_end_out = dp_data_end_out.getCurve('averaging');
                     const vecX_data_end_out = curve_data_end_out.getX();
                     const vecY_data_end_out = curve_data_end_out.getY();
-                    const strain_at_break = vecX_data_end_out.get(0).toExponential(3);
-                    const stress_at_break = vecY_data_end_out.get(0).toExponential(3);
+                    const strain_at_break = vecX_data_end_out.get(0).toExponential(precision);
+                    const stress_at_break = vecY_data_end_out.get(0).toExponential(precision);
                     data_analytics.push({label: "Strain at Break", value: strain_at_break, name: "strain_at_break"});
                     data_analytics.push({label: "Strength at Break", value: stress_at_break, name: "stress_at_break"});
                     op_end.delete();
@@ -627,8 +630,8 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                     const curve_data_max_out = dp_data_max_out.getCurve('averaging');
                     const vecX_data_max_out = curve_data_max_out.getX();
                     const vecY_data_max_out = curve_data_max_out.getY();
-                    const strain_at_ultimate_strength = vecX_data_max_out.get(0).toExponential(3);
-                    const stress_at_ultimate_strength = vecY_data_max_out.get(0).toExponential(3);
+                    const strain_at_ultimate_strength = vecX_data_max_out.get(0).toExponential(precision);
+                    const stress_at_ultimate_strength = vecY_data_max_out.get(0).toExponential(precision);
                     data_analytics.push({label: "Strain at Ultimate Strength", value: strain_at_ultimate_strength, name: "strain_at_ultimate_strength"});
                     data_analytics.push({label: "Strength at  Ultimate Strength", value: stress_at_ultimate_strength, name: "stress_at_ultimate_strength"});
                     op_max.delete();
