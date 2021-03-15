@@ -66,7 +66,23 @@ const PlotCurve = (props) => {
   let width = props.isThumbnail === true?300:800;
   let height = props.isThumbnail === true?300:700;
 
-  const layout = { width: width, height: height, displaylogo:false, modebardisplay: true, showlegend: props.showLegend===undefined||props.showLegend?true:false};
+  let marginThumbnail = {
+    l: 60,
+    r: 40,
+    t: 40,
+    b: 60,
+    pad: 0
+  };
+
+  let marginNormal = {
+    l: 80,
+    r: 80,
+    t: 100,
+    b: 80,
+    pad: 0
+  };
+
+  const layout = { xaxis:{title:props.xtype}, yaxis:{title:props.ytype},width: width, height: height, displaylogo:false, modebardisplay: true, margin:props.isThumbnail === true? marginThumbnail:marginNormal,showlegend: props.showLegend===undefined||props.showLegend?true:false};
  
   var config = {
     displaylogo: false, // remove plotly icon

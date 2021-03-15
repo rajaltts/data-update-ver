@@ -13,7 +13,8 @@ const { Step } = Steps;
 class DRContainer extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {
+        this.state = (!props.modelState.newLoad)? this.state= props.modelState:
+         {
             query: props.modelState.query,
             url: props.modelState.url,
             propDefs: [],
@@ -27,12 +28,21 @@ class DRContainer extends React.Component {
             groups:[],
             plotBuildModel:{},
             propLabelMap:{},
-            selected_resProp:{}
+            selected_resProp:{},
+            salt:props.modelState.salt,
+            widget:props.modelState.widgetId,
+            hidId:props.modelState.hidId,
+            precision:6
         }
+        this.updateState = this.updateState.bind(this);
         //this.getPropertyDef = this.getPropertyDef.bind(this);
         const { Step } = Steps;
 
 
+    }
+    updateState =() =>{
+      console.log("Update State to JSF Widget: "+this.state);
+      window.updateDRState(this.state);
     }
     callbackFunctionStep1 = (childData) => {
         console.log("Parent recieved Selector Data: "+ childData);
@@ -46,7 +56,7 @@ class DRContainer extends React.Component {
             propLabelMap: childData.propLabelMap,
             reloadStep2 : childData.stateChanged
        });
-
+       this.updateState();
        console.log("callbackFunctionStep1 "+childData);
     }
 
@@ -78,8 +88,9 @@ class DRContainer extends React.Component {
             unitSystem: childData.unitSystem,
             xQuantityType: childData.xQuantityType,
             yQuantityType:childData.yQuantityType,
+            precision:childData.precision,
        });
-
+       this.updateState();
     }
 
     callbackFunctionStep3 = (childData) => {
@@ -89,9 +100,10 @@ class DRContainer extends React.Component {
           current: childData.current,
            previous: childData.previous,
            reloadStep2 : childData.stateChanged,
-           plotBuildModel : childData
+           plotBuildModel : childData.data
 
      });
+     this.updateState();
   }
 
   callbackFunctionStep4 = (childData) => {
@@ -101,6 +113,7 @@ class DRContainer extends React.Component {
          previous: childData.previous,
          selected_resProp: childData.selected_resProp,
    });
+   this.updateState();
 }
 
     render() {
@@ -126,7 +139,10 @@ class DRContainer extends React.Component {
             selectedCriteria:this.state.selectedCriteria,
             groupsCriteria:this.state.groupsCriteria,
             criteria:this.state.criteria,
-            reload:this.state.reloadStep2
+            reload:this.state.reloadStep2,
+            xtype:this.state.xtype,
+            ytype:this.state.ytype,
+            precision:this.state.precision,
         }
         if(this.state.res_var1!==undefined && this.state.res_curve!==undefined){
           if(JSON.stringify(this.state.selected_resProp) === JSON.stringify({})||(this.state.selected_resProp===undefined)){
@@ -163,6 +179,9 @@ class DRContainer extends React.Component {
           unitSystem: this.state.unitSystem,
           xQuantityType: this.state.xQuantityType,
           yQuantityType:this.state.yQuantityType,
+          widget:this.state.widget,
+          newLoad:false,
+          precision:this.state.precision,
       }
 
         let tensile_template = require('../../data/template_tensile.json');

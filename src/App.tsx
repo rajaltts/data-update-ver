@@ -8,7 +8,8 @@ import PlotBuilder from './containers/PlotBuilder/PlotBuilder'
 import ReactDOM from 'react-dom';
 
 //<DRContainer modelState={modelState}/>
-const modelState={url:"http://localhost:7050/MaterialCenter",query:"3;01wArS71Q:AqS74g,01wAqwikA:AqS74g,01wArMKnQ:AqS74g,01wArZ81w:AqS74g,01wArguuQ:AqS74g,01wAq3fQQ:AqS74g,01wAq-W6g:AqS74g,01wArW07w:AqS74g,01wArFT1g:AqS74g,01wAqpsuQ:AqS74g,01wArFMQw:AqS74g,01wAq7jSA:AqS74g,01wAq-YxA:AqS74g,01wArFVMg:AqS74g,01wArFUOw:AqS74g,01wArgviA:AqS74g,01wArMMhQ:AqS74g;this"};
+//let modelState = require('./data/data1.json');
+const modelState={newLoad:true,url:"http://localhost:7050/MaterialCenter",query:"3;01wArS71Q:AqS74g,01wAqwikA:AqS74g,01wArMKnQ:AqS74g,01wArZ81w:AqS74g,01wArguuQ:AqS74g,01wAq3fQQ:AqS74g,01wAq-W6g:AqS74g,01wArW07w:AqS74g,01wArFT1g:AqS74g,01wAqpsuQ:AqS74g,01wArFMQw:AqS74g,01wAq7jSA:AqS74g,01wAq-YxA:AqS74g,01wArFVMg:AqS74g,01wArFUOw:AqS74g,01wArgviA:AqS74g,01wArMMhQ:AqS74g;this"};
 //const modelState={url:"http://localhost:7050/MaterialCenter",query:"3;AdlUUQ:AIY,jLgAAPvPA:elM,AcehFw:AIY,jLgAAPviw:elM;this"};
 /*<Layout>
     <Header> </Header>

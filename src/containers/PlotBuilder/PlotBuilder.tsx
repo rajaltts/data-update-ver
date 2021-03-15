@@ -316,7 +316,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
             current: 1,
             previous: true,
             stateChanged: false,
-            groups: data.groups
+            data: data
         }
         sendData(json);
     }
@@ -327,7 +327,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         let json = {
             current: 3,
             previous: false,
-            groups: data.groups
+            data: data
         }
         sendData(json);
     }
@@ -686,6 +686,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         setOperations(operationsUpdate);
     }
 
+
     const getAxisLabel = () => {
         let axis_label = { xlabel: data.xtype, ylabel: data.ytype };
         if(data.xtype.split('_').length>1)
@@ -693,6 +694,17 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         if(data.ytype.split('_').length>1)
             axis_label.ylabel = data.ytype.split('_')[0];
         return axis_label;
+    }
+
+    const tempgroups = [...data.groups];
+    let disableNextBtn = false;
+    for(let ic=0; ic<tempgroups.length; ic++){
+        if(tempgroups[ic].data.length===0 ||tempgroups[ic].data[0].name===undefined){
+            disableNextBtn = true;
+            break;
+        }
+        
+
     }
 
     return (
@@ -734,7 +746,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                         <Button  onClick={e => { handlePrevious() }}>Previous</Button>
                     </div>
                     <div className="ButtonNext">
-                        <Button type="primary" onClick={e => { handleNext() }}>Next</Button>
+                        <Button type="primary" disabled={disableNextBtn} onClick={e => { handleNext() }}>Next</Button>
                     </div>
                 </div>
         </>

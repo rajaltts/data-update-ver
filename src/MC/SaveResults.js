@@ -34,6 +34,7 @@ class SaveResults extends React.Component {
         this.onResultVar = this.onResultVar.bind(this);
         this.updateAttribute = this.updateAttribute.bind(this);
         this.handleSave = this.handleSave.bind(this);
+        this.handleCancel = this.handleCancel.bind(this);
         this.onClassificationChange = this.onClassificationChange.bind(this);
         this.addClassificationAttribute = this.addClassificationAttribute.bind(this);
         this.openClassificationAttribute = this.openClassificationAttribute.bind(this);
@@ -195,6 +196,9 @@ class SaveResults extends React.Component {
         }
      this.sendData(json);
  }
+    handleCancel(){
+        window.closeDataReductionWidget(this.props.propState.widget,'cancelDRWidget' , '');
+    }
     handleSave(){
         const url = this.props.propState.url;
         const saltId = this.props.propState.salt;
@@ -207,30 +211,19 @@ class SaveResults extends React.Component {
             .then(response => {
                 console.log(response);
                 const res = response.data;
+                window.closeDataReductionWidget(this.props.propState.widget,'saveDRWidget' , res.outputs);
             })
     }
     handlePrevious() {
         let json = {
             current: 2,
             previous: true,
-            selectedCurves: this.state.selectedCurves,
-            groups: this.state.groups,
-            type: this.state.xyDisplayScale,
-            xtype: this.state.xtype,
-            xunit: this.state.xunit,
-            ytype: this.state.ytype,
-            yunit: this.state.yunit,
             groupSelected:this.state.groupSelected,		
             selectedCriteria:this.state.selectedCriteria,
-            groupsCriteria:this.state.groupsCriteria,
-            criteria:this.state.criteria,
             targetType: this.state.targetType,
             res_curve: this.state.res_curve,
             res_var1: this.state.res_var1,
             targetClass: this.state.targetClass,
-            unitSystem: this.state.unitSystem,
-            xQuantityType: this.state.xQuantityType,
-            yQuantityType:this.state.yQuantityType,
         }
         this.sendData(json);
     } 
@@ -447,7 +440,7 @@ this.state.groups.map((group, index)=>{
             </td>{
             this.props.propState.plotBuildModel.groups.map((group, index1) =>{
                 return(<td style={{textAlign: 'center'}}  key={'propColCurve'+index1+1}> <PlotCurve onClick={e => { this.handleCurveClick(index1) }}
-                curves={group.curves} showLegend={false} isThumbnail={true} showOnlyAverage={true} groupIndex={group.id}
+                curves={group.curves} showLegend={false} isThumbnail={true} showOnlyAverage={true} groupIndex={group.id} xtype={this.state.xtype} ytype={this.state.ytype}
             /></td>)
             })}
         </tr>
@@ -468,7 +461,7 @@ this.state.groups.map((group, index)=>{
                             return(<Select.Option key={'propOption'+index} value={resc.property}>{resc.label}</Select.Option>);
                         })
                         }
-                    </Select>:this.props.propState.res_var1[data].length ===1?<Input size='small' value={this.props.propState.res_var1[data][0].label} className='InputAttribute' disabled='true' />:""
+                    </Select>:this.props.propState.res_var1[data].length ===1?<Input size='small'  style={{width: '100%'}}value={this.props.propState.res_var1[data][0].label} className='InputAttribute' disabled='true' />:""
 
                     }
                      
@@ -526,7 +519,7 @@ this.state.groups.map((group, index)=>{
                     <Space direction='vertical'>
                     <div  className="AnalysisTypeContainer">
                     <span className='AnalysisResultLabel'> Analysis Result Type </span>
-                        <Input size='small' value={this.props.propState.targetType} style={{width:'60%'}} disabled='true' >                      
+                        <Input className='InputAttribute' size='small' value={this.props.propState.targetType} style={{width:'60%'}} disabled='true' >                      
                         </Input>
                     </div>
                     <div className="DropContainerButton">
@@ -574,7 +567,7 @@ this.state.groups.map((group, index)=>{
                         <Button type="primary"  onClick={e => { this.handleSave() }}>Save</Button>
                     </div>                
                     <div className="ButtonCancel">
-                        <Button>Cancel</Button>
+                        <Button   onClick={e => { this.handleCancel() }}>Cancel</Button>
                     </div>
 
                     <div className="ButtonSave">

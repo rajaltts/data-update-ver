@@ -57,6 +57,9 @@ class DefineGroups extends React.Component {
             selectedCriteria:[],
             groupsCriteria:{},
             showGroupCriteria: false,
+            xtype: props.propState.xtype,
+            ytype: props.propState.ytype,
+            precision: 6,
         }
         this.getCurves = this.getCurves.bind(this);
         this.handleNext = this.handleNext.bind(this);
@@ -200,6 +203,8 @@ class DefineGroups extends React.Component {
             unitSystem: this.state.unitSystem,
             xQuantityType: this.state.xQuantityType,
             yQuantityType:this.state.yQuantityType,
+            stateChanged: false,
+            precision:this.state.precision,
         }
         this.sendData(json);
     }
@@ -309,6 +314,7 @@ class DefineGroups extends React.Component {
             criteria:this.props.propState.criteria,
             xQuantityType: this.props.propState.xQuantityType,
             yQuantityType: this.props.propState.yQuantityType,
+            precision: this.props.propState.precision,
         })
     }
 
@@ -348,7 +354,9 @@ class DefineGroups extends React.Component {
                     targetClass: res.targetClass,
                     unitSystem: res.unitSystem,
                     xQuantityType: res.xQuantityType,
-                    yQuantityType: res.yQuantityType
+                    yQuantityType: res.yQuantityType,
+                    precision:res.precision,
+                    stateChanged: false
                 })
 
 
@@ -378,6 +386,33 @@ class DefineGroups extends React.Component {
        // this.state.loadCurve = true;
         this.forceUpdate();
         //console.log(JSON.stringify(e));
+        let json = {
+            current: 2,
+            previous: false,
+            selectedCurves: this.state.selectedCurves,
+            groups: this.state.groups,
+            type: this.state.xyDisplayScale,
+            xtype: this.state.xtype,
+            xunit: this.state.xunit,
+            ytype: this.state.ytype,
+            yunit: this.state.yunit,
+            groupSelected:this.state.groupSelected,		
+            selected_group: 0,
+            tree: treeGroup,
+            keys: keysGroup,
+            selectedCriteria:this.state.selectedCriteria,
+            groupsCriteria:this.state.groupsCriteria,
+            criteria:this.state.criteria,
+            targetType: this.state.targetType,
+            res_curve: this.state.res_curve,
+            res_var1: this.state.res_var1,
+            targetClass: this.state.targetClass,
+            unitSystem: this.state.unitSystem,
+            xQuantityType: this.state.xQuantityType,
+            yQuantityType:this.state.yQuantityType,
+            stateChanged: false
+        }
+        this.sendData(json);
     }
 
     removeExistingGroup(){
@@ -419,6 +454,7 @@ class DefineGroups extends React.Component {
             selectedCriteria:this.state.selectedCriteria,
             groupsCriteria:this.state.groupsCriteria,
             criteria:this.state.criteria,
+            stateChanged: false,
         }
         this.sendData(json);
         
@@ -469,6 +505,7 @@ class DefineGroups extends React.Component {
             selectedCriteria:this.state.selectedCriteria,
             groupsCriteria:this.state.groupsCriteria,
             criteria:this.state.criteria,
+            stateChanged: false
         }
         this.sendData(json);
         
@@ -563,7 +600,7 @@ this.state.groups.map((group, index)=>{
                     <Col className="DefineGroupPlot">
                     <Skeleton loading={!this.state.loaded}>
                          <PlotCurve
-                        curves={allCurves} showLegend={false} isThumbnail={false} showOnlyAverage={false}
+                        curves={allCurves} showLegend={false} isThumbnail={false} showOnlyAverage={false} xtype={this.state.xtype} ytype={this.state.ytype}
                     />
                     </Skeleton>
                     </Col>
