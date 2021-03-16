@@ -128,7 +128,7 @@ const Steps: React.FC<StepsProps> = (props) => {
     //---------RENDER-----------------------------------------
     return(
     <Fragment>
-        <div style={{borderStyle: 'solid', borderWidth: '2px', margin: 'auto', padding: '10px'}}>
+        <div style={{height: '450px', borderStyle: 'solid', borderWidth: '2px', margin: 'auto', padding: '10px'}}>
             <h1 style={{textAlign: 'center'}}>
                 Analysis type: Tensile
             </h1>

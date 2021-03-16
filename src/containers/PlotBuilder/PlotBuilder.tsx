@@ -515,7 +515,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                 // result flag (true is we have an averagin curve)
                 let result_flag = false;
                 // get curves
-                if(!dataset_out.hasCurve('averaging')){ // do not replace the curve when an averaging curve is generated, we would like to see the ref curves
+               // if(!dataset_out.hasCurve('averaging')){ // do not replace the curve when an averaging curve is generated, we would like to see the ref curves
                     for(let curve_idx=0;curve_idx<newCurves.length;curve_idx++){
                         const curve_out = dataset_out.getCurve(newCurves[curve_idx].name);
                         // get Xs, Ys
@@ -548,7 +548,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                         vecX_out.delete();
                         vecY_out.delete();
                     }
-                }
+               // }
                 if(dataset_out.hasCurve('averaging')){
                     result_flag = true;
                     const curve_out = dataset_out.getCurve('averaging');
@@ -734,9 +734,9 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
     }
 
     return (
-        <>
-            <Row justify="space-around">
-                <Col flex="500px">
+        <div style={{paddingTop: '20px'}}>
+            <Row justify="space-around" >
+                <Col span={8}>
                     <Steps operations={operations}
                            changeSelectedMethod={changeSelectedMethodHandler}
                            changeParameter= {changeParameterHandler}
@@ -751,7 +751,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                            changeAuto={ (val) => setAuto(val)}
                     />
                 </Col>
-                <Col flex="800px">
+                <Col span={8}>
                     <PlotCurve
                        curves={data.groups[data.tree.selectedGroup].curves}
                        data={data.groups[data.tree.selectedGroup].data}
@@ -759,7 +759,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                         axisLabel={getAxisLabel()}
                       />
                 </Col>
-                <Col flex="auto">
+                <Col span={8}>
                     <CurveControls 
                         groupData={data.tree.groupData}
                         onCheck={checkDataTreeHandler}
@@ -776,7 +776,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                         <Button type="primary" disabled={disableNextBtn} onClick={e => { handleNext() }}>Next</Button>
                     </div>
                 </div>
-        </>
+        </div>
     );
         
 }

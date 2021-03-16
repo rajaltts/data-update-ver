@@ -44,9 +44,9 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
   const layout = { 
     modebardisplay: false,
     showlegend: false,
-    autosize: false,
-    width: 800,
-    height: 600,
+    autosize: true,
+    // width: 800,
+    // height: 600,
     margin: {
       l: 70,
       r: 50,
@@ -54,7 +54,7 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
       t: 50,
       pad: 4
     },
-    plot_bgcolor: '#d0d5d9',
+    plot_bgcolor: '#fdfdfd',
     xaxis: {
       title: {
         text: props.axisLabel.xlabel
@@ -137,7 +137,7 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
     });
 
     if(datasource.length>0){
-      return <Table dataSource={datasource} columns={columns} size='small' bordered={true} pagination={false}  style={{width: '500px'}}/>;
+      return <Table dataSource={datasource} columns={columns} size='small' bordered={true} pagination={false}  style={{width: '500px',  margin: 'auto'}}/>;
     } else {
       return <div></div>;
     }    
@@ -154,8 +154,10 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
       //onLegendDoubleClick =  { (event) => props.doubleClickLegendHandler(event)}
       //onLegendClick =  { (event) => props.clickLegendHandler(event)}
     />
+    <div>
     <DisplayData
        data={props.data}/>
+    </div>
     </>
 
   );

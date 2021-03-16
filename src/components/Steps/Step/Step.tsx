@@ -61,7 +61,7 @@ const Step: React.FC<StepProps> = (props) => {
     }
 
     return(
-    <>
+    <div style={{height: '310px'}}>
     <h1 style={{textAlign: 'center'}}>{props.action_label}</h1> 
 
     <Select value={props.selected_method} style={{ width: 200 }}  onChange={changeMethodHandler} >{
@@ -82,7 +82,7 @@ const Step: React.FC<StepProps> = (props) => {
 
     <DisplayAlert/>
      
-    </>);
+    </div>);
 };
 
 

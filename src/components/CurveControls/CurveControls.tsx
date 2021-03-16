@@ -33,7 +33,7 @@ const CurveControls: React.FC<CurveControlsProps> = (props) => {
 
     return(
         <>
-        <div style={{borderStyle: 'solid', borderWidth: '2px', margin: 'auto', padding: '10px'}}>
+        <div style={{height: '450px', borderStyle: 'solid', borderWidth: '2px', margin: 'auto', padding: '10px'}}>
           <h1 style={{textAlign: 'center'}}>
             Curves
           </h1>

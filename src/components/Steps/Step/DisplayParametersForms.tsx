@@ -109,11 +109,15 @@ const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, on
 
     return(
         <>
+        <div  style={{height: '210px'}} >
         {displayParameters}
         <br/>
+        </div>
+        <div>
         <Space style={{ paddingTop: '10px', paddingBottom: '10px'}}>
             <Button size="small" type="primary" disabled={!autoMode&&!applyStatus} onClick={submit}>Apply</Button>
         </Space>
+        </div>
         </>
     );
 

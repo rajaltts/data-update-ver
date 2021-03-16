@@ -16,7 +16,7 @@
   "parameters":[
     {"number_of_points": 30 },
     {"number_of_nodes": 5 },
-    {"regularization": 5},
+    {"regularization": 4},
     {"end_point": "min_max_x"}
   ],
   "id": 1

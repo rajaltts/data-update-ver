@@ -100,20 +100,19 @@ export const tensile_operations_config = [
                          {label:'number of nodes', name: 'number_of_nodes', value: 10, range: {min: 5, max: 20}},
                          {label:'regularization', name: 'regularization', value: 5, range: {min: 1, max: 9}},
                          {label:'Averaging end point method', name: 'end_point',  selection: [{label:'strain',name:'x_value'},
-                                                                                              {label:'mean max strain', name:'mean_max_x'},
                                                                                               {label:'min max strain', name:'min_max_x'}
                                                                                              ],
-                                                                                             value: 2},
+                                                                                             value: 1},
                          {label:'end point value', name: 'end_point_value',  value: undefined, float: true},
                          {label:'Extrapolation method', name: 'extrapolation', selection:[{label:'none',name:'none'},
                                                                                           {label:'based on specific curve', name:'based_on_curve'},
                                                                                           {label:'tangent', name:'tangent'}
                                                                                          ],
-                                                                                         value: 2},
+                                                                                         value: 1},
                         {label: 'extrapolation end point', name: 'extrapolating_end_point', selection:[{label:'mean max strain', name:'mean_max_x'},
                                                                                                         {label:'max max strain', name:'max_max_x'}
                                                                                                       ],
-                                                                                                      value: 1}
+                                                                                                      value: 0}
                          ]
             },
             {
@@ -122,7 +121,7 @@ export const tensile_operations_config = [
                 params: [{label:'number of points', name: 'number_of_points', value: 30},
                          {label:'order', name: 'order', value: 6},
                          {label:'Averaging end point method', name: 'end_point',  selection: [{label:'strain',name:'x_value'},
-                                                                                              {label:'mean max strain', name:'mean_max_x'},
+                                                                                            //   {label:'mean max strain', name:'mean_max_x'},
                                                                                               {label:'min max strain', name:'min_max_x'}
                                                                                             ], value: 2},
                          {label:'end point value', name: 'end_point_value',  value: undefined},
