@@ -56,7 +56,7 @@ function renderDRContainer(model, element) {
   ReactDOM.render(<DRContainer modelState={model} />, element);
 //  ReactDOM.render(
    // React.createElement(DRContainer, {modelState: model}, null),element);
-  console.log("Test External Method element:" + element);
+  //console.log("Test External Method element:" + element);
 }
 
 (window as any).renderDRContainer = renderDRContainer;

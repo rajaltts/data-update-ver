@@ -315,6 +315,19 @@ class DefineGroups extends React.Component {
             xQuantityType: this.props.propState.xQuantityType,
             yQuantityType: this.props.propState.yQuantityType,
             precision: this.props.propState.precision,
+
+            targetType: this.props.propState.targetType,
+            res_curve: this.props.propState.res_curve,
+            res_var1: this.props.propState.res_var1,
+            selected_resProp: this.props.propState.selected_resProp,
+            targetClass: this.props.propState.targetClass,
+            xunit:this.props.propState.xunit,
+            yunit: this.props.propState.yunit,
+            unitSystem: this.props.propState.unitSystem,
+            xQuantityType: this.props.propState.xQuantityType,
+            yQuantityType:this.props.propState.yQuantityType,
+            widget:this.props.propState.widget,
+
         })
     }
 
@@ -324,7 +337,7 @@ class DefineGroups extends React.Component {
 
     getCurves() {
         let propDefs = [];
-        console.log(this.props.propState);
+        //console.log(this.props.propState);
         const url = this.props.propState.url;
         const query = this.props.propState.query;
         const selectedPropDef = this.props.propState.selectedPropDef;
@@ -334,7 +347,7 @@ class DefineGroups extends React.Component {
 
         axios.get(url + '/servlet/rest/dr/get_Curve?query='+ query + '&analysisType='+selectedAnalysisType+'&propDef='+selectedPropDefStr+'&format=json&user=smroot&passwd=sdm')
             .then(response => {
-                console.log(response);
+                //console.log(response);
                 const res = response.data;
                 this.setState({
                     groups: res.groups,
@@ -387,7 +400,7 @@ class DefineGroups extends React.Component {
         this.forceUpdate();
         //console.log(JSON.stringify(e));
         let json = {
-            current: 2,
+            current: 1,
             previous: false,
             selectedCurves: this.state.selectedCurves,
             groups: this.state.groups,
@@ -398,8 +411,6 @@ class DefineGroups extends React.Component {
             yunit: this.state.yunit,
             groupSelected:this.state.groupSelected,		
             selected_group: 0,
-            tree: treeGroup,
-            keys: keysGroup,
             selectedCriteria:this.state.selectedCriteria,
             groupsCriteria:this.state.groupsCriteria,
             criteria:this.state.criteria,
@@ -596,16 +607,22 @@ this.state.groups.map((group, index)=>{
         return (
             <> 
                 <Layout className="DRLayout">
-                    <Row className="DefineGroupsDiv">
-                    <Col className="DefineGroupPlot">
+                    <table className="DefineTable">
+                    <tbody>
+                        <tr  className="DefineRow">
+                    <td className="LeftColumn">
+                    
                     <Skeleton loading={!this.state.loaded}>
+                        <div className="PlotCurveDiv">
                          <PlotCurve
                         curves={allCurves} showLegend={false} isThumbnail={false} showOnlyAverage={false} xtype={this.state.xtype} ytype={this.state.ytype}
                     />
+                    </div>
                     </Skeleton>
-                    </Col>
-                        <Col className="DefineGroupLayout">
-                
+                    
+                    </td>
+                        
+                <td className="RightColumn">
 
                     <Skeleton loading={!this.state.loaded}>
                 <div id='DefineGroup' className="DefineGroup">
@@ -629,7 +646,7 @@ this.state.groups.map((group, index)=>{
 
                     <div className="DropContainer">
                         <header className="DropContainer-header" >
-                        <DragNDrop data={this.state.groups} parentCallback = {this.callbackFunction}/>
+                        <DragNDrop  key="DragNDropKey"  data={this.state.groups} parentCallback = {this.callbackFunction}/>
                         
                         </header>
                     </div>
@@ -639,9 +656,12 @@ this.state.groups.map((group, index)=>{
 
 
              
-                </Col>
+                </td>
                
-                    </Row>
+                    
+                    </tr>
+                    </tbody>
+                    </table>
                 <div className="ButtonPanel">
                     <div className="ButtonPrevious">
                         <Button  onClick={e => { this.handlePrevious() }}>Previous</Button>
@@ -651,7 +671,7 @@ this.state.groups.map((group, index)=>{
                     </div>
                 </div>
 
-
+               
                 </Layout>
                 
             </>

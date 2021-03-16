@@ -41,11 +41,11 @@ class DRContainer extends React.Component {
 
     }
     updateState =() =>{
-      console.log("Update State to JSF Widget: "+this.state);
+      //console.log("Update State to JSF Widget: "+this.state);
       window.updateDRState(this.state);
     }
     callbackFunctionStep1 = (childData) => {
-        console.log("Parent recieved Selector Data: "+ childData);
+        //console.log("Parent recieved Selector Data: "+ childData);
         this.setState({
             current: childData.current,
             selectedPropDef: childData.selectedPropDef,
@@ -57,16 +57,16 @@ class DRContainer extends React.Component {
             reloadStep2 : childData.stateChanged
        });
        this.updateState();
-       console.log("callbackFunctionStep1 "+childData);
+       //console.log("callbackFunctionStep1 "+childData);
     }
 
     callbackFunctionStep2 = (childData) => {
-        console.log("Parent recieved Selector Data: "+JSON.stringify(childData),childData.sections);
+        //console.log("Parent recieved Selector Data: "+JSON.stringify(childData),childData.sections);
         let groups1 = childData.groups;
         let newGroups = childData.groups.slice(1);
         childData.groups = newGroups;
-        console.log("Model for PlotBuilder");
-        console.log(childData);
+        //console.log("Model for PlotBuilder");
+        //console.log(childData);
         this.setState({
             current: childData.current,
              previous: childData.previous,
@@ -95,7 +95,7 @@ class DRContainer extends React.Component {
 
     callbackFunctionStep3 = (childData) => {
       
-     console.log("Parent recieved Selector Data: "+JSON.stringify(childData));
+     //console.log("Parent recieved Selector Data: "+JSON.stringify(childData));
       this.setState({
           current: childData.current,
            previous: childData.previous,
@@ -107,7 +107,7 @@ class DRContainer extends React.Component {
   }
 
   callbackFunctionStep4 = (childData) => {
-    console.log("Parent recieved Selector Data: "+JSON.stringify(childData));
+    //console.log("Parent recieved Selector Data: "+JSON.stringify(childData));
     this.setState({
         current: childData.current,
          previous: childData.previous,
@@ -143,6 +143,20 @@ class DRContainer extends React.Component {
             xtype:this.state.xtype,
             ytype:this.state.ytype,
             precision:this.state.precision,
+            plotBuildModel:this.state.plotBuildModel,
+            targetType: this.state.targetType,
+            res_curve: this.state.res_curve,
+            res_var1: this.state.res_var1,
+            selected_resProp: this.state.selected_resProp,
+            targetClass: this.state.targetClass,
+            xunit: this.state.xunit,
+            yunit: this.state.yunit,
+            unitSystem: this.state.unitSystem,
+            xQuantityType: this.state.xQuantityType,
+            yQuantityType:this.state.yQuantityType,
+            widget:this.state.widget,
+            newLoad:false,
+
         }
         if(this.state.res_var1!==undefined && this.state.res_curve!==undefined){
           if(JSON.stringify(this.state.selected_resProp) === JSON.stringify({})||(this.state.selected_resProp===undefined)){
@@ -193,7 +207,7 @@ class DRContainer extends React.Component {
             },
             {
               title: 'Define Groups',
-              content: <DefineGroups propState={curveJson} parentCallback = {this.callbackFunctionStep2}/>
+              content: <DefineGroups  key="DefineGroupsKey" propState={curveJson} parentCallback = {this.callbackFunctionStep2}/>
             },
             {
               title: 'Data Analysis',
@@ -207,7 +221,7 @@ class DRContainer extends React.Component {
         const  current  = this.state.current;
         return (
             <>
-                <div id='plotBuilderDiv'>
+                <div id='DRContainerDiv' className="DRContainerDiv">
 
                 <Steps current={current}>
           {this.steps.map(item => (

@@ -42,7 +42,7 @@ class SaveResults extends React.Component {
      }
 
      handleAttributeChange = (targetKeys, direction, moveKeys) => {
-        console.log(targetKeys, direction, moveKeys);
+        //console.log(targetKeys, direction, moveKeys);
         this.state.showAttributeDialog = false;
         if(direction === 'left'){
             moveKeys.forEach(attr1 => {
@@ -69,7 +69,7 @@ class SaveResults extends React.Component {
         this.state.classificationLoaded = false;
         axios.get(url + '/servlet/rest/dr/get_Attribute?analysisType='+selectedAnalysisType+'&format=json&user=smroot&passwd=sdm')
             .then(response => {
-                console.log(response);
+                //console.log(response);
                 const res = response.data;
                 this.setState({
                     schemaAttributes: res.schemaAttributes,
@@ -206,10 +206,10 @@ class SaveResults extends React.Component {
             propState: this.props.propState,
             currentState: this.state,
         }
-        console.log(json);
+        //console.log(json);
         axios.post(url +'/servlet/rest/dr/save',{data:json},{headers:{'Content-Type': 'application/json',clientAppType:'REST_API', salt:saltId}})
             .then(response => {
-                console.log(response);
+                //console.log(response);
                 const res = response.data;
                 window.closeDataReductionWidget(this.props.propState.widget,'saveDRWidget' , res.outputs);
             })

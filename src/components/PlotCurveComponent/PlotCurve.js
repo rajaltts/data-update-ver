@@ -40,7 +40,7 @@ const colors =["#e51c23", // red
 ];
 
 const PlotCurve = (props) => {
-  console.log("Create in Plot");
+  //console.log("Create in Plot");
   const Plot = createPlotlyComponent(Plotly);
   let data = [];
 
@@ -101,7 +101,7 @@ const PlotCurve = (props) => {
         name: 'hide markers',
         icon: Plotly.Icons.eraseshape,
         click: function(gd) {
-          console.log(gd);
+          //console.log(gd);
           var newMode = 'lines';
           Plotly.restyle(gd, 'mode', newMode);
         }

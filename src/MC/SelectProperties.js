@@ -75,12 +75,12 @@ class SelectProperties extends React.Component {
 
     getPropertyDef() {
         let propDefs = [];
-        console.log(this.props.propState);
+       // console.log(this.props.propState);
         const url = this.props.propState.url;
         const query = this.props.propState.query;
         axios.get(url + '/servlet/rest/dr/get_PropertyDef?query=' + query + '&format=json&user=smroot&passwd=sdm')
             .then(response => {
-                console.log(response);
+                //console.log(response);
                 const res = response.data;
                 let propDef = res.selectedAnalysisType.propDef;
                 let propDefSelected = propDef.map((prop,index)=> {return prop.value});
@@ -124,7 +124,7 @@ class SelectProperties extends React.Component {
                     if(!strikeout){
                         let empty = true;
                          this.state.selectedPropDef.map((prop, index1)=>{
-                                console.log(matObj.label+"   "+matObj.propObject[prop]+" "+matObj.propObject.hasOwnProperty(prop));
+                                //console.log(matObj.label+"   "+matObj.propObject[prop]+" "+matObj.propObject.hasOwnProperty(prop));
                                 if(empty){
                                 if(matObj.propObject.hasOwnProperty(prop)){
                                     empty = false;                                
