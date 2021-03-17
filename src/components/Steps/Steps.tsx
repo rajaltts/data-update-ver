@@ -128,7 +128,7 @@ const Steps: React.FC<StepsProps> = (props) => {
     //---------RENDER-----------------------------------------
     return(
     <Fragment>
-        <div style={{height: '450px', borderStyle: 'solid', borderWidth: '2px', margin: 'auto', padding: '10px'}}>
+        <div style={{height: '550px', borderStyle: 'solid', borderWidth: '2px', margin: 'auto', padding: '10px'}}>
             <h1 style={{textAlign: 'center'}}>
                 Analysis type: Tensile
             </h1>
@@ -138,7 +138,7 @@ const Steps: React.FC<StepsProps> = (props) => {
             <DisplayStep  operations={props.operations}/>
             
             <br/>
-            <Checkbox  checked={!auto} onChange={manualModeHandler}>Manual mode</Checkbox>
+            <Checkbox  style={{paddingTop: '0px', paddingBottom: '0px'}} checked={!auto} onChange={manualModeHandler}>Manual mode</Checkbox>
         </div>
         
     </Fragment>

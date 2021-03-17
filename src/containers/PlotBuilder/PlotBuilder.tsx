@@ -91,7 +91,7 @@ const dataReducer = (currentData: Data, action: Action) => {
                 }
             });
             action.keys.forEach( (item,i) => {
-               const index_curve = parseInt(item.charAt(item.length-1)); // TODO do not work more than 10 curves
+               const index_curve = parseInt(item.split('-')[1]);
                newData.groups[action.groupid].curves[index_curve].selected = true;
                newData.groups[action.groupid].curves[index_curve].opacity = 1; 
             });
@@ -251,13 +251,13 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                         }
                         operationsUpdated[op_index].selected_method = elem.method;
                         // check if we must convert the data, only if engineering type
-                        if(elem.action === "Convert"){
-                            if(data.xtype.search("engineering") * data.ytype.search("engineering") < 0)
-                                throw new Error("ERROR in data definition: cannot mix true and engineering data type");
-                            if(data.xtype.search("engineering") < 0){ // not found 
-                                operationsUpdated[op_index].status = 'hide';
-                            }
-                        }
+                        // if(elem.action === "Convert"){
+                        //     if(data.xtype.search("engineering") * data.ytype.search("engineering") < 0)
+                        //         throw new Error("ERROR in data definition: cannot mix true and engineering data type");
+                        //     if(data.xtype.search("engineering") < 0){ // not found 
+                        //         operationsUpdated[op_index].status = 'hide';
+                        //     }
+                        // }
                         
                         setOperations(operationsUpdated);         
                     } else if(elem.action!=='Extrapoling')
@@ -677,6 +677,8 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                         action_error = operations[operations.length-1].action;
                     }
                 }
+                if(action_error==="Extrapoling")
+                    action_error = "Averaging";
                 operationsUpdate.find( (el) => el.action === action_error).status = 'failed';
                 operationsUpdate.find( (el) => el.action === action_error).error = error_msg;
                 
@@ -735,8 +737,8 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
 
     return (
         <div style={{paddingTop: '20px'}}>
-            <Row justify="space-around" >
-                <Col span={8}>
+            <Row justify="space-around">
+                <Col span={6}>
                     <Steps operations={operations}
                            changeSelectedMethod={changeSelectedMethodHandler}
                            changeParameter= {changeParameterHandler}
@@ -751,7 +753,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                            changeAuto={ (val) => setAuto(val)}
                     />
                 </Col>
-                <Col span={8}>
+                <Col span={12}>
                     <PlotCurve
                        curves={data.groups[data.tree.selectedGroup].curves}
                        data={data.groups[data.tree.selectedGroup].data}
@@ -759,7 +761,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                         axisLabel={getAxisLabel()}
                       />
                 </Col>
-                <Col span={8}>
+                <Col span={6}>
                     <CurveControls 
                         groupData={data.tree.groupData}
                         onCheck={checkDataTreeHandler}

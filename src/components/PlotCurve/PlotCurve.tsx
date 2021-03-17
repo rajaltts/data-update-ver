@@ -46,7 +46,7 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
     showlegend: false,
     autosize: true,
     // width: 800,
-    // height: 600,
+    height: 550,
     margin: {
       l: 70,
       r: 50,
@@ -124,7 +124,7 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
   function DisplayData(props) {
 
     const columns =[
-      {title: 'Parameter', dataIndex: 'parameter', key: 'name'},
+      {title: 'Property', dataIndex: 'parameter', key: 'name'},
       {title: 'Value', dataIndex: 'value', key: 'value'}
     ];
 
@@ -137,7 +137,7 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
     });
 
     if(datasource.length>0){
-      return <Table dataSource={datasource} columns={columns} size='small' bordered={true} pagination={false}  style={{width: '500px',  margin: 'auto'}}/>;
+      return <Table dataSource={datasource} columns={columns} size='small' bordered={true} pagination={false}  style={{width: '500px', margin: 'auto', paddingTop: '20px'}}/>;
     } else {
       return <div></div>;
     }    

@@ -2,6 +2,7 @@
 export type Selection = {
  label: string;
   name: string;
+  link?: string;
 };
 
 export type Range = {
@@ -16,6 +17,7 @@ export type Parameter = {
     range?: Range;
     value: number;
     float?: boolean;
+    conditional?: string;
    };
    
    export type Method = {

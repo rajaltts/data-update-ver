@@ -1,5 +1,6 @@
 import React , {useState, useEffect} from 'react'
 import { Parameter as parameter_type } from '../../../template.model';
+import '../../../App.css';
 import {Select, Button, Space, Input, Alert,  Row, Col, Slider, InputNumber, Divider  } from 'antd';
 interface DisplayParameterProps {
     initParams: parameter_type[];
@@ -12,14 +13,29 @@ const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, on
     const [params,setParams] = useState<parameter_type[]>([]);
     const [applyStatus,setApplyStatus] = useState(false);
     const { Option } = Select;
+    const [linked,setLinked] = useState([]);
 
     useEffect( () => {
         //const param_init = [...initParams];  // it is a shallow copy
         const param_init = JSON.parse(JSON.stringify(initParams)); // it is a deep copy
         setParams(param_init);
         setApplyStatus(apply);
+        const linked_init = [];
+        param_init.forEach(p => {
+            if('selection' in p){
+                const l = p.selection[p.value].link;
+                if(l){
+                    linked_init.push( {parameter: p.name, value: [l]});
+                } else {
+                    linked_init.push( {parameter: p.name, value: []});
+                }
+            }
+        });
+        setLinked(linked_init);
     }
     ,[initParams,apply]);
+
+    
 
     const changeParamHandler = (event: any,name: string) => {
         const new_params = [...params];
@@ -38,27 +54,42 @@ const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, on
         if(par)
             par.value=value_num;
         setParams(new_params);
+
+        
+        const linked_curr = linked;
+        const t = linked_curr.find( e => e.parameter===name);
+        const link = par.selection[value_num].link;
+        if(t){
+            if(link)
+              t.value.push(link);
+            else
+              t.value=[]; 
+            setLinked(linked_curr);
+        } 
     }
+    const fontStyle = {
+        fontSize: '12px',
+    };
 
     const displayParameters = params.map( p => {
         if( 'selection' in p){  
-            return (<>
+            return (
                 <Row key={p.label}>
                 <Col span={10}>{p.label}</Col>
                 <Col span={10}>
                     <Select placeholder="Default value"
-                         size='small'
                          value={p.selection[p.value].name}
-                         style={{width: 200}}
+                         style={{...fontStyle, width: 200}}
+                         size="small"
                          onChange={ (e) => selectParamHandler(e,p.name,p)}>{
                             p.selection.map( (elm,index) => {
-                                return(<Option value={elm.name} key={elm.name}>{elm.label}</Option>);
+                                return(<Option value={elm.name} key={elm.name} style={fontStyle}>{elm.label}</Option>);
                             })
                         }
                     </Select>
                 </Col>
                 </Row>
-            </>);
+            );
         } else if ('range' in p) {
             return(
                 <Row key={p.label}>
@@ -66,7 +97,8 @@ const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, on
                 <Col span={10}>
                     <InputNumber
                         key={p.label}
-                        size='small'
+                        style={fontStyle}
+                        size="small"
                         min= {p.range.min}
                         max= {p.range.max}
                         defaultValue={p.value}
@@ -79,23 +111,48 @@ const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, on
             let step: number = 1;
             if(p.float)
               step =  ((p.value!==undefined&&p.value!==0)?Math.pow(10,(Math.floor(Math.log10(Math.abs(p.value)))-1)):1);
-            return(
-                <>
-                <Row key={p.label}>
-                <Col span={10}> {p.label}</Col>
-                <Col span={10}>
-                <InputNumber
-                    key={p.name}
-                    size='small'
-                    defaultValue={p.value}
-                    step={step}
-                    onChange={  (event:any) => changeParamHandler(event,p.name)}
-                />
-                </Col>
-                <Col span={4}></Col>
-                </Row>
-                </>
-            );
+            if(p.conditional){ // show if in the linked array
+                const t = linked.find( e => e.parameter===p.conditional);
+                let ii = -1;
+                if(t){
+                    ii = t.value.findIndex( e => e===p.name)
+                }
+                if(ii!==-1){
+                    return(
+                        <Row key={p.label}>
+                        <Col span={10}> {p.label}</Col>
+                        <Col span={10}>
+                        <InputNumber
+                            key={p.name}
+                            style={fontStyle}
+                            size="small"
+                            defaultValue={p.value}
+                            step={step}
+                            onChange={  (event:any) => changeParamHandler(event,p.name)}
+                        />
+                        </Col>
+                        <Col span={4}></Col>
+                        </Row>
+                    );
+                }
+            } else  {
+                return(
+                   <Row key={p.label}>
+                   <Col span={10}> {p.label}</Col>
+                   <Col span={10}>
+                   <InputNumber
+                       key={p.name}
+                       style={fontStyle}
+                       size="small"
+                       defaultValue={p.value}
+                       step={step}
+                       onChange={  (event:any) => changeParamHandler(event,p.name)}
+                   />
+                   </Col>
+                   <Col span={4}></Col>
+                   </Row>
+               );
+            }
         }
     }
         
@@ -109,7 +166,7 @@ const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, on
 
     return(
         <>
-        <div  style={{height: '210px'}} >
+        <div  style={{...fontStyle, height: '260px'}} >
         {displayParameters}
         <br/>
         </div>

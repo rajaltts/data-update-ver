@@ -99,20 +99,22 @@ export const tensile_operations_config = [
                 params: [{label:'number of points', name: 'number_of_points',  value: 30},
                          {label:'number of nodes', name: 'number_of_nodes', value: 10, range: {min: 5, max: 20}},
                          {label:'regularization', name: 'regularization', value: 5, range: {min: 1, max: 9}},
-                         {label:'Averaging end point method', name: 'end_point',  selection: [{label:'strain',name:'x_value'},
+                         {label:'Averaging end point method', name: 'end_point',  selection: [{label:'strain',name:'x_value',link:'end_point_value'},
                                                                                               {label:'min max strain', name:'min_max_x'}
                                                                                              ],
                                                                                              value: 1},
-                         {label:'end point value', name: 'end_point_value',  value: undefined, float: true},
+                         {label:'end point value', name: 'end_point_value',  value: undefined, float: true, conditional: 'end_point'},
                          {label:'Extrapolation method', name: 'extrapolation', selection:[{label:'none',name:'none'},
                                                                                           {label:'based on specific curve', name:'based_on_curve'},
                                                                                           {label:'tangent', name:'tangent'}
                                                                                          ],
                                                                                          value: 1},
                         {label: 'extrapolation end point', name: 'extrapolating_end_point', selection:[{label:'mean max strain', name:'mean_max_x'},
-                                                                                                        {label:'max max strain', name:'max_max_x'}
+                                                                                                        {label:'max max strain', name:'max_max_x'},
+                                                                                                        {label:'strain',name:'x_value',link:'extrapolating_end_point_value'}
                                                                                                       ],
-                                                                                                      value: 0}
+                                                                                                      value: 0},
+                        {label:'extrapolation end point value', name: 'extrapolating_end_point_value',  value: undefined, float: true, conditional: 'extrapolating_end_point'},   
                          ]
             },
             {

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { GroupData } from '../../data.model';
-import { Space, Tree, Radio, Input } from 'antd';
+import { Space, Tree, Radio, Input, Row, Col } from 'antd';
 import { RadioChangeEvent } from 'antd/lib/radio';
 import CurveSelection from './CurveSelection/CurveSelection'
 
@@ -33,11 +33,31 @@ const CurveControls: React.FC<CurveControlsProps> = (props) => {
 
     return(
         <>
-        <div style={{height: '450px', borderStyle: 'solid', borderWidth: '2px', margin: 'auto', padding: '10px'}}>
+        <div style={{height: '550px', borderStyle: 'solid', borderWidth: '2px', margin: 'auto', padding: '10px'}}>
           <h1 style={{textAlign: 'center'}}>
             Curves
           </h1>
-          <br/>
+          <Row>
+            <Col>
+                <Radio.Group onChange={onChangeGroup} value={group}>{
+                    props.groupData.map( (g,index) => {
+                        return(
+                        <Radio key={index}  value={index}>{g.title}</Radio>
+                        );
+                    })
+                }</Radio.Group>
+            </Col>
+          </Row>
+          <Row style={{paddingTop: '10px'}}>
+            <Col>
+                <CurveSelection 
+                    treeData = {props.groupData[group].treeData}
+                    checkedKeys = {props.groupData[group].keys}
+                    onCheck = {onCheckCurve}
+                />
+            </Col>
+          </Row>
+          {/* <br/>
           <Space align='start'>
             <Radio.Group onChange={onChangeGroup} value={group}>{
                 props.groupData.map( (g,index) => {
@@ -51,7 +71,7 @@ const CurveControls: React.FC<CurveControlsProps> = (props) => {
                     checkedKeys = {props.groupData[group].keys}
                     onCheck = {onCheckCurve}
                 />
-          </Space>
+          </Space> */}
         </div>
         </>
     );

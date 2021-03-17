@@ -16,10 +16,16 @@ interface CurveSelection {
         console.log('onSelect', info);
         setSelectedKeys(selectedKeys);
       };
+    
+      const fontStyle = {
+        fontSize: '12px',
+    };
 
      return(
         <>
             <Tree
+            height={400}
+            style={fontStyle}
             showIcon
             checkable
             checkedKeys={props.checkedKeys}
