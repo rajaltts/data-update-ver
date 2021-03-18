@@ -149,36 +149,6 @@ class DefineGroups extends React.Component {
     }
 
     handleNext() {
-        let treeGroup = [];
-        let keysGroup = [];
-        const items = this.state.groups.map((group,index) =>{
-            let groupNode = {};
-            let id = group.id;
-            let name = group.label
-            let curves =[];
-            groupNode.key = (index)+"-0";
-            groupNode.title = name;
-            if(index===0)
-                keysGroup.push(groupNode.key);
-            group.curves.map((curve,index1)=>{
-                let curveName = curve.name;
-                let curveKey = index+"-"+(index1+1);
-                if(index===0)
-                    keysGroup.push(curveKey);
-                let curvetree = {title:curveName,key:curveKey};
-                curves.push(curvetree);
-            });
-
-            groupNode.children = curves;
-            treeGroup.push(groupNode);  
-            
-        }
-      
-    );
-
-
-
-
         let json = {
             current: 2,
             previous: false,
@@ -191,8 +161,6 @@ class DefineGroups extends React.Component {
             yunit: this.state.yunit,
             groupSelected:this.state.groupSelected,		
             selected_group: 0,
-            tree: treeGroup,
-            keys: keysGroup,
             selectedCriteria:this.state.selectedCriteria,
             groupsCriteria:this.state.groupsCriteria,
             criteria:this.state.criteria,
@@ -601,8 +569,17 @@ this.state.groups.map((group, index)=>{
     }
     </tbody>
     </table>  
-
-
+    let nextDisabled = true
+    
+    this.state.groups.map((grp,id)=>{
+                        if(id>0 && nextDisabled){
+                            let size = grp.curves.length;
+                            if(size >0){
+                                nextDisabled = false;
+                            }
+                        }
+                        })
+     
 
         return (
             <> 
@@ -667,7 +644,7 @@ this.state.groups.map((group, index)=>{
                         <Button  onClick={e => { this.handlePrevious() }}>Previous</Button>
                     </div>
                     <div className="ButtonNext">
-                        <Button type="primary" disabled={this.state.groups.length>1?false:true} onClick={e => { this.handleNext() }}>Next</Button>
+                        <Button type="primary" disabled={nextDisabled} onClick={e => { this.handleNext() }}>Next</Button>
                     </div>
                 </div>
 

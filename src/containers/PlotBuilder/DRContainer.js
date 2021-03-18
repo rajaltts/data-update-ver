@@ -64,7 +64,14 @@ class DRContainer extends React.Component {
         //console.log("Parent recieved Selector Data: "+JSON.stringify(childData),childData.sections);
         let groups1 = childData.groups;
         let newGroups = childData.groups.slice(1);
-        childData.groups = newGroups;
+        let updatedGroup = [];
+        newGroups.map((grp,index)=>{
+          let size = grp.curves.length;
+          if(size >0){
+            updatedGroup.push(grp);
+          }
+        })
+        childData.groups = updatedGroup;
         //console.log("Model for PlotBuilder");
         //console.log(childData);
         this.setState({

@@ -145,7 +145,7 @@ class SaveResults extends React.Component {
         group.criteria[crname] = value;
         this.state.groups[index+1] = group;
         let json = {
-            current: 4,
+            current: 3,
             previous: false,
             selectedCurves: this.state.selectedCurves,
             groups: this.state.groups,
@@ -370,7 +370,7 @@ let attributeTable = !(this.props.propState.targetClass && this.props.propState.
     </tbody>            
 </table>
 
-let table = !(this.state.showGroupCriteria && this.state.selectedCriteria.length>0)?"":<table className="Grid">
+let table = <table className="Grid">
 <thead><tr key={'mattr01'}><th key='propCol0'></th>{
     
 this.state.groups.map((group, index)=>{
@@ -408,7 +408,7 @@ this.state.groups.map((group, index)=>{
                      <td  key={'proptd'+(index+this.state.selectedCriteria.length)} className="MatData"> <span> {leftHeaderLabel }</span></td>
                      { 
                        values!==undefined?values.map((val,i)=>{
-                           return(<td><Input value={val} onChange={(e)=>this.updateAttribute(e.target.value,crObj.label,i)}style={{width:'60%'}} placeholder="" /></td>) 
+                           return(<td><Input value={val} onChange={(e)=>this.updateAttribute(e.target.value,crObj.name,i)}style={{width:'60%'}} placeholder="" /></td>) 
 
                        }):""                         
                        

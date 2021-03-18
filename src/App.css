@@ -146,6 +146,10 @@
     box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.3);
     max-height: 200px;
     overflow: auto;
+    margin-top: -6px;
+  }
+  .UnAssignedGroupDiv{
+    margin-top: 6px;
   }
   .dnd-group-unAssigned{
     border-radius: 5px;

@@ -192,7 +192,7 @@ function DragNDrop({data,parentCallback}) {
                  <td className="DefineGroupOuterCol1">
                  <div className="drag-n-drop">
                {
-                <><div>
+                <><div className="UnAssignedGroupDiv">
               <Row key={"Row"+grpUnAssignedI} className='GroupLabel'><Col><Checkbox key={"checkbox"+grpUnAssignedI} checked={unAssignedGrp.isSelected} onChange={(e)=>onCheckBoxChange(e.target.checked,grpUnAssignedI)}/>{unAssignedGrp.isEditable?<><Input value={unAssignedGrp.label}  onPressEnter={(e)=>makeGroupLabelEditable((grpI+1))} onChange={(e)=>updateGroupLabel(e.target.value,grpUnAssignedI)} hidden={!unAssignedGrp.isEditable} style={{width:'60%'}} placeholder="Group Name" /><CheckOutlined title={'Submit'} style={{ color:'green' ,padding:'5px',fontSize: '18px'}}onClick={(e)=>makeGroupLabelEditable(grpUnAssignedI)}/></>:<span style={{color:colors[grpUnAssignedI]}} hidden={unAssignedGrp.isEditable} onClick={(e)=>makeGroupLabelEditable(grpUnAssignedI)}>{unAssignedGrp.label}</span>}  <span value={grpUnAssignedI} >{grpUnAssignedI===0?"" :<DeleteOutlined title={'Delete Group'} style={{ color:'red' ,fontSize: '18px' , padding:'5px'}} onClick={()=>removeGroup(grpUnAssignedI)}/>}</span></Col>
               </Row> <div key={unAssignedGrp.id} onDragOver={onDragOver} onDragStart={(e) => handletDragStart(e, {grpI:grpUnAssignedI, itemI: 0})} onDrop={dragging?(e) => {handleDragEnter(e, {grpI:grpUnAssignedI, itemI: 0})}:null}  className="dnd-group-unAssigned">
                 {unAssignedGrp.curves.map((item, itemI) => (
