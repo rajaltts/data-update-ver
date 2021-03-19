@@ -207,7 +207,7 @@ function DragNDrop({data,parentCallback}) {
             </div>
             </td>
             <td className="DefineGroupOuterCol2">
-            <div className="drag-n-drop">
+            <div className="drag-n-drop AssignedCurveDiv">
             {
            
            newList.map((grp, grpI) => (

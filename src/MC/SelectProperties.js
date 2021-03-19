@@ -148,6 +148,7 @@ class SelectProperties extends React.Component {
         return (
             <>
                 <Layout className="DRLayout">
+                <div className="OuterDivScroll">  
                 <div id='PropertyDef' className="PropertyDef">
                 <Skeleton loading={!this.state.loaded}>
                    <Row className="AnalysisClass">
@@ -171,11 +172,13 @@ class SelectProperties extends React.Component {
 
             
                 </div>
+                </div>  
                 <div className="ButtonPanel">
                     <div className="ButtonNext">
                         {NextButton}
                     </div>
                 </div>
+                
                 </Layout>
             </>
         )

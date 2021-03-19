@@ -736,6 +736,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
     }
 
     return (
+        <div className="OuterDivScroll">
         <div style={{paddingTop: '20px'}}>
             <Row justify="space-around">
                 <Col span={6}>
@@ -769,7 +770,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                         
                 </Col>
             </Row>
-            
+            </div>
             <div className="ButtonPanel">
                     <div className="ButtonPrevious">
                         <Button  onClick={e => { handlePrevious() }}>Previous</Button>

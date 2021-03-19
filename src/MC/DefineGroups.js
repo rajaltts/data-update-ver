@@ -584,6 +584,7 @@ this.state.groups.map((group, index)=>{
         return (
             <> 
                 <Layout className="DRLayout">
+                <div className="OuterDivScroll">
                     <table className="DefineTable">
                     <tbody>
                         <tr  className="DefineRow">
@@ -639,6 +640,7 @@ this.state.groups.map((group, index)=>{
                     </tr>
                     </tbody>
                     </table>
+                </div>
                 <div className="ButtonPanel">
                     <div className="ButtonPrevious">
                         <Button  onClick={e => { this.handlePrevious() }}>Previous</Button>

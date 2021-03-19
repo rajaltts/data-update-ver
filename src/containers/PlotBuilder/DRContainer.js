@@ -63,24 +63,34 @@ class DRContainer extends React.Component {
     callbackFunctionStep2 = (childData) => {
         //console.log("Parent recieved Selector Data: "+JSON.stringify(childData),childData.sections);
         let groups1 = childData.groups;
+        let updatedGroup1 = [];
+        let grpSelected = [];
+        updatedGroup1.push(childData.groups[0]);
         let newGroups = childData.groups.slice(1);
         let updatedGroup = [];
         newGroups.map((grp,index)=>{
           let size = grp.curves.length;
           if(size >0){
             updatedGroup.push(grp);
+            updatedGroup1.push(grp);
           }
         })
+        updatedGroup1.map((grp, grpI) =>  { 
+               
+          if(grp.isSelected){
+            grpSelected.push(grpI);
+          }
+      })  
         childData.groups = updatedGroup;
         //console.log("Model for PlotBuilder");
         //console.log(childData);
         this.setState({
             current: childData.current,
              previous: childData.previous,
-             groups : groups1,
+             groups : updatedGroup1,
              selectedCurves: childData.selectedCurves,
              plotBuildModel : childData,
-             groupSelected:childData.groupSelected,		
+             groupSelected:grpSelected,		
             selectedCriteria:childData.selectedCriteria,
             groupsCriteria:childData.groupsCriteria,
             criteria:childData.criteria,

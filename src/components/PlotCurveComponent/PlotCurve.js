@@ -64,7 +64,7 @@ const PlotCurve = (props) => {
     }
   }
   let width = props.isThumbnail === true?300:800;
-  let height = props.isThumbnail === true?300:700;
+  let height = props.isThumbnail === true?300:600;
 
   let marginThumbnail = {
     l: 60,
