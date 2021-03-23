@@ -109,7 +109,7 @@ const PlotCurve = (props) => {
     ],
     displayModeBar: !props.isThumbnail?true:false,
     staticPlot:  props.isThumbnail?true:false,
-    modeBarButtonsToRemove: [ 'hoverClosestCartesian', 'hoverCompareCartesian','toggleSpikelines'] // 2D: zoom2d, pan2d, select2d, lasso2d, zoomIn2d, zoomOut2d, autoScale2d, resetScale2d
+    modeBarButtonsToRemove: ['hoverClosestCartesian', 'hoverCompareCartesian', 'resetScale2d', 'lasso2d','select2d', 'toggleHover'] // 2D: zoom2d, pan2d, select2d, lasso2d, zoomIn2d, zoomOut2d, autoScale2d, resetScale2d
                                                   //'Cartesian', hoverClosestCartesian, hoverCompareCartesian
                                                   //-'Other', hoverClosestGl2d, hoverClosestPie, toggleHover, resetViews, toImage, sendDataToCloud, toggleSpikelines, resetViewMapbox
   }
@@ -120,11 +120,6 @@ const PlotCurve = (props) => {
       data = { data }
       layout = { layout }
       config = { config }
-      //onUpdate = { (event) => props.updatePlot(event) }
-      onClick = { (data) => props.clickPointHandler(data) }
-      onLegendDoubleClick =  { (event) => props.doubleClickLegendHandler(event)}
-      onLegendClick =  { (event) => props.clickLegendHandler(event)}
-
     />
   );
 }

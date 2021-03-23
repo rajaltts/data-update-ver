@@ -108,7 +108,7 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
   const config = {
     displaylogo: false, // remove plotly icon
     reponsive: true,
-    modeBarButtonsToRemove: [ 'hoverClosestCartesian', 'hoverCompareCartesian', 'resetScale2d', , 'toggleHover'],
+    modeBarButtonsToRemove: [ 'hoverClosestCartesian', 'hoverCompareCartesian', 'resetScale2d', 'lasso2d','select2d', 'toggleHover'],
     modeBarButtonsToAdd: [
       {
         name: 'show markers',

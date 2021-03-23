@@ -349,7 +349,7 @@ let unSelectedCriteriaGrp = {};
     
 let unSelectedCriteria = Array.from(unSelectedCriteriaSet)
 
-let attributeTable = !(this.props.propState.targetClass && this.props.propState.targetClass.length>0)?"":<table className="Grid">
+let attributeTable = !(this.props.propState.targetClass && this.props.propState.targetClass.length>0)?"":<table className="GridAttribute">
     <thead><tr key={'attr01'}><th key='attpropCol0'>{'Attribute'}</th><th>{'Value'}</th></tr>
     </thead>
     <tbody>
