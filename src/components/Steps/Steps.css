@@ -1,0 +1,31 @@
+.ant-steps-small .ant-steps-item-title {
+    font-size: 12px;
+}
+
+.step-title {
+    text-align: center;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.analysis-type-title {
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+    padding-bottom: 10px;
+}
+
+.step-select-method {
+    font-size: 12px;
+    width: 150px;
+}
+
+.step-input-parameter {
+    font-size: 12px;
+}
+
+.step-manual-mode {
+    font-size: 12px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+}

@@ -72,18 +72,21 @@ const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, on
     };
 
     const displayParameters = params.map( p => {
-        if( 'selection' in p){  
+        if( p.label.length==0){
+            return;
+        }
+        else if( 'selection' in p){  
             return (
                 <Row key={p.label}>
                 <Col span={10}>{p.label}</Col>
                 <Col span={10}>
                     <Select placeholder="Default value"
                          value={p.selection[p.value].name}
-                         style={{...fontStyle, width: 200}}
+                         className="step-select-method"
                          size="small"
                          onChange={ (e) => selectParamHandler(e,p.name,p)}>{
                             p.selection.map( (elm,index) => {
-                                return(<Option value={elm.name} key={elm.name} style={fontStyle}>{elm.label}</Option>);
+                                return(<Option value={elm.name} key={elm.name} className="step-select-method">{elm.label}</Option>);
                             })
                         }
                     </Select>
@@ -97,7 +100,7 @@ const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, on
                 <Col span={10}>
                     <InputNumber
                         key={p.label}
-                        style={fontStyle}
+                        className="step-input-parameter"
                         size="small"
                         min= {p.range.min}
                         max= {p.range.max}
@@ -124,7 +127,7 @@ const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, on
                         <Col span={10}>
                         <InputNumber
                             key={p.name}
-                            style={fontStyle}
+                            className="step-input-parameter"
                             size="small"
                             defaultValue={p.value}
                             step={step}
@@ -166,13 +169,13 @@ const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, on
 
     return(
         <>
-        <div  style={{...fontStyle, height: '260px'}} >
+        <div  style={{...fontStyle, height: '300px'}} >
         {displayParameters}
         <br/>
         </div>
         <div>
-        <Space style={{ paddingTop: '10px', paddingBottom: '10px'}}>
-            <Button size="small" type="primary" disabled={!autoMode&&!applyStatus} onClick={submit}>Apply</Button>
+        <Space style={{ position: 'absolute', right: '10px', paddingTop: '10px', paddingBottom: '10px'}}>
+            <Button size="small" type="primary" disabled={!applyStatus} onClick={submit}>Apply</Button>
         </Space>
         </div>
         </>

@@ -35,6 +35,7 @@ type Action =
     | {type: 'UPDATE_CURVES', curves: Curve[], data: any[], result: boolean }
     | {type: 'RESET_CURVES', input: any}
     | {type: 'RESET_CURVES_INIT', groupid: number}
+    | {type: 'SET_MARKER', curve_id: number, point_id: number}
     ;
 
 const dataReducer = (currentData: Data, action: Action) => {
@@ -132,6 +133,11 @@ const dataReducer = (currentData: Data, action: Action) => {
             console.log(group_new);
             return {...currentData, groups: group_new}
         }
+        case 'SET_MARKER':{
+            const group_new = [...currentData.groups];
+            group_new[currentData.tree.selectedGroup].curves[action.curve_id].marker = action.point_id;
+            return {...currentData, groups: group_new};
+        }
         default:
             throw new Error('Not be reach this case'); 
    }
@@ -179,6 +185,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
     const [current, setCurrent] = useState(0);
     const [auto, setAuto] = useState(true);
     const [precision,setPrecision] = useState(3);
+    const [action,setAction]= useState("");
 
 
     //---------EFFECT-----------------------------------------
@@ -289,6 +296,48 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         setOperations(operationsUpdate);
     };
 
+    // Curve handler
+    const clickPointHandler = (data_plot) : boolean =>  { // should be replace by a call to updateCurveHandler with the right ALGO/METHOD and id
+        console.log("CLICK POINT HANDLER");
+        console.log(data_plot);
+
+        if(action!=="Cleaning_ends")
+           return false;
+
+        // check if we click on a merker
+        const isMarker = (data_plot.points[0].data.mode==='markers'?true:false);
+        if(isMarker)
+           return false;
+
+        const curve_idx = data_plot.points[0].curveNumber;
+        const x = data_plot.points[0].x;
+        const pt_index = data_plot.points[0].pointIndex;
+        const curve_name = data_plot.points[0].data.name;
+    
+       // set operations parameters
+       const operationsUpdate = [...operations];
+       const a = operationsUpdate.find( (el) => el.action === "Cleaning_ends");
+       const sm = a.selected_method;
+       const m = a.methods.find( e => e.type === sm);
+       if(m.type!=='Max_Xs')
+         return false;
+       //  check if already inserted
+       const index = m.params[0].curveId.findIndex( e => e === curve_name );
+       if(index===-1){
+          m.params[0].value = [...m.params[0].value, x]; // pt_index
+          m.params[0].curveId = [...m.params[0].curveId, curve_name];
+       } else {
+          m.params[0].value[index] = x; 
+       }
+      
+       setOperations(operationsUpdate);
+       // add marker in the curve
+       dispatch({type: 'SET_MARKER', curve_id: curve_idx, point_id: pt_index });
+       return true;
+
+
+    }
+
     // DataTree handler
     const checkDataTreeHandler =  (checkedKeys: string[], group_id: number) => {
         console.log('onCheck', checkedKeys);
@@ -350,6 +399,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
     }
     //Operation Handler
     const updatedCurveHandler = (action) => {
+        setAction(action);
         // always reset curve between update
         restoreInitdataHandler();
         const group_id = data.tree.selectedGroup;
@@ -370,14 +420,22 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
             const curves = data.groups[group_id].curves;
             for(let ic=0; ic<data.groups[group_id].curves.length; ic++){
                 if(curves[ic].name!=='average'){
-                    const curve = { x: curves[ic].x,
+                    let curve: Curve = {
+                                    id: curves[ic].id,
+                                    oid: curves[ic].oid,
+                                    matDataLabel: curves[ic].matDataLabel,
+                                    x: curves[ic].x,
                                     y: curves[ic].y,
                                     name: 'curve'+ic,
                                     label: curves[ic].label,
                                     selected: curves[ic].selected,
                                     opacity: curves[ic].opacity,
                                     x0: curves[ic].x0,
-                                    y0: curves[ic].y0};
+                                    y0: curves[ic].y0
+                                };
+                    if(curves[ic].marker){
+                        curve = {...curve, marker: curves[ic].marker};
+                    }
                     newCurves.push(curve);
                 }
             }
@@ -454,6 +512,9 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                                             val = (val===0?1e-15:val*(1+1e-15));
                                         } 
                                         par.push( {[name] : val})
+                                        if(param.curveId){
+                                            par.push( {curveId : param.curveId });
+                                        }
                                     }
                                 }
                             }
@@ -757,10 +818,12 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                 </Col>
                 <Col span={12}>
                     <PlotCurve
+                       group={data.tree.selectedGroup}
                        curves={data.groups[data.tree.selectedGroup].curves}
                        data={data.groups[data.tree.selectedGroup].data}
                        keys={data.tree.groupData[data.tree.selectedGroup].keys}
-                        axisLabel={getAxisLabel()}
+                       axisLabel={getAxisLabel()}
+                       clickPoint={clickPointHandler}
                       />
                 </Col>
                 <Col span={6}>

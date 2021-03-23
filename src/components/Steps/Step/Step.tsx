@@ -3,6 +3,7 @@ import {Select, Alert } from 'antd';
 import { Operation } from '../../../template.model';
 import DisplayParametersForms from './DisplayParametersForms'
 import { Parameter as parameter_type } from '../../../template.model';
+import '../Steps.css';
 
 interface StepProps {
     action_label: string;
@@ -62,12 +63,13 @@ const Step: React.FC<StepProps> = (props) => {
 
     return(
     <div style={{height: '360px'}}>
-    <h1 style={{textAlign: 'center'}}>{props.action_label}</h1> 
+    {/* <h1 style={{textAlign: 'center'}}>{props.action_label}</h1>  */}
+    <div className="step-title">{props.action_label}</div>
 
-    <Select value={props.selected_method} style={{ width: 200 }}  onChange={changeMethodHandler} >{
+    <Select value={props.selected_method} size="small" className="step-select-method"  onChange={changeMethodHandler} >{
             props.methods.map( met => {
                 return(
-                        <Option key={met.type} value={met.type}>{met.label}</Option>
+                        <Option key={met.type} value={met.type} className="step-select-method">{met.label}</Option>
                 );
             })
         }

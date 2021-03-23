@@ -3,6 +3,7 @@ import { GroupData } from '../../data.model';
 import { Space, Tree, Radio, Input, Row, Col } from 'antd';
 import { RadioChangeEvent } from 'antd/lib/radio';
 import CurveSelection from './CurveSelection/CurveSelection'
+import './CurveControls.css';
 
 interface CurveControlsProps {
    groupData: GroupData[];
@@ -24,25 +25,18 @@ const CurveControls: React.FC<CurveControlsProps> = (props) => {
         props.onCheck(e,group);
     }
 
-   
-    const radioStyle = {
-        display: 'block',
-        height: '30px',
-        lineHeight: '30px',
-    };
-
     return(
         <>
         <div style={{height: '550px', borderStyle: 'solid', borderWidth: '2px', margin: 'auto', padding: '10px'}}>
-          <h1 style={{textAlign: 'center'}}>
+          <div className="curve-title">
             Curves
-          </h1>
+          </div>
           <Row>
             <Col>
                 <Radio.Group onChange={onChangeGroup} value={group}>{
                     props.groupData.map( (g,index) => {
                         return(
-                        <Radio key={index}  value={index}>{g.title}</Radio>
+                        <Radio key={index}  value={index} className="curve-group-title">{g.title}</Radio>
                         );
                     })
                 }</Radio.Group>

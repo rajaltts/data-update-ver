@@ -3,6 +3,8 @@ import {Button, Tooltip, Space, Steps as AntSteps, Checkbox } from 'antd';
 import { CheckCircleFilled, RightCircleOutlined , ExclamationCircleTwoTone, CaretRightFilled, CaretLeftFilled } from '@ant-design/icons';
 import Step from './Step/Step';
 import { Operation } from '../../template.model';
+import './Steps.css';
+import { collapseTextChangeRangesAcrossMultipleVersions } from 'typescript';
 
 interface StepsProps {
     operations: Operation[];
@@ -44,6 +46,7 @@ const Steps: React.FC<StepsProps> = (props) => {
     }
 
     const changeSelectedMethod2 = (select:string, action: string) => {
+       
         return  props.changeSelectedMethod(select,action);
     }
 
@@ -124,26 +127,25 @@ const Steps: React.FC<StepsProps> = (props) => {
         );
     }
 
-    
+   
     //---------RENDER-----------------------------------------
     return(
     <Fragment>
         <div style={{height: '550px', borderStyle: 'solid', borderWidth: '2px', margin: 'auto', padding: '10px'}}>
-            <h1 style={{textAlign: 'center'}}>
+            <div className="analysis-type-title">
                 Analysis type: Tensile
-            </h1>
+            </div>
 
             <DisplayProgress/>
             
             <DisplayStep  operations={props.operations}/>
             
             <br/>
-            <Checkbox  style={{paddingTop: '0px', paddingBottom: '0px'}} checked={!auto} onChange={manualModeHandler}>Manual mode</Checkbox>
+            <Checkbox  className="step-manual-mode" checked={!auto} onChange={manualModeHandler}>Manual mode</Checkbox>
         </div>
         
     </Fragment>
     );
-
 };
 
 export default Steps;

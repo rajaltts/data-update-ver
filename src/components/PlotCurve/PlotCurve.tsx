@@ -7,15 +7,19 @@ import { Curve } from '../../data.model';
 import { colors } from '../../assets/colors.js';
 
 interface PlotCurveProps {
+   group: number;
    curves: Curve[];
    data: any[];
    keys: string[];
    axisLabel: { xlabel: string, ylabel: string};
+   clickPoint: (data: any) => boolean;
 };
 
 const PlotCurve: React.FC<PlotCurveProps> = (props) => {
 
-  const [data,setData] = useState<any>([]);
+  const [dataPlot,setDataPlot] = useState<any>([]);
+  const [newGroup,setNewGroup] = useState(true);
+  const [currentGroup,setCurrentGroup] = useState(-1);
 
   useEffect(() => {
     let data_: any = [];
@@ -35,18 +39,53 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
       if(props.curves[i].name==='average'){
         line = {...line,  line: {color: 'rgb(0, 0, 0)', width: 4} };
       }
+      if(props.curves[i].marker){
+        const x_marker = props.curves[i].x[props.curves[i].marker];
+        const y_marker = props.curves[i].y[props.curves[i].marker];
+        const point = { type: 'scatter', mode: 'markers', name: props.curves[i].name,  marker: { color: 'black', symbol: ['x'], size: 10 }, x: [x_marker], y: [y_marker] };
+        data_.push(point);
+      }
       data_.push(line);
     }
-    setData(data_);
+    setDataPlot(data_);
+
+    if(props.group!==currentGroup){
+      setNewGroup(true);
+      setCurrentGroup(props.group);
+    }
 
   },[props.curves,props.keys]);
 
+  const AddPoint = (data_point: any) =>{
+    if(!props.clickPoint(data_point))
+      return;
+    const curve_idx = data_point.points[0].curveNumber;
+    const x = data_point.points[0].x;
+    const y = data_point.points[0].y;
+    const pt_index = data_point.points[0].pointIndex;
+    const curve_name = data_point.points[0].data.name;
+    const data_up = [...dataPlot];
+    // check if marker already exist
+    const c = data_up.find( c => (c.mode==='markers'&&c.name === curve_name));
+    if(c){ // replace by new value
+      c.x = [x];
+      c.y = [y];
+    } else { // insert new point
+      const point = { type: 'scatter', mode: 'markers', name: curve_name,  marker: { color: 'black', symbol: ['x'], size: 10 }, x: [x], y: [y] };
+      data_up.push(point);
+    }
+    
+    setDataPlot(data_up);
+    
+  }
   const layout = { 
     modebardisplay: false,
     showlegend: false,
     autosize: true,
     // width: 800,
     height: 550,
+    hovermode: "closest",
+    uirevision: (newGroup?'false':'true'),
     margin: {
       l: 70,
       r: 50,
@@ -146,11 +185,12 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
   return(
     <>
     <PlotlyChart
-      data = { data }
+      data = { dataPlot }
       layout = { layout }
       config = { config }
       //onUpdate = { (event) => props.updatePlot(event) }
-      //onClick = { (data) => props.clickPointHandler(data) }
+      //onClick = { (data) => props.clickPoint(data) }
+      onClick = {AddPoint}
       //onLegendDoubleClick =  { (event) => props.doubleClickLegendHandler(event)}
       //onLegendClick =  { (event) => props.clickLegendHandler(event)}
     />
