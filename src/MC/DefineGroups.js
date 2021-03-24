@@ -449,6 +449,7 @@ class DefineGroups extends React.Component {
             curvesId.map((curveId,index)=>{
                 groups[0].curves.map((curve,index1)=>{
                     if(curveId === curve.oid){
+                        curve.opacity = 0.3;
                        curves.push(curve);   
                        groups[0].curves.splice(index1, 1);
                    }
