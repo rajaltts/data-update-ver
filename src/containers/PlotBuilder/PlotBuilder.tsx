@@ -301,7 +301,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         console.log("CLICK POINT HANDLER");
         console.log(data_plot);
 
-        if(action!=="Cleaning_ends")
+        if(!auto&&action!=="Cleaning_ends")
            return false;
 
         // check if we click on a merker
@@ -324,10 +324,10 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
        //  check if already inserted
        const index = m.params[0].curveId.findIndex( e => e === curve_name );
        if(index===-1){
-          m.params[0].value = [...m.params[0].value, x]; // pt_index
+          m.params[0].value = [...m.params[0].value,  pt_index]; // pt_index
           m.params[0].curveId = [...m.params[0].curveId, curve_name];
        } else {
-          m.params[0].value[index] = x; 
+          m.params[0].value[index] =  pt_index; 
        }
       
        setOperations(operationsUpdate);
@@ -398,10 +398,11 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         setOperations(operationsUpdate);
     }
     //Operation Handler
-    const updatedCurveHandler = (action) => {
-        setAction(action);
+    const updatedCurveHandler = (action) => { 
         // always reset curve between update
         restoreInitdataHandler();
+       
+        setAction(action);
         const group_id = data.tree.selectedGroup;
         
         let op_target = 0;

@@ -55,8 +55,11 @@ const Steps: React.FC<StepsProps> = (props) => {
     }
     // aplly button for a step
     const updatedCurveHandler = (action: string) => {
-        if(auto)
+        if(auto){
+            const last_step = props.operations.length - 1;
+            setCurrent(last_step);
             return props.updatedCurve('Template');
+        }
         else
             return props.updatedCurve(action);
     }
@@ -74,6 +77,17 @@ const Steps: React.FC<StepsProps> = (props) => {
             props.changeCurrent(0);
             props.restoreInitdata();
         }        
+    }
+
+    const resetModeHandler = (event: any) => {
+        if(auto){
+            setCurrent(0);
+            return props.updatedCurve('Convert');
+
+        }
+        // setCurrent(0);
+        // props.changeCurrent(0);
+        // props.restoreInitdata();
     }
 
     const changeOperationsHandler = (new_ops: Operation[]) => { 
@@ -140,6 +154,10 @@ const Steps: React.FC<StepsProps> = (props) => {
             
             <DisplayStep  operations={props.operations}/>
             
+            <br/>
+            <Space style={{ position: 'absolute', right: '10px', paddingTop: '5px', paddingBottom: '0px'}}>
+                <Button size="small" type="primary"  disabled={false} onClick={resetModeHandler}>Reset curves</Button>
+            </Space>
             <br/>
             <Checkbox  className="step-manual-mode" checked={!auto} onChange={manualModeHandler}>Manual mode</Checkbox>
         </div>

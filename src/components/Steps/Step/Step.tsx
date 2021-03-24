@@ -55,7 +55,7 @@ const Step: React.FC<StepProps> = (props) => {
     const DisplayAlert = () => {
         let ret: any;
         if(props.status==='failed')
-            ret = <Alert  message={props.error_msg} type="error"/>;
+            ret = <Alert style={{ fontSize: '10px'}} message={props.error_msg} type="error"/>;
         else
             ret = null;
         return ret;
@@ -81,7 +81,7 @@ const Step: React.FC<StepProps> = (props) => {
         autoMode={props.automatic_mode}
         apply={applyStatus}
     />   
-    <div style={{paddingTop: '25px'}}>
+    <div style={{paddingTop: '80px'}}>
     <DisplayAlert/>
     </div>
      
