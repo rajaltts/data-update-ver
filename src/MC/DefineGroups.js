@@ -100,6 +100,7 @@ class DefineGroups extends React.Component {
             unitSystem: this.state.unitSystem,
             xQuantityType: this.state.xQuantityType,
             yQuantityType:this.state.yQuantityType,
+            measurement: this.state.measurement,
         }
         this.sendData(json);
     }
@@ -144,6 +145,7 @@ class DefineGroups extends React.Component {
             unitSystem: this.state.unitSystem,
             xQuantityType: this.state.xQuantityType,
             yQuantityType:this.state.yQuantityType,
+            measurement: this.state.measurement,
         }
         this.sendData(json);
     }
@@ -173,6 +175,7 @@ class DefineGroups extends React.Component {
             yQuantityType:this.state.yQuantityType,
             stateChanged: false,
             precision:this.state.precision,
+            measurement: this.state.measurement,
         }
         this.sendData(json);
     }
@@ -295,6 +298,7 @@ class DefineGroups extends React.Component {
             xQuantityType: this.props.propState.xQuantityType,
             yQuantityType:this.props.propState.yQuantityType,
             widget:this.props.propState.widget,
+            measurement: this.props.propState.measurement,
 
         })
     }
@@ -317,7 +321,7 @@ class DefineGroups extends React.Component {
             .then(response => {
                 //console.log(response);
                 const res = response.data;
-                this.setState({
+                this.setState({                    
                     groups: res.groups,
                     loaded: true,
                     type: res.xyDisplayScale,
@@ -337,7 +341,8 @@ class DefineGroups extends React.Component {
                     xQuantityType: res.xQuantityType,
                     yQuantityType: res.yQuantityType,
                     precision:res.precision,
-                    stateChanged: false
+                    stateChanged: false,
+                    measurement: res.measurement,
                 })
 
 
@@ -389,6 +394,7 @@ class DefineGroups extends React.Component {
             unitSystem: this.state.unitSystem,
             xQuantityType: this.state.xQuantityType,
             yQuantityType:this.state.yQuantityType,
+            measurement: this.state.measurement,
             stateChanged: false
         }
         this.sendData(json);
@@ -434,6 +440,7 @@ class DefineGroups extends React.Component {
             groupsCriteria:this.state.groupsCriteria,
             criteria:this.state.criteria,
             stateChanged: false,
+            measurement: this.state.measurement,
         }
         this.sendData(json);
         
@@ -485,7 +492,8 @@ class DefineGroups extends React.Component {
             selectedCriteria:this.state.selectedCriteria,
             groupsCriteria:this.state.groupsCriteria,
             criteria:this.state.criteria,
-            stateChanged: false
+            stateChanged: false,
+            measurement: this.state.measurement,
         }
         this.sendData(json);
         

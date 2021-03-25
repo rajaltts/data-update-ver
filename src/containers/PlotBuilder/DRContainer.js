@@ -32,7 +32,8 @@ class DRContainer extends React.Component {
             salt:props.modelState.salt,
             widget:props.modelState.widgetId,
             hidId:props.modelState.hidId,
-            precision:6
+            precision:6,
+            measurement: "engineering"
         }
         this.updateState = this.updateState.bind(this);
         //this.getPropertyDef = this.getPropertyDef.bind(this);
@@ -71,7 +72,9 @@ class DRContainer extends React.Component {
         newGroups.map((grp,index)=>{
           let size = grp.curves.length;
           if(size >0){
-            updatedGroup.push(grp);
+            if(grp.isSelected){
+              updatedGroup.push(grp);
+            }
             updatedGroup1.push(grp);
           }
         })
@@ -106,6 +109,7 @@ class DRContainer extends React.Component {
             xQuantityType: childData.xQuantityType,
             yQuantityType:childData.yQuantityType,
             precision:childData.precision,
+            measurement: childData.measurement,
        });
        this.updateState();
     }
@@ -173,7 +177,7 @@ class DRContainer extends React.Component {
             yQuantityType:this.state.yQuantityType,
             widget:this.state.widget,
             newLoad:false,
-
+            measurement: this.state.measurement
         }
         if(this.state.res_var1!==undefined && this.state.res_curve!==undefined){
           if(JSON.stringify(this.state.selected_resProp) === JSON.stringify({})||(this.state.selected_resProp===undefined)){
@@ -213,6 +217,7 @@ class DRContainer extends React.Component {
           widget:this.state.widget,
           newLoad:false,
           precision:this.state.precision,
+          measurement: this.state.measurement,
       }
 
         let tensile_template = require('../../data/template_tensile.json');

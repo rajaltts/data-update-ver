@@ -94,8 +94,20 @@ section.DRLayout{
 
 
 .InputAttribute{
-width: 100%;
-color : rgba(0, 0, 0, 0.75) !important;
+  width: 100%;
+  padding : 4px 11px;
+  color : rgba(0, 0, 0, 0.75) !important;
+  font: normal 12px sans-serif;
+  font-style: normal;
+  font-variant-ligatures: normal;
+  font-variant-caps: normal;
+  font-variant-numeric: normal;
+  font-variant-east-asian: normal;
+  font-weight: normal;
+  font-stretch: normal;
+  font-size: 12px !important;
+  line-height: normal;
+  font-family: sans-serif;
 }
 
 
@@ -300,7 +312,16 @@ background-color: #666666;
 }
 
 .AnalysisResultLabel{
-font-weight: bold;
+    font: bold 12px sans-serif;
+    font-style: normal;
+    font-variant-ligatures: normal;
+    font-variant-caps: normal;
+    font-variant-numeric: normal;
+    font-variant-east-asian: normal;
+    font-stretch: normal;
+    font-size: 12px;
+    line-height: normal;
+    font-family: sans-serif;
 }
 
 td.LeftColumn{

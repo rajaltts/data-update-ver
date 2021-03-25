@@ -333,7 +333,7 @@ let unSelectedCriteriaGrp = {};
                 this.state.groups.map((group, index1)=>{
                  let critObj = group.criteria;
                  if(critObj !== undefined){
-                     
+                    
                     Object.keys(this.props.propState.criteria).map((key, i) => {
                         if(!this.state.selectedCriteria.includes(key)){
                             unSelectedCriteriaSet.add(key);
@@ -408,7 +408,7 @@ this.state.groups.map((group, index)=>{
                      <td  key={'proptd'+(index+this.state.selectedCriteria.length)} className="MatData"> <span> {leftHeaderLabel }</span></td>
                      { 
                        values!==undefined?values.map((val,i)=>{
-                           return(<td><Input value={val} onChange={(e)=>this.updateAttribute(e.target.value,crObj.name,i)}style={{width:'60%'}} placeholder="" /></td>) 
+                           return(<td><Input className='InputAttribute' value={val} onChange={(e)=>this.updateAttribute(e.target.value,crObj.name,i)}style={{width:'60%'}} placeholder="" /></td>) 
 
                        }):""                         
                        
