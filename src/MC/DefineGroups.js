@@ -462,8 +462,15 @@ class DefineGroups extends React.Component {
                    }
                 })
             })
+            let grpCriteria = this.state.groupsCriteria[key].criteria;
+            Object.keys(grpCriteria).map((key, index)=>{
+                if(!this.state.selectedCriteria.includes(key)){
+                    grpCriteria[key] ="";
+                }
+            })
+            
             let size = this.state.groups.length;
-            let row = {label:'Group '+(size),isSelected: true, isEditable:false,curves: curves , id:size, criteria: this.state.groupsCriteria[key].criteria};
+            let row = {label:'Group '+(size),isSelected: true, isEditable:false,curves: curves , id:size, criteria: grpCriteria};
             this.state.groups = [...groups,row];
             this.state.groupSelected.push(++i);
             this.state.showGroupCriteria = true;
