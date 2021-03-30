@@ -520,7 +520,10 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                                 }
                             }
                         });
-                        ops.push({action: action, method: op.selected_method, parameters: par});
+                        if(action==='Averaging')
+                            ops.push({action: action, method: op.selected_method, parameters: par, result: 'Shifting'});
+                        else 
+                            ops.push({action: action, method: op.selected_method, parameters: par});
 
                         // manage Extrapolation action in Averaging
                         if(action === 'Averaging'){
@@ -542,7 +545,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                                         }
                                     }
                                 });
-                                ops.push({action: 'Extrapoling' , method: extrapolation_method, parameters: params})
+                                ops.push({action: 'Extrapoling' , method: extrapolation_method, parameters: params, result: 'Shifting'})
                             }
                         }
                         
