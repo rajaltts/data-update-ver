@@ -5,6 +5,8 @@ import axios from '../axios-orders';
 import PlotCurve from '../components/PlotCurveComponent/PlotCurve';
 import "../App.css";
 import DragNDrop  from '../components/DragNDrop/DragNDrop.js'
+import * as FileSaver from 'file-saver';
+import * as XLSX from 'xlsx';
 
 class SaveResults extends React.Component {
     constructor(props) {
@@ -39,7 +41,100 @@ class SaveResults extends React.Component {
         this.addClassificationAttribute = this.addClassificationAttribute.bind(this);
         this.openClassificationAttribute = this.openClassificationAttribute.bind(this);
         this.handleAttributeChange = this.handleAttributeChange.bind(this);
+        this.exportToCSV = this.exportToCSV.bind(this);
      }
+
+     exportToCSV(){
+        const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
+        const fileExtension = '.xlsx';
+       let wsArray = [];
+       this.props.propState.plotBuildModel.groups.map((group,index)=>{
+       let groupArray =[];
+       let groupObj = {};
+       groupObj['Name']="Group Name";
+       groupObj['Value']=group.label;
+       groupArray.push(groupObj);
+       let analysisTypeObj = {};
+       let selectedAnalysisType = this.props.propState.selectedAnalysisType.title;
+       analysisTypeObj['Name']="Analysis Type";
+       analysisTypeObj['Value']=selectedAnalysisType;
+       groupArray.push(analysisTypeObj);
+       groupArray.push({'Name':'','Value':''});
+       groupArray.push({'Name':'','Value':''}); 
+       let criteria = this.props.propState.groups[index+1].criteria;
+       Object.keys(criteria).map((key, i) => {
+        let obj = new Object();
+        let crtiteriaLabel = this.props.propState.criteria[key].label;
+        let criteriaValue =criteria[key];
+        if(criteriaValue!==undefined && criteriaValue !== ''){
+            obj["Name"] = crtiteriaLabel;
+            obj["Value"] = criteriaValue;
+            groupArray.push(obj);
+        }
+    })
+    groupArray.push({'Name':'','Value':''});
+    groupArray.push({'Name':'Result Data','Value':''});
+       
+       let selectedResProp = this.props.propState.selected_resProp;
+       group.data.map((d,index1)=>{
+           let groupObj = {};
+           let selectPropLabel = d.label;
+           if(selectedResProp[d.name].label!==undefined){
+                selectPropLabel = selectedResProp[d.name].label+" ("+selectedResProp[d.name].unit+") "
+           }
+           groupObj['Name']=selectPropLabel;
+           groupObj['Value']=d.value;
+           groupArray.push(groupObj);
+       })
+       const ws = XLSX.utils.json_to_sheet(groupArray, {skipHeader: 1});   
+
+       wsArray.push(ws);
+       let curveArray =[];
+       let curvesSize = group.curves.length;
+       group.curves.map((c,index2)=>{
+        let curveArray1 =[];
+        let curHeader = [];
+        curHeader[0] =  'Input Curve';
+        curHeader[1] = '';
+        if(index2 === curvesSize-1){
+            curHeader[0] =  'Average Curve';
+        }
+        curveArray1.push(curHeader);  
+        let cur1 = [];
+        cur1[0] =  this.props.propState.plotBuildModel.xtype;
+        cur1[1] = this.props.propState.plotBuildModel.ytype;
+        curveArray1.push(cur1);       
+        c['x'].map((pointx,l)=>{
+            let cur = [];
+            cur[0] = pointx;
+            cur[1] = c['y'][l];
+            curveArray1.push(cur); 
+        })
+        let tempIndex = (index2*2+index2) + 3;
+        wsArray[index]=  XLSX.utils.sheet_add_aoa(wsArray[index],curveArray1,
+            {
+              header: ["X", "Y"],
+              origin: { r: 0, c: tempIndex}
+            });
+    })
+    })
+            const wb = XLSX.utils.book_new();
+            wsArray.map((w,k) =>{
+                XLSX.utils.book_append_sheet(wb, w,  this.props.propState.plotBuildModel.groups[k].label);
+            }) 
+        const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+        const data = new Blob([excelBuffer], {type: fileType});
+        FileSaver.saveAs(data, "Analysis_Result" + fileExtension);
+    }
+
+    populateGroupToWorkSheet(group){
+        let groupObj = {};
+        group.data.map((d,index)=>{
+            groupObj[d.label]=d.value;
+        })
+        const ws = XLSX.utils.aoa_to_sheet(groupObj);
+       // groupObj[]
+    }
 
      handleAttributeChange = (targetKeys, direction, moveKeys) => {
         //console.log(targetKeys, direction, moveKeys);
@@ -447,7 +542,7 @@ this.state.groups.map((group, index)=>{
 
     {
         Object.keys(outputGrp).map((data, index) =>{
-            let leftHeaderLabel = outputLabels[data];
+            let leftHeaderLabel = outputLabels[data]+" ["+this.props.propState.selected_resProp[data].unit+"] ";
             let values = outputGrp[data];
             return(
                 leftHeaderLabel===''?'':
@@ -573,7 +668,7 @@ this.state.groups.map((group, index)=>{
                     </div>
 
                     <div className="ButtonSave">
-                        <Button>Export Excel</Button>
+                        <Button onClick={(e) => {this.exportToCSV()}}>Export Excel</Button>
                     </div>
                 </div>
 
