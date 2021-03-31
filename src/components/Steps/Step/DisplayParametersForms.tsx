@@ -7,9 +7,10 @@ interface DisplayParameterProps {
     onChangeParameter: (a: any) => any;
     autoMode: boolean;
     apply: boolean;
+    actionLabel: string;
 };
 
-const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, onChangeParameter,autoMode,apply}) => {
+const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, onChangeParameter,autoMode,apply,actionLabel}) => {
     const [params,setParams] = useState<parameter_type[]>([]);
     const [applyStatus,setApplyStatus] = useState(false);
     const { Option } = Select;
@@ -169,13 +170,13 @@ const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, on
 
     return(
         <>
-        <div  style={{...fontStyle, height: '300px'}} >
+        <div  style={{...fontStyle,height: '270px',borderStyle: 'dashed', borderWidth: '0px', paddingBottom: '0px'}} >
         {displayParameters}
         <br/>
         </div>
         <div>
-        <Space style={{ position: 'absolute', right: '10px', paddingTop: '10px', paddingBottom: '10px'}}>
-            <Button size="small" type="primary" disabled={!applyStatus} onClick={submit}>Apply</Button>
+        <Space style={{ position: 'absolute', right: '20px', paddingTop: '5px'}}>
+            <Button style={{fontSize: '11px'}} size="small" type="primary" disabled={false/*!applyStatus*/} onClick={submit}>Apply {actionLabel}</Button>
         </Space>
         </div>
         </>

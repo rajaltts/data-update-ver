@@ -1,27 +1,8 @@
 // for tensile case
 export const tensile_operations_config = [
     {
-        action: 'Convert',
-        action_label: 'Convert',
-        methods: [
-            { 
-                label: 'Engineering to True',
-                type: 'Engineering_to_true',
-                params: []
-            },
-            { 
-                label: 'None',
-                type: 'None',
-                params: []
-            }
-        ],
-        selected_method: 'Engineering_to_true',
-        status: 'waiting',
-        error: ''
-    },
-    {
         action: 'Cleaning_ends',
-        action_label: 'Cleaning ends',
+        action_label: 'Cleaning Ends',
         methods: [
             { 
                 label: 'None',
@@ -29,27 +10,27 @@ export const tensile_operations_config = [
                 params: []
             },
             {
-                label: 'Strength',
+                label: 'Max Stress',
                 type: 'Y_Max',
                 params: []
             },
             {
-                label: 'Max strain',
+                label: 'Max Strain',
                 type: 'X_Max',
                 params: []
             },
             {
-                label: 'Strain',
+                label: 'User Defined Strain',
                 type: 'Max_X',
-                params: [{label: 'value', name: 'value',  value: 0.05, float: true }]
+                params: [{label: 'Value', name: 'value',  value: 0.05, float: true }]
             },
             {
-                label: 'Stress',
+                label: 'User Defined Stress',
                 type: 'Max_Y',
-                params: [{label: 'value', name: 'value',  value: 1000, float: true}]
+                params: [{label: 'Value', name: 'value',  value: 1000, float: true}]
             },
             {
-                label: 'Points',
+                label: 'User Defined Point',
                 type: 'Max_Xs',
                 params: [ {label: '', name: 'value', value: [], curveId: []}]
             }
@@ -68,21 +49,21 @@ export const tensile_operations_config = [
                 params: []
             },
             {
-                label: 'Defined strain',
+                label: 'User Defined Strain',
                 type: 'X_shift_defined',
-                params: [{label: 'value', name: 'value',  value: 0, float: true}]
+                params: [{label: 'Value', name: 'value',  value: 0, float: true}]
             },
             {
-                label: 'Stiffness stress based',
+                label: 'Linear Regression Stress',
                 type: 'X_tangent_yrange',
-                params: [{label: 'min stress', name: 'min', value: 0, float: true},
-                         {label: 'max stress', name: 'max', value: undefined, float: true}]
+                params: [{label: 'Initial Stress', name: 'min', value: 0, float: true},
+                         {label: 'Final Stress', name: 'max', value: undefined, float: true}]
             },
             {
-                label: 'Stiffness strain based',
+                label: 'Linear Regression Strain',
                 type: 'X_tangent_xrange',
-                params: [{label: 'min strain', name: 'min', value: 0, float: true},
-                         {label: 'max strain',  name: 'max',value: 0.001, float: true}]
+                params: [{label: 'Initial Strain', name: 'min', value: 0, float: true},
+                         {label: 'Final Strain',  name: 'max',value: 0.001, float: true}]
             }
         ],
         selected_method: 'None',
@@ -94,54 +75,54 @@ export const tensile_operations_config = [
         action_label: 'Averaging',
         methods: [
             { 
-                label: 'none',
+                label: 'None',
                 type: 'None',
                 params: []
             },
             {
-                label: 'spline',
+                label: 'Spline',
                 type: 'Spline',
-                params: [{label:'number of points', name: 'number_of_points',  value: 30},
-                         {label:'number of nodes', name: 'number_of_nodes', value: 10, range: {min: 5, max: 100}},
-                         {label:'regularization', name: 'regularization', value: 5, range: {min: 1, max: 9}},
-                         {label:'Averaging end point method', name: 'end_point',  selection: [{label:'strain',name:'x_value',link:'end_point_value'},
-                                                                                              {label:'min max strain', name:'min_max_x'}
+                params: [{label:'Number of Points', name: 'number_of_points',  value: 30},
+                         {label:'Number of Nodes', name: 'number_of_nodes', value: 10, range: {min: 5, max: 100}},
+                         {label:'Smoothing', name: 'regularization', value: 5, range: {min: 1, max: 9}},
+                         {label:'Averaging End Point', name: 'end_point',  selection: [{label:'User Defined Strain',name:'x_value',link:'end_point_value'},
+                                                                                              {label:'Min Max Strain', name:'min_max_x'}
                                                                                              ],
                                                                                              value: 1},
-                         {label:'end point value', name: 'end_point_value',  value: undefined, float: true, conditional: 'end_point'},
-                         {label:'Extrapolation method', name: 'extrapolation', selection:[{label:'none',name:'none'},
-                                                                                          {label:'based on specific curve', name:'based_on_curve'},
-                                                                                          {label:'tangent', name:'tangent'}
+                         {label:'Value', name: 'end_point_value',  value: undefined, float: true, conditional: 'end_point'},
+                         {label:'Extrapolation Method', name: 'extrapolation', selection:[{label:'None',name:'none'},
+                                                                                          {label:'Max Strain Curve', name:'based_on_curve'},
+                                                                                          {label:'Tangent', name:'tangent'}
                                                                                          ],
                                                                                          value: 1},
-                        {label: 'extrapolation end point', name: 'extrapolating_end_point', selection:[{label:'mean max strain', name:'mean_max_x'},
-                                                                                                        {label:'max max strain', name:'max_max_x'},
-                                                                                                        {label:'strain',name:'x_value',link:'extrapolating_end_point_value'}
+                        {label: 'Extrapolation End Point', name: 'extrapolating_end_point', selection:[{label:'Mean Max Strain', name:'mean_max_x'},
+                                                                                                        {label:'Max Max Strain', name:'max_max_x'},
+                                                                                                        {label:'User Defined Strain',name:'x_value',link:'extrapolating_end_point_value'}
                                                                                                       ],
                                                                                                       value: 0},
-                        {label:'extrapolation end point value', name: 'extrapolating_end_point_value',  value: undefined, float: true, conditional: 'extrapolating_end_point'},   
+                        {label:'Value', name: 'extrapolating_end_point_value',  value: undefined, float: true, conditional: 'extrapolating_end_point'},   
                          ]
             },
             {
-                label: 'polynomial',
+                label: 'Polynomial',
                 type: 'Polynomial',
-                params: [{label:'number of points', name: 'number_of_points', value: 30},
-                         {label:'order', name: 'order', value: 6},
-                         {label:'Averaging end point method', name: 'end_point',  selection: [{label:'strain',name:'x_value',link:'end_point_value'},
-                                                                                              {label:'min max strain', name:'min_max_x'}
+                params: [{label:'Number of points', name: 'number_of_points', value: 30},
+                         {label:'Order', name: 'order', value: 6},
+                         {label:'Averaging End Point', name: 'end_point',  selection: [{label:'User Defined Strain',name:'x_value',link:'end_point_value'},
+                                                                                              {label:'Min Max Strain', name:'min_max_x'}
                                                                                             ], value: 1},
-                         {label:'end point value', name: 'end_point_value',  value: undefined, float: true, conditional: 'end_point'},
-                         {label:'Extrapolation method', name: 'extrapolation', selection:[{label:'none',name:'none'},
-                                                                                          {label:'based on specific curve', name:'based_on_curve'},
-                                                                                          {label:'tangent', name:'tangent'}
+                         {label:'Value', name: 'end_point_value',  value: undefined, float: true, conditional: 'end_point'},
+                         {label:'Extrapolation Method', name: 'extrapolation', selection:[{label:'None',name:'none'},
+                                                                                          {label:'Max Strain Curve', name:'based_on_curve'},
+                                                                                          {label:'Tangent', name:'tangent'}
                                                                                         ],
                                                                                         value: 1},
-                        {label: 'extrapolation end point', name: 'extrapolating_end_point', selection:[ {label:'mean max strain', name:'mean_max_x'},
-                                                                                                        {label:'max max strain', name:'max_max_x'},
-                                                                                                        {label:'strain',name:'x_value',link:'extrapolating_end_point_value'}
+                        {label: 'Extrapolation End Point', name: 'extrapolating_end_point', selection:[ {label:'Mean Max Strain', name:'mean_max_x'},
+                                                                                                        {label:'Max Max Strain', name:'max_max_x'},
+                                                                                                        {label:'User Defined Strain',name:'x_value',link:'extrapolating_end_point_value'}
                                                                                                       ],
                                                                                                       value: 0},
-                        {label:'extrapolation end point value', name: 'extrapolating_end_point_value', value: undefined, float: true, conditional: 'extrapolating_end_point'},   
+                        {label:'Value', name: 'extrapolating_end_point_value', value: undefined, float: true, conditional: 'extrapolating_end_point'},   
                         ]
             }
         ],

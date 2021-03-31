@@ -119,7 +119,8 @@ const dataReducer = (currentData: Data, action: Action) => {
         }
         case 'RESET_CURVES_INIT':{
             console.log('RESET_CURVES_INIT');
-            const group_new = [...currentData.groups];
+            //const group_new = [...currentData.groups];
+            const group_new = JSON.parse(JSON.stringify(currentData.groups)); // it is a deep copy
             group_new[action.groupid].curves.map( (val,index,arr) => {
                 if(val.name !== 'average') { 
                     arr[index].x = [...arr[index].x0];  arr[index].y = [...arr[index].y0];
@@ -183,7 +184,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
     // need to manage the state to manage group changes
     // should be better to use useContext hook to share these state with Steps component
     const [current, setCurrent] = useState(0);
-    const [auto, setAuto] = useState(true);
+    const [auto, setAuto] = useState(false);
     const [precision,setPrecision] = useState(3);
     const [action,setAction]= useState("");
 
@@ -359,7 +360,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         if(!result_status){ // if no result reset data and set to first step with auto mode
             restoreInitdataHandler();
             setCurrent(0);
-            setAuto(true);
+           // setAuto(true);
         }
     };
 
@@ -818,6 +819,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                            autoIn={auto}
                            changeCurrent={ (cur) => setCurrent(cur)}
                            changeAuto={ (val) => setAuto(val)}
+                           setAction={ (val) => setAction(val)}
                     />
                 </Col>
                 <Col span={12}>

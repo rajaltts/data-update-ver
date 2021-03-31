@@ -62,7 +62,7 @@ const Step: React.FC<StepProps> = (props) => {
     }
 
     return(
-    <div style={{height: '360px'}}>
+    <div style={{height: '360px',borderStyle: 'solid', borderWidth: '1px', paddingLeft: '5px', paddingBottom: '0px'}}>
     {/* <h1 style={{textAlign: 'center'}}>{props.action_label}</h1>  */}
     <div className="step-title">{props.action_label}</div>
 
@@ -80,8 +80,9 @@ const Step: React.FC<StepProps> = (props) => {
         onChangeParameter={changeParametersHandler}
         autoMode={props.automatic_mode}
         apply={applyStatus}
+        actionLabel={props.action_label}
     />   
-    <div style={{paddingTop: '80px'}}>
+    <div style={{paddingTop: '90px'}}>
     <DisplayAlert/>
     </div>
      

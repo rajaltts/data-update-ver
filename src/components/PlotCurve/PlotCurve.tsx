@@ -1,7 +1,7 @@
 import React, {useState, useEffect}  from 'react';
 import PlotlyChart from 'react-plotlyjs-ts';
 import Plotly from 'plotly.js/dist/plotly';
-import {Table } from 'antd';
+import {Table, Switch, Space } from 'antd';
 
 import { Curve } from '../../data.model';
 import { colors } from '../../assets/colors.js';
@@ -20,8 +20,11 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
   const [dataPlot,setDataPlot] = useState<any>([]);
   const [newGroup,setNewGroup] = useState(true);
   const [currentGroup,setCurrentGroup] = useState(-1);
+  const [displayInitCurves,setDisplayInitCurves ] = useState(false);
+  const [showSwitch,setShowSwitch] = useState(false);
 
   useEffect(() => {
+    setShowSwitch(false);
     let data_: any = [];
     for(let i=0; i<props.curves.length; i++){
       //console.log(props.curves[i].name);
@@ -36,8 +39,22 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
         line: { color: colors[i] },
       // visible: props.curves[i].selected,
       };
+      let line_init : any = {
+        type: 'scatter',
+        //mode: 'lines+markers',
+        mode: 'lines',
+        x: props.curves[i].x0,
+        y: props.curves[i].y0,
+        name: props.curves[i].name,
+        opacity: props.curves[i].opacity,
+        line: { color: colors[i] },
+      // visible: props.curves[i].selected,
+      };
+
       if(props.curves[i].name==='average'){
         line = {...line,  line: {color: 'rgb(0, 0, 0)', width: 4} };
+        line_init = {...line,  line: {color: 'rgb(0, 0, 0)', width: 4} };
+        setShowSwitch(true);
       }
       if(props.curves[i].marker){
         const x_marker = props.curves[i].x[props.curves[i].marker];
@@ -45,7 +62,11 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
         const point = { type: 'scatter', mode: 'markers', name: props.curves[i].name,  marker: { color: 'black', symbol: ['x'], size: 10 }, x: [x_marker], y: [y_marker] };
         data_.push(point);
       }
-      data_.push(line);
+     
+      if(displayInitCurves)
+        data_.push(line_init);
+      else 
+        data_.push(line);  
     }
     setDataPlot(data_);
 
@@ -54,7 +75,7 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
       setCurrentGroup(props.group);
     }
 
-  },[props.curves,props.keys]);
+  },[props.curves,props.keys,displayInitCurves]);
 
   const AddPoint = (data_point: any) =>{
     if(!props.clickPoint(data_point))
@@ -182,8 +203,19 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
     }    
   } 
 
+  const switchChange = (checked: boolean, event: Event) => {
+    setDisplayInitCurves(!checked);
+}
+
   return(
+    
     <>
+    {showSwitch&&
+    <Space style={{fontSize: '12px', width: '100%', justifyContent: 'left', paddingLeft: '5px'}}>
+                Initial Curves
+                <Switch disabled={false} size='small' defaultChecked  style={{backgroundColor: "grey"}} onChange={switchChange} />
+                Shifting Curves
+    </Space>}
     <PlotlyChart
       data = { dataPlot }
       layout = { layout }

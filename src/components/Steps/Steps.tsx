@@ -19,12 +19,13 @@ interface StepsProps {
     autoIn: boolean;
     changeCurrent: (v: number) => void;
     changeAuto: (v: boolean) => void;
+    setAction: (a: string) => void;
 };
 
 const Steps: React.FC<StepsProps> = (props) => {
     //-----------STATE----------------------------------------
     const [current, setCurrent] = useState(0);
-    const [auto, setAuto] = useState(true);
+    const [auto, setAuto] = useState(false);
 
     //---------EFFECT------------------------------------------
     useEffect(() => {
@@ -37,12 +38,13 @@ const Steps: React.FC<StepsProps> = (props) => {
 
     //---------HANDLER----------------------------------------
     const stepsOnChangeHandler = (current) => {
-        if(!auto) { 
+      //  if(!auto) { 
             const action = props.operations[current].action;
-            props.updatedCurve(action);
-        }
+        //no run when click    props.updatedCurve(action);
+      //  }
         setCurrent(current);
         props.changeCurrent(current);
+        props.setAction(action);
     }
 
     const changeSelectedMethod2 = (select:string, action: string) => {
@@ -55,39 +57,41 @@ const Steps: React.FC<StepsProps> = (props) => {
     }
     // aplly button for a step
     const updatedCurveHandler = (action: string) => {
-        if(auto){
+        if(action==='all'){
             const last_step = props.operations.length - 1;
             setCurrent(last_step);
-            return props.updatedCurve('Template');
+            const action = props.operations[last_step].action;
+            return props.updatedCurve(action);
+            //return props.updatedCurve('Template');
         }
         else
             return props.updatedCurve(action);
     }
 
-    const manualModeHandler = (event: any) => {
-        const status = event.target.checked;
-        // if status is check(true) -> auto=false
-        setAuto(!status);
-        props.changeAuto(!status);
-        // get result status
-        if(props.resultStatus){
+    // const manualModeHandler = (event: any) => {
+    //     const status = event.target.checked;
+    //     // if status is check(true) -> auto=false
+    //     setAuto(!status);
+    //     props.changeAuto(!status);
+    //     // get result status
+    //     if(props.resultStatus){
 
-        } else {
-            setCurrent(0);
-            props.changeCurrent(0);
-            props.restoreInitdata();
-        }        
-    }
+    //     } else {
+    //         setCurrent(0);
+    //         props.changeCurrent(0);
+    //         props.restoreInitdata();
+    //     }        
+    // }
 
     const resetModeHandler = (event: any) => {
-        if(auto){
-            setCurrent(0);
-            return props.updatedCurve('Convert');
+        // if(auto){
+        //     setCurrent(0);
+        //     return props.updatedCurve('Convert');
 
-        }
-        // setCurrent(0);
-        // props.changeCurrent(0);
-        // props.restoreInitdata();
+        // }
+         setCurrent(0);
+         props.changeCurrent(0);
+         props.restoreInitdata();
     }
 
     const changeOperationsHandler = (new_ops: Operation[]) => { 
@@ -155,15 +159,19 @@ const Steps: React.FC<StepsProps> = (props) => {
             <DisplayStep  operations={props.operations}/>
             
             <br/>
-            <Space style={{ position: 'absolute', right: '10px', paddingTop: '5px', paddingBottom: '0px'}}>
-                <Button size="small" type="primary"  disabled={false} onClick={resetModeHandler}>Reset curves</Button>
-            </Space>
+            <div style={{  float: 'right', paddingRight: '7px', paddingTop: '0px', paddingBottom: '10px'}}>
+                <Button style={{fontSize: '12px'}} size="small" type="primary"  disabled={false} onClick={() => updatedCurveHandler('all')}>Apply All</Button>
+            </div>
+
+            <div style={{ float: 'right', paddingRight: '20px', paddingTop: '0px', paddingBottom: '10px'}}>
+                <Button style={{fontSize: '12px'}} size="small" type="primary"  disabled={false} onClick={resetModeHandler}>Reset Curves</Button>
+            </div>
             <br/>
-            <Checkbox  className="step-manual-mode" checked={!auto} onChange={manualModeHandler}>Manual mode</Checkbox>
+            {/* <Checkbox  className="step-manual-mode" checked={!auto} onChange={manualModeHandler}>Manual mode</Checkbox> */}
         </div>
         
     </Fragment>
     );
 };
-
+//
 export default Steps;
