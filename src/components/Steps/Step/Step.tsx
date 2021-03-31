@@ -82,7 +82,7 @@ const Step: React.FC<StepProps> = (props) => {
         apply={applyStatus}
         actionLabel={props.action_label}
     />   
-    <div style={{paddingTop: '90px'}}>
+    <div style={{paddingTop: '95px'}}>
     <DisplayAlert/>
     </div>
      

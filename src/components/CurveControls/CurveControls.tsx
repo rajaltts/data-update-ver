@@ -27,7 +27,7 @@ const CurveControls: React.FC<CurveControlsProps> = (props) => {
 
     return(
         <>
-        <div style={{height: '550px', borderStyle: 'solid', borderWidth: '2px', margin: 'auto', padding: '10px'}}>
+        <div style={{height: '550px',borderStyle: 'solid', borderWidth: '2px', margin: 'auto', padding: '10px', width: '100%'}}>
           <div className="curve-title">
             Curves
           </div>
@@ -42,7 +42,7 @@ const CurveControls: React.FC<CurveControlsProps> = (props) => {
                 }</Radio.Group>
             </Col>
           </Row>
-          <Row style={{paddingTop: '10px'}}>
+          <Row style={{ width: '100%',  paddingTop: '10px'}}>
             <Col>
                 <CurveSelection 
                     treeData = {props.groupData[group].treeData}

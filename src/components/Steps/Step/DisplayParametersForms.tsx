@@ -170,7 +170,7 @@ const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, on
 
     return(
         <>
-        <div  style={{...fontStyle,height: '270px',borderStyle: 'dashed', borderWidth: '0px', paddingBottom: '0px'}} >
+        <div  style={{...fontStyle,height: '270px',borderStyle: 'dashed', borderWidth: '0px', paddingBottom: '0px',paddingLeft: '7px'}} >
         {displayParameters}
         <br/>
         </div>

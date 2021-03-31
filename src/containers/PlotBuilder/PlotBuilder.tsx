@@ -119,8 +119,7 @@ const dataReducer = (currentData: Data, action: Action) => {
         }
         case 'RESET_CURVES_INIT':{
             console.log('RESET_CURVES_INIT');
-            //const group_new = [...currentData.groups];
-            const group_new = JSON.parse(JSON.stringify(currentData.groups)); // it is a deep copy
+            const group_new = [...currentData.groups];
             group_new[action.groupid].curves.map( (val,index,arr) => {
                 if(val.name !== 'average') { 
                     arr[index].x = [...arr[index].x0];  arr[index].y = [...arr[index].y0];

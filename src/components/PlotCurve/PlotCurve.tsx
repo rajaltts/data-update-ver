@@ -5,6 +5,7 @@ import {Table, Switch, Space } from 'antd';
 
 import { Curve } from '../../data.model';
 import { colors } from '../../assets/colors.js';
+import SkeletonButton from 'antd/lib/skeleton/Button';
 
 interface PlotCurveProps {
    group: number;
@@ -22,9 +23,115 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
   const [currentGroup,setCurrentGroup] = useState(-1);
   const [displayInitCurves,setDisplayInitCurves ] = useState(false);
   const [showSwitch,setShowSwitch] = useState(false);
+  const [menus,setMenus] = useState([]);
 
   useEffect(() => {
-    setShowSwitch(false);
+  
+    const avg_cur_index = props.curves.findIndex( c => c.name==='average');
+    const withAvgResult = (avg_cur_index===-1?false:true);
+    if(withAvgResult)
+      setShowSwitch(true);
+    else
+      setShowSwitch(false);
+    const displayInitCurve = (withAvgResult&&displayInitCurves?true:false);
+    
+
+    // data [ {average } {curve1}, { curve2},  ... { curveN}, {curveInit1}, { curveInit2},  ... { curveInitN},]
+    // visible_current [ true(if exist), true, true, ....., false, false,....]
+    // visibel_init  [ true(if exist) , false, false,...., true, true,...]
+    let data_: any = [];
+    const visible_current = [];
+    const visible_init = [];
+    if(withAvgResult){
+      const line : any = {
+        type: 'scatter',
+        mode: 'lines',
+        x: props.curves[avg_cur_index].x,
+        y: props.curves[avg_cur_index].y,
+        name: props.curves[avg_cur_index].name,
+        opacity: props.curves[avg_cur_index].opacity,
+        line: { color: 'rgb(0, 0, 0)', width: 4 },
+      };
+      data_.push(line);
+      visible_current.push(true);
+      visible_init.push(true);
+    }
+    for(let i=0; i<props.curves.length; i++){
+      const line : any = {
+        type: 'scatter',
+        mode: 'lines',
+        x: props.curves[i].x,
+        y: props.curves[i].y,
+        name: props.curves[i].name,
+        opacity: props.curves[i].opacity,
+        line: { color: colors[i] },
+      };
+      data_.push(line);
+      visible_current.push(true);
+      visible_init.push(false);
+    }
+    if(withAvgResult){
+      for(let i=0; i<props.curves.length; i++){
+        const line : any = {
+          type: 'scatter',
+          mode: 'lines',
+          visible: false,
+          x: props.curves[i].x0,
+          y: props.curves[i].y0,
+          name: props.curves[i].name,
+          opacity: props.curves[i].opacity,
+          line: { color: colors[i] },
+        };
+        data_.push(line);
+        visible_current.push(false);
+        visible_init.push(true);
+      }
+    }
+    for(let i=0; i<props.curves.length; i++){
+      if(props.curves[i].marker){
+        const x_marker = props.curves[i].x[props.curves[i].marker];
+        const y_marker = props.curves[i].y[props.curves[i].marker];
+        const point = { type: 'scatter', mode: 'markers', name: props.curves[i].name,  marker: { color: 'black', symbol: ['x'], size: 10 }, x: [x_marker], y: [y_marker] };
+        data_.push(point);
+        visible_current.push(true);
+        visible_init.push(true);
+      }
+    }
+  
+    let updatemenus;
+    if(withAvgResult){
+     
+      updatemenus = [
+      {
+        buttons: [{
+          args: [{'visible': [...visible_current]}],
+          label: 'Shifted Curves',
+          method: 'update'
+        },
+        {
+          args: [{'visible': [...visible_init]}],
+          label: 'Initial Curves',
+          method: 'update'
+        }
+        ],
+        direction: 'left',
+        font: {size: 12},
+        showactive: true,
+        type: 'buttons',
+        x: 0.0,
+        xanchor: 'left',
+        y: 1.05,
+        yanchor: 'top'
+      }
+      ];
+    } else {
+      updatemenus =[];
+    }
+    setMenus(updatemenus);
+
+
+
+/*
     let data_: any = [];
     for(let i=0; i<props.curves.length; i++){
       //console.log(props.curves[i].name);
@@ -54,7 +161,7 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
       if(props.curves[i].name==='average'){
         line = {...line,  line: {color: 'rgb(0, 0, 0)', width: 4} };
         line_init = {...line,  line: {color: 'rgb(0, 0, 0)', width: 4} };
-        setShowSwitch(true);
+        //setShowSwitch(true);
       }
       if(props.curves[i].marker){
         const x_marker = props.curves[i].x[props.curves[i].marker];
@@ -62,12 +169,13 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
         const point = { type: 'scatter', mode: 'markers', name: props.curves[i].name,  marker: { color: 'black', symbol: ['x'], size: 10 }, x: [x_marker], y: [y_marker] };
         data_.push(point);
       }
-     
-      if(displayInitCurves)
+      
+      if(displayInitCurve)
         data_.push(line_init);
       else 
         data_.push(line);  
     }
+    */
     setDataPlot(data_);
 
     if(props.group!==currentGroup){
@@ -99,12 +207,15 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
     setDataPlot(data_up);
     
   }
+
+  
   const layout = { 
     modebardisplay: false,
     showlegend: false,
     autosize: true,
     // width: 800,
     height: 550,
+    updatemenus: menus,
     hovermode: "closest",
     uirevision: (newGroup?'false':'true'),
     margin: {
@@ -208,29 +319,26 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
 }
 
   return(
-    
     <>
-    {showSwitch&&
-    <Space style={{fontSize: '12px', width: '100%', justifyContent: 'left', paddingLeft: '5px'}}>
-                Initial Curves
-                <Switch disabled={false} size='small' defaultChecked  style={{backgroundColor: "grey"}} onChange={switchChange} />
-                Shifting Curves
-    </Space>}
-    <PlotlyChart
-      data = { dataPlot }
-      layout = { layout }
-      config = { config }
-      //onUpdate = { (event) => props.updatePlot(event) }
-      //onClick = { (data) => props.clickPoint(data) }
-      onClick = {AddPoint}
-      //onLegendDoubleClick =  { (event) => props.doubleClickLegendHandler(event)}
-      //onLegendClick =  { (event) => props.clickLegendHandler(event)}
-    />
+   
+      <PlotlyChart
+        data = { dataPlot }
+        layout = { layout }
+        config = { config }
+        //onUpdate = { (event) => props.updatePlot(event) }
+        //onClick = { (data) => props.clickPoint(data) }
+        onClick = {AddPoint}
+        //onLegendDoubleClick =  { (event) => props.doubleClickLegendHandler(event)}
+        //onLegendClick =  { (event) => props.clickLegendHandler(event)}
+      />
+    
+
     <div>
     <DisplayData
        data={props.data}/>
     </div>
     </>
+   
 
   );
 }

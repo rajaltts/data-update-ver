@@ -11,3 +11,8 @@
 .curve-label {
     font-size: 12px;
 }
+
+.ant-col {
+    position: relative;
+    width: 100%;
+}
