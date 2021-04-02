@@ -4,6 +4,7 @@
     "ytype": "stress_engineering",
     "xunit": "no",
     "yunit": "MPa",
+    "measurement": "engineering",
     "groups": [{"label": "my_group1",
       "curves": [
         {

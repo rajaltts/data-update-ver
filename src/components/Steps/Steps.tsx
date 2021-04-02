@@ -20,6 +20,7 @@ interface StepsProps {
     changeCurrent: (v: number) => void;
     changeAuto: (v: boolean) => void;
     setAction: (a: string) => void;
+    updatePlot: () => void;
 };
 
 const Steps: React.FC<StepsProps> = (props) => {
@@ -59,7 +60,7 @@ const Steps: React.FC<StepsProps> = (props) => {
     const updatedCurveHandler = (action: string) => {
         if(action==='all'){
             const last_step = props.operations.length - 1;
-            setCurrent(last_step);
+            //setCurrent(last_step);
             const action = props.operations[last_step].action;
             return props.updatedCurve(action);
             //return props.updatedCurve('Template');
@@ -84,14 +85,10 @@ const Steps: React.FC<StepsProps> = (props) => {
     // }
 
     const resetModeHandler = (event: any) => {
-        // if(auto){
-        //     setCurrent(0);
-        //     return props.updatedCurve('Convert');
-
-        // }
-         setCurrent(0);
-         props.changeCurrent(0);
-         props.restoreInitdata();
+        //setCurrent(0);
+        //props.changeCurrent(0);
+        props.restoreInitdata(-1,true); // -1 -> current group, true -> removePoints
+        props.updatePlot();
     }
 
     const changeOperationsHandler = (new_ops: Operation[]) => { 
@@ -149,7 +146,7 @@ const Steps: React.FC<StepsProps> = (props) => {
     //---------RENDER-----------------------------------------
     return(
     <Fragment>
-        <div style={{height: '550px', borderStyle: 'solid', borderWidth: '2px', margin: 'auto', padding: '10px'}}>
+        <div style={{height: '550px', borderStyle: 'solid', borderWidth: '2px', borderColor: '#d9d9d9', margin: 'auto', padding: '10px'}}>
             <div className="analysis-type-title">
                 Analysis type: Tensile
             </div>
@@ -160,11 +157,11 @@ const Steps: React.FC<StepsProps> = (props) => {
             
             <br/>
             <div style={{  float: 'right', paddingRight: '7px', paddingTop: '0px', paddingBottom: '10px'}}>
-                <Button style={{fontSize: '12px'}} size="small" type="primary"  disabled={false} onClick={() => updatedCurveHandler('all')}>Apply All</Button>
+                <Button style={{fontSize: '12px', background: '#096dd9',  borderColor: '#096dd9'}} size="small" type="primary"  disabled={false} onClick={() => updatedCurveHandler('all')}>Apply All</Button>
             </div>
 
             <div style={{ float: 'right', paddingRight: '20px', paddingTop: '0px', paddingBottom: '10px'}}>
-                <Button style={{fontSize: '12px'}} size="small" type="primary"  disabled={false} onClick={resetModeHandler}>Reset Curves</Button>
+                <Button style={{fontSize: '12px', background: '#096dd9',  borderColor: '#096dd9'}} size="small" type="primary"  disabled={false} onClick={resetModeHandler}>Reset Curves</Button>
             </div>
             <br/>
             {/* <Checkbox  className="step-manual-mode" checked={!auto} onChange={manualModeHandler}>Manual mode</Checkbox> */}

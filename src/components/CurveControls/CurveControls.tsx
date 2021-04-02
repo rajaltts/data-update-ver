@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { GroupData } from '../../data.model';
-import { Space, Tree, Radio, Input, Row, Col } from 'antd';
+import { Radio, Row, Col, Button, Tooltip } from 'antd';
 import { RadioChangeEvent } from 'antd/lib/radio';
 import CurveSelection from './CurveSelection/CurveSelection'
 import './CurveControls.css';
@@ -8,6 +8,8 @@ import './CurveControls.css';
 interface CurveControlsProps {
    groupData: GroupData[];
    onCheck: any;
+   measurement: string;
+   convertToTrue: () => void;
 };
 
 const CurveControls: React.FC<CurveControlsProps> = (props) => {
@@ -25,12 +27,28 @@ const CurveControls: React.FC<CurveControlsProps> = (props) => {
         props.onCheck(e,group);
     }
 
+    const submit = (e: any) => {
+        props.convertToTrue();
+    }
+
     return(
         <>
-        <div style={{height: '550px',borderStyle: 'solid', borderWidth: '2px', margin: 'auto', padding: '10px', width: '100%'}}>
+        <div style={{height: '550px',borderStyle: 'solid', borderWidth: '2px',  borderColor: '#d9d9d9', margin: 'auto', padding: '10px', width: '100%'}}>
           <div className="curve-title">
             Curves
           </div>
+          <Row style={{paddingTop: '10px', paddingBottom: '10px'}}>
+            <Col span={10}>
+                <div className="curve-measurement">
+                <strong>Data Type: </strong>{props.measurement}
+                </div>
+            </Col>
+            <Col  span={14}>
+                <Tooltip title="WARNING: All results will be reset" visible={(props.measurement==='engineering'?true:false)}>
+                <Button style={{fontSize: '11px',float: 'right'}} size="small"  type="primary"  disabled={(props.measurement==='engineering'?false:true)} onClick={submit}>Convert to True</Button>
+                </Tooltip>
+            </Col>
+          </Row>
           <Row>
             <Col>
                 <Radio.Group onChange={onChangeGroup} value={group}>{

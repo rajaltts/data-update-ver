@@ -176,7 +176,7 @@ const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, on
         </div>
         <div>
         <Space style={{ position: 'absolute', right: '20px', paddingTop: '5px'}}>
-            <Button style={{fontSize: '11px'}} size="small" type="primary" disabled={false/*!applyStatus*/} onClick={submit}>Apply {actionLabel}</Button>
+            <Button style={{fontSize: '12px'}} size="small" type="primary" disabled={false/*!applyStatus*/} onClick={submit}>{actionLabel}</Button>
         </Space>
         </div>
         </>

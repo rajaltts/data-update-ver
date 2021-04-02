@@ -14,6 +14,8 @@ interface PlotCurveProps {
    keys: string[];
    axisLabel: { xlabel: string, ylabel: string};
    clickPoint: (data: any) => boolean;
+   plotUpdate: boolean;
+   showMarkers: boolean;
 };
 
 const PlotCurve: React.FC<PlotCurveProps> = (props) => {
@@ -24,6 +26,7 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
   const [displayInitCurves,setDisplayInitCurves ] = useState(false);
   const [showSwitch,setShowSwitch] = useState(false);
   const [menus,setMenus] = useState([]);
+  const [annotations,setAnnotations] = useState([]);
 
   useEffect(() => {
   
@@ -50,13 +53,15 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
         y: props.curves[avg_cur_index].y,
         name: props.curves[avg_cur_index].name,
         opacity: props.curves[avg_cur_index].opacity,
-        line: { color: 'rgb(0, 0, 0)', width: 4 },
+        line: { color: '#000000', width: 4 },
       };
       data_.push(line);
       visible_current.push(true);
       visible_init.push(true);
     }
     for(let i=0; i<props.curves.length; i++){
+      if(i===avg_cur_index)
+        continue;
       const line : any = {
         type: 'scatter',
         mode: 'lines',
@@ -72,6 +77,8 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
     }
     if(withAvgResult){
       for(let i=0; i<props.curves.length; i++){
+        if(i===avg_cur_index)
+         continue;
         const line : any = {
           type: 'scatter',
           mode: 'lines',
@@ -87,18 +94,21 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
         visible_init.push(true);
       }
     }
-    for(let i=0; i<props.curves.length; i++){
-      if(props.curves[i].marker){
-        const x_marker = props.curves[i].x[props.curves[i].marker];
-        const y_marker = props.curves[i].y[props.curves[i].marker];
-        const point = { type: 'scatter', mode: 'markers', name: props.curves[i].name,  marker: { color: 'black', symbol: ['x'], size: 10 }, x: [x_marker], y: [y_marker] };
-        data_.push(point);
-        visible_current.push(true);
-        visible_init.push(true);
+    if(props.showMarkers){
+      for(let i=0; i<props.curves.length; i++){
+        if(props.curves[i].marker){
+          const x_marker = props.curves[i].x[props.curves[i].marker];
+          const y_marker = props.curves[i].y[props.curves[i].marker];
+          const point = { type: 'scatter', mode: 'markers', name: props.curves[i].name,  marker: { color: 'black', symbol: ['x'], size: 10 }, x: [x_marker], y: [y_marker] };
+          data_.push(point);
+          visible_current.push(true);
+          visible_init.push(true);
+        }
       }
     }
   
     let updatemenus;
+    let annotations;
     if(withAvgResult){
      
       updatemenus = [
@@ -106,12 +116,12 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
         buttons: [{
           args: [{'visible': [...visible_current]}],
           label: 'Shifted Curves',
-          method: 'update'
+          method: 'restyle'
         },
         {
           args: [{'visible': [...visible_init]}],
           label: 'Initial Curves',
-          method: 'update'
+          method: 'restyle'
         }
         ],
         direction: 'left',
@@ -120,14 +130,30 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
         type: 'buttons',
         x: 0.0,
         xanchor: 'left',
-        y: 1.05,
-        yanchor: 'top'
+        y: 1.2,
+        yanchor: 'top',
+        // bgcolor: '#1890ff',
+        // bordercolor: '#1890ff'
       }
+      ];
+
+      annotations = [
+        {
+          text: 'Reference Curves:',
+          x: 0.,
+          y: 1.185,
+          //yref: 'paper',
+          yref: 'domain',
+          align: 'left',
+          showarrow: false
+        }
       ];
     } else {
       updatemenus =[];
+      annotations = [];
     }
     setMenus(updatemenus);
+    setAnnotations(annotations);
 
 
 
@@ -183,7 +209,7 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
       setCurrentGroup(props.group);
     }
 
-  },[props.curves,props.keys,displayInitCurves]);
+  },[props.curves,props.keys,displayInitCurves,props.plotUpdate]);
 
   const AddPoint = (data_point: any) =>{
     if(!props.clickPoint(data_point))
@@ -216,6 +242,7 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
     // width: 800,
     height: 550,
     updatemenus: menus,
+ //   annotations: annotations,
     hovermode: "closest",
     uirevision: (newGroup?'false':'true'),
     margin: {

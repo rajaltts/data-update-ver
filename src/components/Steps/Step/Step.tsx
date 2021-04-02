@@ -62,7 +62,7 @@ const Step: React.FC<StepProps> = (props) => {
     }
 
     return(
-    <div style={{height: '360px',borderStyle: 'solid', borderWidth: '1px', paddingLeft: '5px', paddingBottom: '0px'}}>
+    <div style={{height: '360px',borderStyle: 'solid', borderWidth: '1px', borderColor: '#d9d9d9', paddingLeft: '5px', paddingBottom: '0px'}}>
     {/* <h1 style={{textAlign: 'center'}}>{props.action_label}</h1>  */}
     <div className="step-title">{props.action_label}</div>
 
