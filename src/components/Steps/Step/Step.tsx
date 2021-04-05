@@ -18,6 +18,7 @@ interface StepProps {
     changeOperations: (a: Operation[]) => void;
     operations: Operation[];
     action: string;
+    saveParams: (p: parameter_type[] ) => void;
 };
 
 const Step: React.FC<StepProps> = (props) => {
@@ -40,7 +41,7 @@ const Step: React.FC<StepProps> = (props) => {
         props.changeOperations(operationsUpdate);
     }
 
-    const changeParametersHandler = (params_: parameter_type[]) => {
+    const changeParametersHandler = (params_: parameter_type[],apply:boolean) => {
         const operationsUpdate = [...props.operations];
         //const operationsUpdate = JSON.parse(JSON.stringify(props.operations)); // it is a deep copy
         const a = operationsUpdate.find( (el) => el.action === props.action);
@@ -49,7 +50,8 @@ const Step: React.FC<StepProps> = (props) => {
         m.params.length = 0;
         m.params = params_;
         props.changeOperations(operationsUpdate);
-        props.applyButton();
+        if(apply)
+            props.applyButton();
     }
 
     const DisplayAlert = () => {
@@ -81,6 +83,7 @@ const Step: React.FC<StepProps> = (props) => {
         autoMode={props.automatic_mode}
         apply={applyStatus}
         actionLabel={props.action_label}
+        saveParams={props.saveParams}
     />   
     <div style={{paddingTop: '95px'}}>
     <DisplayAlert/>

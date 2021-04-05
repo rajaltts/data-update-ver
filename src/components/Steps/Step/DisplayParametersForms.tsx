@@ -4,17 +4,19 @@ import '../../../App.css';
 import {Select, Button, Space, Input, Alert,  Row, Col, Slider, InputNumber, Divider  } from 'antd';
 interface DisplayParameterProps {
     initParams: parameter_type[];
-    onChangeParameter: (a: any) => any;
+    onChangeParameter: (a: any, apply: boolean) => any;
     autoMode: boolean;
     apply: boolean;
     actionLabel: string;
+    saveParams: (p: parameter_type[] ) => void;
 };
 
-const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, onChangeParameter,autoMode,apply,actionLabel}) => {
+const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, onChangeParameter,autoMode,apply,actionLabel,saveParams}) => {
     const [params,setParams] = useState<parameter_type[]>([]);
     const [applyStatus,setApplyStatus] = useState(false);
     const { Option } = Select;
     const [linked,setLinked] = useState([]);
+    const [changed,setChanged] = useState(false);
 
     useEffect( () => {
         //const param_init = [...initParams];  // it is a shallow copy
@@ -33,9 +35,21 @@ const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, on
             }
         });
         setLinked(linked_init);
-    }
-    ,[initParams,apply]);
+    },[initParams,apply]);
 
+    // useEffect( () => { return () => {
+        
+    // }
+    // },[]);
+
+    // this solution does not work , infinite loop
+    // Solutions
+    // 1 - Add a validate button when parameter changed and call onChangeParameter but without apply
+    // 2 - use useRef to avoid the infinite loop
+    // useEffect( () => {
+    //     if(params.length!==0)
+    //        onChangeParameter(params);
+    // },[params]);
     
 
     const changeParamHandler = (event: any,name: string) => {
@@ -44,7 +58,9 @@ const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, on
         if(par)
             par.value=event;
         setParams(new_params);
+        saveParams(new_params);
         setApplyStatus(true);
+        setChanged(true);
     }
 
     const selectParamHandler = (value:any, name: string, param: any) => {
@@ -55,8 +71,9 @@ const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, on
         if(par)
             par.value=value_num;
         setParams(new_params);
+        setChanged(true);
+        saveParams(new_params);
 
-        
         const linked_curr = linked;
         const t = linked_curr.find( e => e.parameter===name);
         const link = par.selection[value_num].link;
@@ -66,7 +83,7 @@ const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, on
             else
               t.value=[]; 
             setLinked(linked_curr);
-        } 
+        }
     }
     const fontStyle = {
         fontSize: '12px',
@@ -162,10 +179,17 @@ const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, on
         
     );
 
+    const validate = (e: any) => {
+       // e.preventDefault();
+        onChangeParameter(params,false);
+       // setParams([]);
+    };
+
     const submit = (e: any) => {
         e.preventDefault();
-        onChangeParameter(params);
+        onChangeParameter(params,true);
         setParams([]);
+        setChanged(false);
     };
 
     return(
@@ -175,9 +199,15 @@ const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, on
         <br/>
         </div>
         <div>
-        <Space style={{ position: 'absolute', right: '20px', paddingTop: '5px'}}>
+        <Space style={{ float: 'right', paddingRight: '7px', paddingBottom: '10px'}}>
             <Button style={{fontSize: '12px'}} size="small" type="primary" disabled={false/*!applyStatus*/} onClick={submit}>{actionLabel}</Button>
         </Space>
+        {false/*changed*/&&
+        <Space style={{ float: 'right', paddingRight: '10px',  paddingBottom: '10px'}}>
+            <Button style={{fontSize: '12px'}} size="small" type="primary" disabled={false/*!applyStatus*/} onClick={validate}>Validate</Button>
+        </Space> 
+        }
+        
         </div>
         </>
     );

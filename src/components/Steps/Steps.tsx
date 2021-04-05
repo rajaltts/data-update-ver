@@ -1,10 +1,11 @@
-import React, {Fragment, useEffect, useState} from 'react'
+import React, {Fragment, useEffect, useState, useRef} from 'react'
 import {Button, Tooltip, Space, Steps as AntSteps, Checkbox } from 'antd';
 import { CheckCircleFilled, RightCircleOutlined , ExclamationCircleTwoTone, CaretRightFilled, CaretLeftFilled } from '@ant-design/icons';
 import Step from './Step/Step';
 import { Operation } from '../../template.model';
 import './Steps.css';
 import { collapseTextChangeRangesAcrossMultipleVersions } from 'typescript';
+import { Parameter as parameter_type } from '../../template.model';
 
 interface StepsProps {
     operations: Operation[];
@@ -27,6 +28,8 @@ const Steps: React.FC<StepsProps> = (props) => {
     //-----------STATE----------------------------------------
     const [current, setCurrent] = useState(0);
     const [auto, setAuto] = useState(false);
+    const paramsRef = useRef([]);
+
 
     //---------EFFECT------------------------------------------
     useEffect(() => {
@@ -38,7 +41,30 @@ const Steps: React.FC<StepsProps> = (props) => {
 
 
     //---------HANDLER----------------------------------------
+    const saveParamsHandler = (p: parameter_type[] ) => {
+        paramsRef.current = p;
+    }
+    const changeParametersHandler = () => {
+        if(paramsRef.current.length===0)
+          return;
+         
+        const operationsUpdate = [...props.operations];
+        //const operationsUpdate = JSON.parse(JSON.stringify(props.operations)); // it is a deep copy
+        const a = operationsUpdate[current];
+        const sm = a.selected_method;
+        const m = a.methods.find( e => e.type === sm);
+        m.params.length = 0;
+        m.params = [...paramsRef.current];
+        props.changeOperations(operationsUpdate);
+        
+        paramsRef.current.length=0; // reset ref
+    }
+
+
     const stepsOnChangeHandler = (current) => {
+        console.log("useRef :");
+        paramsRef.current.forEach( p => console.log(p.name+" = "+p.value));
+        changeParametersHandler()
       //  if(!auto) { 
             const action = props.operations[current].action;
         //no run when click    props.updatedCurve(action);
@@ -46,6 +72,7 @@ const Steps: React.FC<StepsProps> = (props) => {
         setCurrent(current);
         props.changeCurrent(current);
         props.setAction(action);
+       
     }
 
     const changeSelectedMethod2 = (select:string, action: string) => {
@@ -119,6 +146,7 @@ const Steps: React.FC<StepsProps> = (props) => {
                               changeOperations= { changeOperationsHandler }
                               operations = {props.operations}
                               action={op.action}
+                              saveParams={saveParamsHandler}
                         />
                         );
         });
@@ -160,7 +188,7 @@ const Steps: React.FC<StepsProps> = (props) => {
                 <Button style={{fontSize: '12px', background: '#096dd9',  borderColor: '#096dd9'}} size="small" type="primary"  disabled={false} onClick={() => updatedCurveHandler('all')}>Apply All</Button>
             </div>
 
-            <div style={{ float: 'right', paddingRight: '20px', paddingTop: '0px', paddingBottom: '10px'}}>
+            <div style={{ float: 'right', paddingRight: '10px', paddingTop: '0px', paddingBottom: '10px'}}>
                 <Button style={{fontSize: '12px', background: '#096dd9',  borderColor: '#096dd9'}} size="small" type="primary"  disabled={false} onClick={resetModeHandler}>Reset Curves</Button>
             </div>
             <br/>
