@@ -5,8 +5,8 @@ export type Curve = {
     name: string;
     selected: boolean;
     opacity: number;
-    x0: number[];
-    y0: number[];
+    x0?: number[];
+    y0?: number[];
     oid: string;
     matDataLabel: string;
     label: string;

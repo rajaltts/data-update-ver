@@ -79,6 +79,17 @@ const dataReducer = (currentData: Data, action: Action) => {
     
                         group_d.treeData.push(curve_data);
                         group_d.keys.push(curve_data.key);
+                    } else {
+                        const curve_d: Curve = { id: index_c,
+                            x: [...c.x], y: [...c.y],
+                            name: 'average',
+                            label: (c.matDataLabel?c.matDataLabel:c.label),
+                            matDataLabel: c.matDataLabel,
+                            oid: c.oid,
+                            selected: true, opacity: 1
+                        };
+                        group_c.curves.push(curve_d);
+                        
                     }
                 });
                 data.groups.push(group_c);
