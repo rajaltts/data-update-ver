@@ -43,6 +43,7 @@ export type GroupData = {
     title: string; // group name
     treeData: CurveData[];
     keys: string[];
+    resultsView: number;
 }
 
 export type Tree = {

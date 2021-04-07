@@ -16,6 +16,8 @@ interface PlotCurveProps {
    clickPoint: (data: any) => boolean;
    plotUpdate: boolean;
    showMarkers: boolean;
+   resultsView: number;
+   changeView: (v: number) => void;
 };
 
 const PlotCurve: React.FC<PlotCurveProps> = (props) => {
@@ -30,15 +32,91 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
 
   useEffect(() => {
   
+    if(props.resultsView !== undefined){
+      const view = (props.resultsView===0?false:true);
+      setDisplayInitCurves(view);
+    }
+    
     const avg_cur_index = props.curves.findIndex( c => c.name==='average');
     const withAvgResult = (avg_cur_index===-1?false:true);
     if(withAvgResult)
       setShowSwitch(true);
     else
       setShowSwitch(false);
-    const displayInitCurve = (withAvgResult&&displayInitCurves?true:false);
-    
+    //const displayInitCurve = (withAvgResult&&displayInitCurves?true:false);
 
+
+    let data_: any = [];
+    if(withAvgResult){
+      const line : any = {
+        type: 'scatter',
+        mode: 'lines',
+        x: props.curves[avg_cur_index].x,
+        y: props.curves[avg_cur_index].y,
+        name: props.curves[avg_cur_index].name,
+        opacity: props.curves[avg_cur_index].opacity,
+        line: { color: '#000000', width: 4 },
+      };
+      data_.push(line);
+    }
+
+
+    if(displayInitCurves){
+      for(let i=0; i<props.curves.length; i++){
+        if(i===avg_cur_index)
+         continue;
+        const line : any = {
+          type: 'scatter',
+          mode: 'lines',
+          x: props.curves[i].x0,
+          y: props.curves[i].y0,
+          name: props.curves[i].name,
+          opacity: props.curves[i].opacity,
+          line: { color: colors[i] },
+        };
+        data_.push(line);
+      }
+      if(props.showMarkers){
+        for(let i=0; i<props.curves.length; i++){
+          if(props.curves[i].marker){
+            const x_marker2 = props.curves[i].x0[props.curves[i].marker];
+            const y_marker2 = props.curves[i].y0[props.curves[i].marker];
+            const point2 = { type: 'scatter', mode: 'markers', name: props.curves[i].name,  marker: { color: 'black', symbol: ['x'], size: 10 }, x: [x_marker2], y: [y_marker2] };
+            data_.push(point2);
+            
+          }
+        }
+      }
+    } else {
+      for(let i=0; i<props.curves.length; i++){
+        if(i===avg_cur_index)
+          continue;
+        const line : any = {
+          type: 'scatter',
+          mode: 'lines',
+          x: props.curves[i].x,
+          y: props.curves[i].y,
+          name: props.curves[i].name,
+          opacity: props.curves[i].opacity,
+          line: { color: colors[i] },
+        };
+        data_.push(line);
+      }
+      if(props.showMarkers){
+        for(let i=0; i<props.curves.length; i++){
+          if(props.curves[i].marker){
+            const x_marker = props.curves[i].x[props.curves[i].marker];
+            const y_marker = props.curves[i].y[props.curves[i].marker];
+            const point = { type: 'scatter', mode: 'markers', name: props.curves[i].name,  marker: { color: 'black', symbol: ['x'], size: 10 }, x: [x_marker], y: [y_marker] };
+            data_.push(point);
+          }
+        }
+      }
+    }
+    setDataPlot(data_);
+    
+    
+/*
     // data [ {average } {curve1}, { curve2},  ... { curveN}, {curveInit1}, { curveInit2},  ... { curveInitN},]
     // visible_current [ true(if exist), true, true, ....., false, false,....]
     // visibel_init  [ true(if exist) , false, false,...., true, true,...]
@@ -102,6 +180,12 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
           const point = { type: 'scatter', mode: 'markers', name: props.curves[i].name,  marker: { color: 'black', symbol: ['x'], size: 10 }, x: [x_marker], y: [y_marker] };
           data_.push(point);
           visible_current.push(true);
+          visible_init.push(false);
+          const x_marker2 = props.curves[i].x0[props.curves[i].marker];
+          const y_marker2 = props.curves[i].y0[props.curves[i].marker];
+          const point2 = { type: 'scatter', mode: 'markers', name: props.curves[i].name,  marker: { color: 'black', symbol: ['x'], size: 10 }, x: [x_marker], y: [y_marker] };
+          data_.push(point2);
+          visible_current.push(false);
           visible_init.push(true);
         }
       }
@@ -155,54 +239,8 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
     setMenus(updatemenus);
     setAnnotations(annotations);
 
-
-
-/*
-    let data_: any = [];
-    for(let i=0; i<props.curves.length; i++){
-      //console.log(props.curves[i].name);
-      let line : any = {
-        type: 'scatter',
-        //mode: 'lines+markers',
-        mode: 'lines',
-        x: props.curves[i].x,
-        y: props.curves[i].y,
-        name: props.curves[i].name,
-        opacity: props.curves[i].opacity,
-        line: { color: colors[i] },
-      // visible: props.curves[i].selected,
-      };
-      let line_init : any = {
-        type: 'scatter',
-        //mode: 'lines+markers',
-        mode: 'lines',
-        x: props.curves[i].x0,
-        y: props.curves[i].y0,
-        name: props.curves[i].name,
-        opacity: props.curves[i].opacity,
-        line: { color: colors[i] },
-      // visible: props.curves[i].selected,
-      };
-
-      if(props.curves[i].name==='average'){
-        line = {...line,  line: {color: 'rgb(0, 0, 0)', width: 4} };
-        line_init = {...line,  line: {color: 'rgb(0, 0, 0)', width: 4} };
-        //setShowSwitch(true);
-      }
-      if(props.curves[i].marker){
-        const x_marker = props.curves[i].x[props.curves[i].marker];
-        const y_marker = props.curves[i].y[props.curves[i].marker];
-        const point = { type: 'scatter', mode: 'markers', name: props.curves[i].name,  marker: { color: 'black', symbol: ['x'], size: 10 }, x: [x_marker], y: [y_marker] };
-        data_.push(point);
-      }
-      
-      if(displayInitCurve)
-        data_.push(line_init);
-      else 
-        data_.push(line);  
-    }
-    */
     setDataPlot(data_);
+    */
 
     if(props.group!==currentGroup){
       setNewGroup(true);
@@ -240,8 +278,8 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
     showlegend: false,
     autosize: true,
     // width: 800,
-    height: 550,
-    updatemenus: menus,
+    height: 530,
+  //  updatemenus: menus,
  //   annotations: annotations,
     hovermode: "closest",
     uirevision: (newGroup?'false':'true'),
@@ -342,22 +380,29 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
   } 
 
   const switchChange = (checked: boolean, event: Event) => {
-    setDisplayInitCurves(!checked);
-}
+    setDisplayInitCurves(checked);
+    const up = (checked===true?1:0);
+    props.changeView(up);
+  }
 
   return(
     <>
-   
+      <div style={{height: '20px', fontSize: '12px', paddingLeft: '5px'}}>
+      {showSwitch&&
+      <Space align='center'>
+             Shifted Curves
+             <Switch size="small" checked={displayInitCurves} style={{backgroundColor: "grey"}} onChange={switchChange} />
+             Initial Curves
+      </Space>}
+      </div>
+      
       <PlotlyChart
         data = { dataPlot }
         layout = { layout }
         config = { config }
-        //onUpdate = { (event) => props.updatePlot(event) }
-        //onClick = { (data) => props.clickPoint(data) }
         onClick = {AddPoint}
-        //onLegendDoubleClick =  { (event) => props.doubleClickLegendHandler(event)}
-        //onLegendClick =  { (event) => props.clickLegendHandler(event)}
       />
+
     
 
     <div>

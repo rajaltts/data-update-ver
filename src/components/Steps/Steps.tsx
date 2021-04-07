@@ -22,6 +22,7 @@ interface StepsProps {
     changeAuto: (v: boolean) => void;
     setAction: (a: string) => void;
     updatePlot: () => void;
+    removeAllPoints: () => void;
 };
 
 const Steps: React.FC<StepsProps> = (props) => {
@@ -114,13 +115,17 @@ const Steps: React.FC<StepsProps> = (props) => {
     const resetModeHandler = (event: any) => {
         //setCurrent(0);
         //props.changeCurrent(0);
-        props.restoreInitdata(-1,true); // -1 -> current group, true -> removePoints
+        props.restoreInitdata(-1); // -1 -> current group
         props.updatePlot();
     }
 
     const changeOperationsHandler = (new_ops: Operation[]) => { 
         props.changeOperations(new_ops);
      }
+
+    const removeAllPointsHandler = () => {
+        props.removeAllPoints();
+    } 
     
     //---------SUB-COMPONENTS------------------------------------
     function DisplayStep(props)  {
@@ -147,6 +152,7 @@ const Steps: React.FC<StepsProps> = (props) => {
                               operations = {props.operations}
                               action={op.action}
                               saveParams={saveParamsHandler}
+                              removeAllPoints={removeAllPointsHandler}
                         />
                         );
         });

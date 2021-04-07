@@ -44,9 +44,10 @@ const CurveControls: React.FC<CurveControlsProps> = (props) => {
                 </div>
             </Col>
             <Col  span={14}>
-                <Tooltip title="WARNING: All results will be reset" visible={(props.measurement==='engineering'?true:false)}>
+                {(props.measurement==='engineering'?true:false)&&
+                <Tooltip title="WARNING: All results will be reset">
                 <Button style={{fontSize: '11px',float: 'right'}} size="small"  type="primary"  disabled={(props.measurement==='engineering'?false:true)} onClick={submit}>Convert to True</Button>
-                </Tooltip>
+                </Tooltip>}
             </Col>
           </Row>
           <Row>

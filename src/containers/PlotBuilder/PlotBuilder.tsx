@@ -36,8 +36,9 @@ type Action =
     | {type: 'UPDATE_ALL_CURVES', groups: Group[] }
     | {type: 'RESET_CURVES', input: any}
     | {type: 'RESET_CURVES_INIT', groupid: number}
-    | {type: 'SET_MARKER', curve_id: number, point_id: number}
+    | {type: 'SET_MARKER', curve_name: string, point_id: number}
     | {type: 'RESET_MARKERS', group_id: number}
+    | {type: 'SET_VIEW', val: number}
     ;
 
 const dataReducer = (currentData: Data, action: Action) => {
@@ -57,7 +58,7 @@ const dataReducer = (currentData: Data, action: Action) => {
            
             action.input.groups.forEach( (g,index_g) => {
                 const group_c: Group = { id: index_g, curves: [], data: [], label:g.label, result: false};
-                const group_d: GroupData = { title: g.label, treeData: [], keys: [] };
+                const group_d: GroupData = { title: g.label, treeData: [], keys: [], resultsView: 0 };
 
                 g.curves.forEach( (c, index_c) => {
                     if(c.name!=='average'){
@@ -143,7 +144,8 @@ const dataReducer = (currentData: Data, action: Action) => {
         }
         case 'SET_MARKER':{
             const group_new = [...currentData.groups];
-            group_new[currentData.tree.selectedGroup].curves[action.curve_id].marker = action.point_id;
+            group_new[currentData.tree.selectedGroup].curves.find( c => c.name === action.curve_name).marker = action.point_id;
+            //group_new[currentData.tree.selectedGroup].curves[action.curve_id].marker = action.point_id;
             return {...currentData, groups: group_new};
         }
         case 'RESET_MARKERS': {
@@ -153,6 +155,11 @@ const dataReducer = (currentData: Data, action: Action) => {
                 val.marker = undefined;
             });
             return {...currentData, groups: group_new}
+        }
+        case 'SET_VIEW': {
+            const newData = {...currentData};
+            newData.tree.groupData[currentData.tree.selectedGroup].resultsView = action.val;
+            return newData;
         }
         default:
             throw new Error('Not be reach this case'); 
@@ -176,7 +183,8 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                     ],
             tree: { groupData: [ {title:'group1',
                                   treeData: [{title: 'curve1', key: '0-0', icon: <LineOutlined/>}],
-                                  keys: []
+                                  keys: [],
+                                  resultsView: 0
                                   }
                                 ],
                     selectedGroup: 0}
@@ -332,7 +340,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         if(isMarker)
            return false;
 
-        const curve_idx = data_plot.points[0].curveNumber;
+      //  const curve_idx = data_plot.points[0].curveNumber;
         const x = data_plot.points[0].x;
         const pt_index = data_plot.points[0].pointIndex;
         const curve_name = data_plot.points[0].data.name;
@@ -355,11 +363,16 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
       
        setOperations(operationsUpdate);
        // add marker in the curve
-       dispatch({type: 'SET_MARKER', curve_id: curve_idx, point_id: pt_index });
+       dispatch({type: 'SET_MARKER', curve_name: curve_name, point_id: pt_index });
        return true;
     }
 
-    const removeAllPoints = (group_id: number) => {
+    const changeViewHandler = (val: number) => {
+        dispatch({type: 'SET_VIEW', val: val });
+    }
+
+    const removeAllPoints = () => {
+        const group_id = data.tree.selectedGroup;
        
         const operationsUpdate = [...operations];
         const a = operationsUpdate.find( (el) => el.action === "Cleaning_ends");
@@ -369,6 +382,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
             m.params[0].curveId.length = 0;
         }
         dispatch({type: 'RESET_MARKERS', group_id: group_id});
+        updatePlotHandler();
     }
 
     // DataTree handler
@@ -909,7 +923,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
     // };
 
     // restore initial curves
-    const restoreInitdataHandler = (gid: number = -1,removePoints: boolean = false) => {
+    const restoreInitdataHandler = (gid: number = -1) => {
         let group_id: number;
         if(gid===-1)
             group_id = data.tree.selectedGroup;
@@ -921,9 +935,6 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         const operationsUpdate = [...operations];
         operationsUpdate.forEach( (val,index,arr) => {arr[index].status='waiting'});
         setOperations(operationsUpdate);
-        // remove all points selected on the curves for all groups
-        if(removePoints)
-            removeAllPoints(group_id);
     }
 
 
@@ -967,6 +978,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                            changeAuto={ (val) => setAuto(val)}
                            setAction={ (val) => setAction(val)}
                            updatePlot={updatePlotHandler}
+                           removeAllPoints={removeAllPoints}
                     />
                 </Col>
                 <Col span={12}>
@@ -979,6 +991,8 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                        clickPoint={clickPointHandler}
                        plotUpdate={plotUpdate}
                        showMarkers={showMarkers}
+                       resultsView={data.tree.groupData[data.tree.selectedGroup].resultsView}
+                       changeView={changeViewHandler}
                       />
                 </Col>
                 <Col span={6}>

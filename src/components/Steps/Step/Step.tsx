@@ -19,6 +19,7 @@ interface StepProps {
     operations: Operation[];
     action: string;
     saveParams: (p: parameter_type[] ) => void;
+    removeAllPoints: () => void;
 };
 
 const Step: React.FC<StepProps> = (props) => {
@@ -63,6 +64,10 @@ const Step: React.FC<StepProps> = (props) => {
         return ret;
     }
 
+    const removeAllPointsHAndler = () => {
+        props.removeAllPoints();
+    }
+
     return(
     <div style={{height: '360px',borderStyle: 'solid', borderWidth: '1px', borderColor: '#d9d9d9', paddingLeft: '5px', paddingBottom: '0px'}}>
     {/* <h1 style={{textAlign: 'center'}}>{props.action_label}</h1>  */}
@@ -84,6 +89,9 @@ const Step: React.FC<StepProps> = (props) => {
         apply={applyStatus}
         actionLabel={props.action_label}
         saveParams={props.saveParams}
+        action={props.action}
+        method={props.selected_method}
+        removeAllPoints={removeAllPointsHAndler}
     />   
     <div style={{paddingTop: '95px'}}>
     <DisplayAlert/>

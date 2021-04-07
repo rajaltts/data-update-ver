@@ -9,9 +9,12 @@ interface DisplayParameterProps {
     apply: boolean;
     actionLabel: string;
     saveParams: (p: parameter_type[] ) => void;
+    action: string;
+    method: string;
+    removeAllPoints: () => void;
 };
 
-const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, onChangeParameter,autoMode,apply,actionLabel,saveParams}) => {
+const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, onChangeParameter,autoMode,apply,actionLabel,saveParams,action,method,removeAllPoints}) => {
     const [params,setParams] = useState<parameter_type[]>([]);
     const [applyStatus,setApplyStatus] = useState(false);
     const { Option } = Select;
@@ -192,6 +195,10 @@ const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, on
         setChanged(false);
     };
 
+    const resetPoints = (e: any) => {
+        removeAllPoints();
+    }
+
     return(
         <>
         <div  style={{...fontStyle,height: '270px',borderStyle: 'dashed', borderWidth: '0px', paddingBottom: '0px',paddingLeft: '7px'}} >
@@ -205,6 +212,11 @@ const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, on
         {false/*changed*/&&
         <Space style={{ float: 'right', paddingRight: '10px',  paddingBottom: '10px'}}>
             <Button style={{fontSize: '12px'}} size="small" type="primary" disabled={false/*!applyStatus*/} onClick={validate}>Validate</Button>
+        </Space> 
+        }
+        {(action==='Cleaning_ends'&&method==='Max_Xs')&&
+        <Space style={{ float: 'right', paddingRight: '10px',  paddingBottom: '10px'}}>
+            <Button style={{fontSize: '12px'}} size="small" type="primary" disabled={false/*!applyStatus*/} onClick={resetPoints}>Reset Points</Button>
         </Space> 
         }
         
