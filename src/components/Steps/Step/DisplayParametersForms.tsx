@@ -1,12 +1,13 @@
 import React , {useState, useEffect} from 'react'
 import { Parameter as parameter_type } from '../../../template.model';
 import '../../../App.css';
-import {Select, Button, Space, Input, Alert,  Row, Col, Slider, InputNumber, Divider  } from 'antd';
+import {Select, Button, Space,  Row, Col, InputNumber} from 'antd';
+// npm install --save rfdc @types/rfdc
+const clone = require('rfdc')();
+
 interface DisplayParameterProps {
     initParams: parameter_type[];
     onChangeParameter: (a: any, apply: boolean) => any;
-    autoMode: boolean;
-    apply: boolean;
     actionLabel: string;
     saveParams: (p: parameter_type[] ) => void;
     action: string;
@@ -14,18 +15,17 @@ interface DisplayParameterProps {
     removeAllPoints: () => void;
 };
 
-const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, onChangeParameter,autoMode,apply,actionLabel,saveParams,action,method,removeAllPoints}) => {
+const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, onChangeParameter,actionLabel,saveParams,action,method,removeAllPoints}) => {
     const [params,setParams] = useState<parameter_type[]>([]);
-    const [applyStatus,setApplyStatus] = useState(false);
     const { Option } = Select;
     const [linked,setLinked] = useState([]);
-    const [changed,setChanged] = useState(false);
 
     useEffect( () => {
         //const param_init = [...initParams];  // it is a shallow copy
-        const param_init = JSON.parse(JSON.stringify(initParams)); // it is a deep copy
+        //const param_init = JSON.parse(JSON.stringify(initParams)); // it is a deep copy
+        console.log("Action: "+action+" Method: "+method);
+        const param_init = clone(initParams); // efficient deep copy
         setParams(param_init);
-        setApplyStatus(apply);
         const linked_init = [];
         param_init.forEach(p => {
             if('selection' in p){
@@ -38,22 +38,7 @@ const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, on
             }
         });
         setLinked(linked_init);
-    },[initParams,apply]);
-
-    // useEffect( () => { return () => {
-        
-    // }
-    // },[]);
-
-    // this solution does not work , infinite loop
-    // Solutions
-    // 1 - Add a validate button when parameter changed and call onChangeParameter but without apply
-    // 2 - use useRef to avoid the infinite loop
-    // useEffect( () => {
-    //     if(params.length!==0)
-    //        onChangeParameter(params);
-    // },[params]);
-    
+    },[initParams]);
 
     const changeParamHandler = (event: any,name: string) => {
         const new_params = [...params];
@@ -62,19 +47,15 @@ const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, on
             par.value=event;
         setParams(new_params);
         saveParams(new_params);
-        setApplyStatus(true);
-        setChanged(true);
     }
 
     const selectParamHandler = (value:any, name: string, param: any) => {
-        setApplyStatus(true);
         const value_num = param.selection.findIndex( e => e.name===value);
         const new_params = [...params];
         const par = new_params.find( e => e.name===name);
         if(par)
             par.value=value_num;
         setParams(new_params);
-        setChanged(true);
         saveParams(new_params);
 
         const linked_curr = linked;
@@ -179,20 +160,12 @@ const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, on
             }
         }
     }
-        
     );
-
-    const validate = (e: any) => {
-       // e.preventDefault();
-        onChangeParameter(params,false);
-       // setParams([]);
-    };
 
     const submit = (e: any) => {
         e.preventDefault();
         onChangeParameter(params,true);
         setParams([]);
-        setChanged(false);
     };
 
     const resetPoints = (e: any) => {
@@ -207,16 +180,11 @@ const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, on
         </div>
         <div>
         <Space style={{ float: 'right', paddingRight: '7px', paddingBottom: '10px'}}>
-            <Button style={{fontSize: '12px'}} size="small" type="primary" disabled={false/*!applyStatus*/} onClick={submit}>{actionLabel}</Button>
+            <Button style={{fontSize: '12px'}} size="small" type="primary" onClick={submit}>{actionLabel}</Button>
         </Space>
-        {false/*changed*/&&
-        <Space style={{ float: 'right', paddingRight: '10px',  paddingBottom: '10px'}}>
-            <Button style={{fontSize: '12px'}} size="small" type="primary" disabled={false/*!applyStatus*/} onClick={validate}>Validate</Button>
-        </Space> 
-        }
         {(action==='Cleaning_ends'&&method==='Max_Xs')&&
         <Space style={{ float: 'right', paddingRight: '10px',  paddingBottom: '10px'}}>
-            <Button style={{fontSize: '12px'}} size="small" type="primary" disabled={false/*!applyStatus*/} onClick={resetPoints}>Reset Points</Button>
+            <Button style={{fontSize: '12px'}} size="small" type="primary" onClick={resetPoints}>Reset Points</Button>
         </Space> 
         }
         

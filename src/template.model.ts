@@ -16,7 +16,7 @@ export type Parameter = {
     selection?: Selection[];
     range?: Range;
     value: any; // number or number[]
-    curveId?: string[];
+    curveId?: {groupId: number, curveName: string}[];
     float?: boolean;
     conditional?: string;
    };

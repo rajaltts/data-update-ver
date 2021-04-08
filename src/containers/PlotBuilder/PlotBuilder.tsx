@@ -1,19 +1,15 @@
-import React, { Fragment, useEffect, useState, useReducer } from 'react';
-import { Col, Row , Alert, Button } from 'antd';
-import {LineOutlined, SafetyCertificateTwoTone} from '@ant-design/icons'
+import React, {  useEffect, useState, useReducer } from 'react';
+import { Col, Row , Button } from 'antd';
+import {LineOutlined} from '@ant-design/icons'
 import 'antd/dist/antd.css';
 import PlotCurve from '../../components/PlotCurve/PlotCurve';
-import OperationControls from '../../components/OperationControls/OperationControls'
 import CurveControls from '../../components/CurveControls/CurveControls'
 import Steps from '../../components/Steps/Steps';
 import { Data, Group, Curve, Tree, GroupData, CurveData } from '../../data.model';
 import { Operation } from '../../template.model';
-
 import ReactWasm from '../../assets/dataclean/dataclean.js'
 import {colors} from '../../assets/colors';
 import { tensile_operations_config } from '../../assets/tensile_operations_config.js';
-
-
 
 //---------INTERFACE-----------------------------
 interface EmscriptenModule {
@@ -120,12 +116,12 @@ const dataReducer = (currentData: Data, action: Action) => {
             // input: curves
             // output: replace current curves by the input curves
             console.log('UPDATE_CURVES');
-            console.log(currentData);
+            //console.log(currentData);
             const group_new = [...currentData.groups];
             group_new[currentData.tree.selectedGroup].curves = action.curves;
             group_new[currentData.tree.selectedGroup].data = action.data;
             group_new[currentData.tree.selectedGroup].result = action.result;
-            console.log(group_new);
+            //console.log(group_new);
             return {...currentData, groups: group_new};
         }
         case 'UPDATE_ALL_CURVES':{
@@ -218,7 +214,6 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
     // need to manage the state to manage group changes
     // should be better to use useContext hook to share these state with Steps component
     const [current, setCurrent] = useState(0);
-    const [auto, setAuto] = useState(false);
     const [precision,setPrecision] = useState(3);
     const [action,setAction]= useState("");
     const [ measurement, setMeasurement] = useState("engineering");
@@ -319,11 +314,6 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
     const changeOperationsHandler = (new_ops: Operation[]) => { 
         setOperations(new_ops);
      }
-     // fct called by  resetAll button 
-    const initHandler = () => { 
-        dispatch({type: 'SET', input: props.data_input}); // init curves
-        setTemplate(props.template_input); // init operations
-    };
 
     const changeSelectedMethodHandler = (selectedMethod: string,action: string) => {
         console.log(selectedMethod+"--"+action);
@@ -341,17 +331,13 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
     // Curve handler
     const clickPointHandler = (data_plot) : boolean =>  { // should be replace by a call to updateCurveHandler with the right ALGO/METHOD and id
         console.log("CLICK POINT HANDLER");
-        console.log(data_plot);
-
-    //    if(!auto&&action!=="Cleaning_ends")
-    //       return false;
+        //console.log(data_plot);
 
         // check if we click on a merker
         const isMarker = (data_plot.points[0].data.mode==='markers'?true:false);
         if(isMarker)
            return false;
 
-      //  const curve_idx = data_plot.points[0].curveNumber;
         const x = data_plot.points[0].x;
         const pt_index = data_plot.points[0].pointIndex;
         const curve_name = data_plot.points[0].data.name;
@@ -364,10 +350,11 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
        if(m.type!=='Max_Xs')
          return false;
        //  check if already inserted
-       const index = m.params[0].curveId.findIndex( e => e === curve_name );
+       const group_id = data.tree.selectedGroup;
+       const index = m.params[0].curveId.findIndex( e => (e.curveName === curve_name && e.groupId === group_id) );
        if(index===-1){
           m.params[0].value = [...m.params[0].value,  pt_index]; // pt_index
-          m.params[0].curveId = [...m.params[0].curveId, curve_name];
+          m.params[0].curveId = [...m.params[0].curveId, {groupId: group_id,curveName: curve_name}];
        } else {
           m.params[0].value[index] =  pt_index; 
        }
@@ -389,8 +376,18 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         const a = operationsUpdate.find( (el) => el.action === "Cleaning_ends");
         const m = a.methods.find( m => m.type=='Max_Xs');
         if(m){
+            const new_value= [];
+            const new_id = [];
+            for(let i=0; i<  m.params[0].curveId.length; i++){
+                if(m.params[0].curveId[i].groupId!==group_id){
+                    new_id.push(m.params[0].curveId[i]);
+                    new_value.push(m.params[0].value[i]);
+                }
+            }
             m.params[0].value.length = 0;
             m.params[0].curveId.length = 0;
+            m.params[0].value = [...new_value];
+            m.params[0].curveId = [...new_id];
         }
         dispatch({type: 'RESET_MARKERS', group_id: group_id});
         updatePlotHandler();
@@ -402,7 +399,6 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         const keys = [];
         let group_index = '-1';
         if(checkedKeys.length>0){
-            //const group_index = checkedKeys[checkedKeys.length-1].charAt(0);
             group_index = checkedKeys.slice(-1)[0].charAt(0);  // index group of last check
             checkedKeys.forEach( (item, index) =>
             {
@@ -414,10 +410,9 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         dispatch({ type: 'CHECK_CURVES', keys: keys, groupid: group_id});
         // check result status of the group
         const result_status = data.groups[group_id].result;
-        if(!result_status){ // if no result reset data and set to first step with auto mode
+        if(!result_status){ // if no result reset data and set to first step
             restoreInitdataHandler();
             setCurrent(0);
-           // setAuto(true);
         }
     };
 
@@ -489,10 +484,6 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                             x_new.push(vecX_out.get(i));
                             y_new.push(vecY_out.get(i));
                         }
-                        // groups_new[gid].curves[cid].x.length=0;
-                        // groups_new[gid].curves[cid].y.length=0;
-                        // groups_new[gid].curves[cid].x = [...x_new];
-                        // groups_new[gid].curves[cid].y = [...y_new];
                         if(groups_new[gid].curves[cid].x0){  // not for average curve
                             groups_new[gid].curves[cid].x0.length=0;
                             groups_new[gid].curves[cid].y0.length=0;
@@ -505,7 +496,6 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                         ic++;
                     }
                 }
-               // dispatch({type: 'UPDATE_ALL_CURVES', groups: groups_new});
                setMeasurement('true');
             }
             const todoOperationFailed = (dataprocess: any) => {
@@ -552,15 +542,6 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         props.parentCallback(result);
     }
 
-    const changeParameterHandler = (name: string, value: number, action: string) => {
-        const operationsUpdate = [...operations];
-        const a = operationsUpdate.find( (el) => el.action === action);
-        const sm = a.selected_method;
-        const m = a.methods.find( e => e.type === sm);
-        const p = m.params.find( e => e.name === name);
-        p.value = value;
-        setOperations(operationsUpdate);
-    }
     //Operation Handler
     const updatedCurveHandler = (action) => { 
         // always reset curve between update
@@ -647,8 +628,8 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
             // create DataProcess
             const dataprocess = new Module.DataProcess(dataset);
             
-            let error_msg;
-            let log;
+            let error_msg: string;
+            let log: string;;
             // promise
             const applyOperation = (dataprocess) => {
                 return new Promise((success,failure) => {
@@ -676,9 +657,19 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                                         if(param.float){ // if the float is an integer number we need to add decimal separator in order to well interpreted by dataclean.lib
                                             val = (val===0?1e-15:val*(1+1e-15));
                                         } 
-                                        par.push( {[name] : val})
                                         if(param.curveId){
-                                            par.push( {curveId : param.curveId });
+                                            const curve_names = [];
+                                            const values = [];
+                                            param.curveId.forEach( (p,i) => {
+                                                if(p.groupId === group_id){
+                                                    curve_names.push(p.curveName);
+                                                    values.push(val[i]);
+                                                }
+                                            })
+                                            par.push( {curveId : curve_names });
+                                            par.push( {[name] : values})
+                                        } else {
+                                            par.push( {[name] : val})
                                         }
                                     }
                                 }
@@ -744,40 +735,38 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                 // result flag (true is we have an averagin curve)
                 let result_flag = false;
                 // get curves
-               // if(!dataset_out.hasCurve('averaging')){ // do not replace the curve when an averaging curve is generated, we would like to see the ref curves
-                    for(let curve_idx=0;curve_idx<newCurves.length;curve_idx++){
-                        const curve_out = dataset_out.getCurve(newCurves[curve_idx].name);
-                        // get Xs, Ys
-                        //console.log("new points");
-                        let vecX_out = curve_out.getX();
-                        let vecY_out = curve_out.getY();
-                        //console.log("new size: "+vecX_out.size());
-            
-                        // update newCurves
-                        const x_new = [];
-                        const y_new = [];
-                        for(let i=0; i< vecX_out.size(); i++){
-                            x_new.push(vecX_out.get(i));
-                            y_new.push(vecY_out.get(i));
-                        }
-                        //console.log("----------new X,Y-------------");
-                        //console.log("new size:"+x_new.length);
-                    
-                        // update selected curves
-                        if(newCurves[curve_idx].selected){
-                            // reset x and y
-                            newCurves[curve_idx].x.length = 0;
-                            newCurves[curve_idx].y.length = 0;
-                            // update x and y array
-                            newCurves[curve_idx].x = x_new;
-                            newCurves[curve_idx].y = y_new;
-                        }
-                        // delete C++ object
-                        curve_out.delete();
-                        vecX_out.delete();
-                        vecY_out.delete();
+                for(let curve_idx=0;curve_idx<newCurves.length;curve_idx++){
+                    const curve_out = dataset_out.getCurve(newCurves[curve_idx].name);
+                    // get Xs, Ys
+                    //console.log("new points");
+                    let vecX_out = curve_out.getX();
+                    let vecY_out = curve_out.getY();
+                    //console.log("new size: "+vecX_out.size());
+        
+                    // update newCurves
+                    const x_new = [];
+                    const y_new = [];
+                    for(let i=0; i< vecX_out.size(); i++){
+                        x_new.push(vecX_out.get(i));
+                        y_new.push(vecY_out.get(i));
                     }
-               // }
+                    //console.log("----------new X,Y-------------");
+                    //console.log("new size:"+x_new.length);
+                
+                    // update selected curves
+                    if(newCurves[curve_idx].selected){
+                        // reset x and y
+                        newCurves[curve_idx].x.length = 0;
+                        newCurves[curve_idx].y.length = 0;
+                        // update x and y array
+                        newCurves[curve_idx].x = [...x_new];
+                        newCurves[curve_idx].y = [...y_new];
+                    }
+                    // delete C++ object
+                    curve_out.delete();
+                    vecX_out.delete();
+                    vecY_out.delete();
+                }
                 if(dataset_out.hasCurve('averaging')){
                     result_flag = true;
                     const curve_out = dataset_out.getCurve('averaging');
@@ -811,30 +800,6 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                     data_analytics.push({label: "Young's Modulus", value: young, name: "young"});
                     op_slope.delete();
                     dp_data.delete();
-
-                    /*
-                    // create DataProcess
-                    const dp_data_slope = new Module.DataProcess(dataset_out);
-                    // create operation                   
-                    const op_slope_range = new Module.Operation(Module.ActionType.DATA_ANALYTICS,Module.MethodType.SLOPE_RANGE_POINT);
-                    op_slope_range.addParameterFloat("x_begin",0.0005);
-                    //op_slope_range.addParameterFloat("x_end",0.0025);
-                    op_slope_range.addParameterFloat("x_end",0.005);
-                    // apply operation
-                    const check_slope_range = dp_data_slope.apply(op_slope_range);
-                    console.log("ERROR KO"+dp_data_slope.getErrorMessage());
-                    console.log("LOG OK:"+dp_data_slope.logfile());
-                    const dp_data_slope_range_out = dp_data_slope.getOutputDataset();
-                    const curve_data_slope_out = dp_data_slope_range_out.getCurve('averaging');
-                    let vecX_data_slope_out = curve_data_slope_out.getY();
-                    let vecY_data_slope_out = curve_data_slope_out.getY();
-                    const young_range = vecX_data_slope_out.get(0);
-                    console.log("Young Range ="+young_range);
-                    data_analytics.length = 0;
-                    data_analytics.push({label: "Young's Modulus 2", value: young_range});
-                    op_slope_range.delete();
-                    dp_data_slope.delete();
-                    */
 
                     // create DataProcess
                     const dp_data_end = new Module.DataProcess(dataset_out);                 
@@ -884,6 +849,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                     }
                 }
                 setOperations(operationsUpdate);
+                updatePlotHandler();
             }
 
             const todoOperationFailed = (dataprocess) => {
@@ -911,7 +877,6 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                 operationsUpdate.find( (el) => el.action === action_error).status = 'failed';
                 operationsUpdate.find( (el) => el.action === action_error).error = error_msg;
                 
-                
                 setOperations(operationsUpdate);
             }
 
@@ -922,16 +887,6 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         });
         
     };
-
-    // cancel an operation and restore previous data state
-    // const resetOperationHandler = (event, action) => {
-    //     dispatch({type: 'RESET_CURVES',input: previousCurves});
-    //      // flag status operation
-    //     const operationsUpdate = [...operations];
-    //     const ind = operationsUpdate.findIndex( (el) => el.action === action);
-    //     operationsUpdate[ind].status = 'waiting';
-    //     setOperations(operationsUpdate);
-    // };
 
     // restore initial curves
     const restoreInitdataHandler = (gid: number = -1) => {
@@ -947,7 +902,6 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         operationsUpdate.forEach( (val,index,arr) => {arr[index].status='waiting'});
         setOperations(operationsUpdate);
     }
-
 
     const getAxisLabel = () => {
         let axis_label = { xlabel: data.xtype, ylabel: data.ytype };
@@ -969,6 +923,13 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
 
     }
 
+    const dataTypeHandler = () => {
+        if(data.type === undefined)
+         return 'tensile';
+        else
+         return data.type;
+    }
+
     return (
         <>
         <div className="OuterDivScroll">
@@ -977,19 +938,15 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                 <Col span={6}>
                     <Steps operations={operations}
                            changeSelectedMethod={changeSelectedMethodHandler}
-                           changeParameter= {changeParameterHandler}
                            updatedCurve={updatedCurveHandler}
-                           resetAll={initHandler}
                            changeOperations={changeOperationsHandler}
                            restoreInitdata={restoreInitdataHandler}
-                           resultStatus={data.groups[data.tree.selectedGroup].result}
                            currentIn={current}
-                           autoIn={auto}
                            changeCurrent={ (cur) => setCurrent(cur)}
-                           changeAuto={ (val) => setAuto(val)}
                            setAction={ (val) => setAction(val)}
                            updatePlot={updatePlotHandler}
                            removeAllPoints={removeAllPoints}
+                           dataType={dataTypeHandler()}
                     />
                 </Col>
                 <Col span={12}>

@@ -5,7 +5,6 @@ import {Table, Switch, Space } from 'antd';
 
 import { Curve } from '../../data.model';
 import { colors } from '../../assets/colors.js';
-import SkeletonButton from 'antd/lib/skeleton/Button';
 
 interface PlotCurveProps {
    group: number;
@@ -27,24 +26,22 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
   const [currentGroup,setCurrentGroup] = useState(-1);
   const [displayInitCurves,setDisplayInitCurves ] = useState(false);
   const [showSwitch,setShowSwitch] = useState(false);
-  const [menus,setMenus] = useState([]);
-  const [annotations,setAnnotations] = useState([]);
 
   useEffect(() => {
   
-    if(props.resultsView !== undefined){
-      const view = (props.resultsView===0?false:true);
-      setDisplayInitCurves(view);
-    }
-    
     const avg_cur_index = props.curves.findIndex( c => c.name==='average');
     const withAvgResult = (avg_cur_index===-1?false:true);
     if(withAvgResult)
       setShowSwitch(true);
     else
       setShowSwitch(false);
-    //const displayInitCurve = (withAvgResult&&displayInitCurves?true:false);
 
+    if(withAvgResult&&props.resultsView !== undefined){
+      const view = (props.resultsView===0?false:true);
+      setDisplayInitCurves(view);
+    } else {
+      setDisplayInitCurves(false);
+    }
 
     let data_: any = [];
     if(withAvgResult){
@@ -62,6 +59,7 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
 
 
     if(displayInitCurves){
+      console.log("PLOT init curves");
       for(let i=0; i<props.curves.length; i++){
         if(i===avg_cur_index)
          continue;
@@ -88,6 +86,7 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
         }
       }
     } else {
+      console.log("PLOT result curves");
       for(let i=0; i<props.curves.length; i++){
         if(i===avg_cur_index)
           continue;
@@ -114,133 +113,6 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
       }
     }
     setDataPlot(data_);
-    
-    
-/*
-    // data [ {average } {curve1}, { curve2},  ... { curveN}, {curveInit1}, { curveInit2},  ... { curveInitN},]
-    // visible_current [ true(if exist), true, true, ....., false, false,....]
-    // visibel_init  [ true(if exist) , false, false,...., true, true,...]
-    let data_: any = [];
-    const visible_current = [];
-    const visible_init = [];
-    if(withAvgResult){
-      const line : any = {
-        type: 'scatter',
-        mode: 'lines',
-        x: props.curves[avg_cur_index].x,
-        y: props.curves[avg_cur_index].y,
-        name: props.curves[avg_cur_index].name,
-        opacity: props.curves[avg_cur_index].opacity,
-        line: { color: '#000000', width: 4 },
-      };
-      data_.push(line);
-      visible_current.push(true);
-      visible_init.push(true);
-    }
-    for(let i=0; i<props.curves.length; i++){
-      if(i===avg_cur_index)
-        continue;
-      const line : any = {
-        type: 'scatter',
-        mode: 'lines',
-        x: props.curves[i].x,
-        y: props.curves[i].y,
-        name: props.curves[i].name,
-        opacity: props.curves[i].opacity,
-        line: { color: colors[i] },
-      };
-      data_.push(line);
-      visible_current.push(true);
-      visible_init.push(false);
-    }
-    if(withAvgResult){
-      for(let i=0; i<props.curves.length; i++){
-        if(i===avg_cur_index)
-         continue;
-        const line : any = {
-          type: 'scatter',
-          mode: 'lines',
-          visible: false,
-          x: props.curves[i].x0,
-          y: props.curves[i].y0,
-          name: props.curves[i].name,
-          opacity: props.curves[i].opacity,
-          line: { color: colors[i] },
-        };
-        data_.push(line);
-        visible_current.push(false);
-        visible_init.push(true);
-      }
-    }
-    if(props.showMarkers){
-      for(let i=0; i<props.curves.length; i++){
-        if(props.curves[i].marker){
-          const x_marker = props.curves[i].x[props.curves[i].marker];
-          const y_marker = props.curves[i].y[props.curves[i].marker];
-          const point = { type: 'scatter', mode: 'markers', name: props.curves[i].name,  marker: { color: 'black', symbol: ['x'], size: 10 }, x: [x_marker], y: [y_marker] };
-          data_.push(point);
-          visible_current.push(true);
-          visible_init.push(false);
-          const x_marker2 = props.curves[i].x0[props.curves[i].marker];
-          const y_marker2 = props.curves[i].y0[props.curves[i].marker];
-          const point2 = { type: 'scatter', mode: 'markers', name: props.curves[i].name,  marker: { color: 'black', symbol: ['x'], size: 10 }, x: [x_marker], y: [y_marker] };
-          data_.push(point2);
-          visible_current.push(false);
-          visible_init.push(true);
-        }
-      }
-    }
-  
-    let updatemenus;
-    let annotations;
-    if(withAvgResult){
-     
-      updatemenus = [
-      {
-        buttons: [{
-          args: [{'visible': [...visible_current]}],
-          label: 'Shifted Curves',
-          method: 'restyle'
-        },
-        {
-          args: [{'visible': [...visible_init]}],
-          label: 'Initial Curves',
-          method: 'restyle'
-        }
-        ],
-        direction: 'left',
-        font: {size: 12},
-        showactive: true,
-        type: 'buttons',
-        x: 0.0,
-        xanchor: 'left',
-        y: 1.2,
-        yanchor: 'top',
-        // bgcolor: '#1890ff',
-        // bordercolor: '#1890ff'
-      }
-      ];
-
-      annotations = [
-        {
-          text: 'Reference Curves:',
-          x: 0.,
-          y: 1.185,
-          //yref: 'paper',
-          yref: 'domain',
-          align: 'left',
-          showarrow: false
-        }
-      ];
-    } else {
-      updatemenus =[];
-      annotations = [];
-    }
-    setMenus(updatemenus);
-    setAnnotations(annotations);
-
-    setDataPlot(data_);
-    */
 
     if(props.group!==currentGroup){
       setNewGroup(true);
@@ -272,15 +144,11 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
     
   }
 
-  
   const layout = { 
     modebardisplay: false,
     showlegend: false,
     autosize: true,
-    // width: 800,
     height: 530,
-  //  updatemenus: menus,
- //   annotations: annotations,
     hovermode: "closest",
     uirevision: (newGroup?'false':'true'),
     margin: {
@@ -327,35 +195,6 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
       }
     ]
   };
- /*
-  var config = {
-    displaylogo: false, // remove plotly icon
-    reponsive: true,
-    modeBarButtonsToAdd: [
-      {
-        name: 'show markers',
-        icon: Plotly.Icons.pencil,
-        direction: 'up',
-        click: function(gd) {
-          var newMode = 'lines+markers';
-          Plotly.restyle(gd, 'mode', newMode);
-        }
-      },
-      {
-        name: 'hide markers',
-        icon: Plotly.Icons.eraseshape,
-        click: function(gd) {
-          console.log(gd);
-          var newMode = 'lines';
-          Plotly.restyle(gd, 'mode', newMode);
-        }
-      }
-    ],
-    modeBarButtonsToRemove: [ 'hoverClosestCartesian', 'hoverCompareCartesian'] // 2D: zoom2d, pan2d, select2d, lasso2d, zoomIn2d, zoomOut2d, autoScale2d, resetScale2d
-                                                  //'Cartesian', hoverClosestCartesian, hoverCompareCartesian
-                                                  //-'Other', hoverClosestGl2d, hoverClosestPie, toggleHover, resetViews, toImage, sendDataToCloud, toggleSpikelines, resetViewMapbox
-  }
-   */ 
 
   function DisplayData(props) {
 
@@ -391,7 +230,7 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
       {showSwitch&&
       <Space align='center'>
              Shifted Curves
-             <Switch size="small" checked={displayInitCurves} style={{backgroundColor: "grey"}} onChange={switchChange} />
+             <Switch size="small" checked={displayInitCurves}  onChange={switchChange} />
              Initial Curves
       </Space>}
       </div>
