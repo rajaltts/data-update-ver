@@ -184,7 +184,7 @@ const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, on
         </Space>
         {(action==='Cleaning_ends'&&method==='Max_Xs')&&
         <Space style={{ float: 'right', paddingRight: '10px',  paddingBottom: '10px'}}>
-            <Button style={{fontSize: '12px'}} size="small" type="primary" onClick={resetPoints}>Reset Points</Button>
+            <Button style={{fontSize: '12px'}} size="small" type="primary" onClick={resetPoints}>Remove Points</Button>
         </Space> 
         }
         

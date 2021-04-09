@@ -10,6 +10,7 @@ import { Operation } from '../../template.model';
 import ReactWasm from '../../assets/dataclean/dataclean.js'
 import {colors} from '../../assets/colors';
 import { tensile_operations_config } from '../../assets/tensile_operations_config.js';
+const clone = require('rfdc')();
 
 //---------INTERFACE-----------------------------
 interface EmscriptenModule {
@@ -51,10 +52,11 @@ const dataReducer = (currentData: Data, action: Action) => {
                                 tree: { groupData: [],
                                         selectedGroup: 0}
                                 };
-           
+            const initState = (action.input.tree === undefined?true:false);
             action.input.groups.forEach( (g,index_g) => {
-                const group_c: Group = { id: index_g, curves: [], data: [], label:g.label, result: false};
-                const group_d: GroupData = { title: g.label, treeData: [], keys: [], resultsView: 0 };
+                const group_c: Group = { id: index_g, curves: [], data: [], label:g.label, result: (initState?false:g.result)};
+                const group_d: GroupData = { title: g.label, treeData: [], keys: (initState?[]:[...action.input.tree.groupData[index_g].keys]), 
+                                             resultsView: (initState?0:action.input.tree.groupData[index_g].resultsView)};
 
                 g.curves.forEach( (c, index_c) => {
                     if(c.name!=='average'){
@@ -64,17 +66,16 @@ const dataReducer = (currentData: Data, action: Action) => {
                                                  label: (c.matDataLabel?c.matDataLabel:c.label),
                                                  matDataLabel: c.matDataLabel,
                                                  oid: c.oid,
-                                                 selected: true, opacity: 1,
-                                                 x0: [...c.x], y0: [...c.y]};
-                        
+                                                 selected: (initState?true:c.selected),
+                                                 opacity: (initState?1:c.opacity),
+                                                 x0: (initState?[...c.x]:[...c.x0]),
+                                                 y0: (initState?[...c.y]:[...c.y0])};
                         group_c.curves.push(curve_d);
-                        group_c.data.push({label:'',value: 0});
-    
+                        // insert in GroupData
                         const curve_data: CurveData = { title: curve_d.label,key: '',icon: <LineOutlined style={{fontSize: '24px', color: colors[index_c]}}/>};
                         curve_data.key = index_g.toString()+'-'+index_c.toString();
-    
                         group_d.treeData.push(curve_data);
-                        group_d.keys.push(curve_data.key);
+                        //group_d.keys.push(curve_data.key);
                     } else {
                         const curve_d: Curve = { id: index_c,
                             x: [...c.x], y: [...c.y],
@@ -85,9 +86,15 @@ const dataReducer = (currentData: Data, action: Action) => {
                             selected: true, opacity: 1
                         };
                         group_c.curves.push(curve_d);
-                        
                     }
                 });
+                if(initState)
+                    group_c.data.push({label:'',value: 0});
+                else{
+                    const data_c = clone(g.data); // efficient deep copy
+                    group_c.data =  data_c;
+                }
+                       
                 data.groups.push(group_c);
                 data.tree.groupData.push(group_d);
             });
@@ -367,6 +374,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
 
     const changeViewHandler = (val: number) => {
         dispatch({type: 'SET_VIEW', val: val });
+        console.log(data);
     }
 
     const removeAllPoints = () => {
@@ -475,6 +483,8 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                 let ic = 0;
                 for(let gid=0; gid<data.groups.length;gid++){
                     for(let cid=0; cid<data.groups[gid].curves.length; cid++){
+                        if(data.groups[gid].curves[cid].x0===undefined) // do not consider avaerage curve
+                            continue;
                         const curve_out = dataset_out.getCurve(ic.toString());
                         let vecX_out = curve_out.getX();
                         let vecY_out = curve_out.getY();

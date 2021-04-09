@@ -51,7 +51,7 @@ const Steps: React.FC<StepsProps> = (props) => {
     const stepsOnChangeHandler = (current) => {
         console.log("useRef :");
         paramsRef.current.forEach( p => console.log(p.name+" = "+p.value));
-        changeParametersHandler()
+        changeParametersHandler();
         const action = props.operations[current].action;
         setCurrent(current);
         props.changeCurrent(current);
@@ -85,6 +85,10 @@ const Steps: React.FC<StepsProps> = (props) => {
     const removeAllPointsHandler = () => {
         props.removeAllPoints();
     } 
+    const applyAllHandler = () => {
+        changeParametersHandler();
+        updatedCurveHandler('all')
+    }
     
     //---------SUB-COMPONENTS------------------------------------
     function DisplayStep(props)  {
@@ -147,7 +151,7 @@ const Steps: React.FC<StepsProps> = (props) => {
             
             <br/>
             <div style={{  float: 'right', paddingRight: '7px', paddingTop: '0px', paddingBottom: '10px'}}>
-                <Button style={{fontSize: '12px', background: '#096dd9',  borderColor: '#096dd9'}} size="small" type="primary"  disabled={false} onClick={() => updatedCurveHandler('all')}>Apply All</Button>
+                <Button style={{fontSize: '12px', background: '#096dd9',  borderColor: '#096dd9'}} size="small" type="primary"  disabled={false} onClick={() => applyAllHandler()/*updatedCurveHandler('all')*/}>Apply All</Button>
             </div>
 
             <div style={{ float: 'right', paddingRight: '10px', paddingTop: '0px', paddingBottom: '10px'}}>

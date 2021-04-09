@@ -22,7 +22,6 @@ interface PlotCurveProps {
 const PlotCurve: React.FC<PlotCurveProps> = (props) => {
 
   const [dataPlot,setDataPlot] = useState<any>([]);
-  const [newGroup,setNewGroup] = useState(true);
   const [currentGroup,setCurrentGroup] = useState(-1);
   const [displayInitCurves,setDisplayInitCurves ] = useState(false);
   const [showSwitch,setShowSwitch] = useState(false);
@@ -56,7 +55,6 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
       };
       data_.push(line);
     }
-
 
     if(displayInitCurves){
       console.log("PLOT init curves");
@@ -115,10 +113,8 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
     setDataPlot(data_);
 
     if(props.group!==currentGroup){
-      setNewGroup(true);
       setCurrentGroup(props.group);
-    }
-
+    } 
   },[props.curves,props.keys,displayInitCurves,props.plotUpdate]);
 
   const AddPoint = (data_point: any) =>{
@@ -144,32 +140,6 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
     
   }
 
-  const layout = { 
-    modebardisplay: false,
-    showlegend: false,
-    autosize: true,
-    height: 530,
-    hovermode: "closest",
-    uirevision: (newGroup?'false':'true'),
-    margin: {
-      l: 70,
-      r: 50,
-      b: 50,
-      t: 50,
-      pad: 4
-    },
-    plot_bgcolor: '#fdfdfd',
-    xaxis: {
-      title: {
-        text: props.axisLabel.xlabel
-      }
-    },
-    yaxis: {
-      title: {
-        text: props.axisLabel.ylabel
-      }
-    }
-  };
   const config = {
     displaylogo: false, // remove plotly icon
     reponsive: true,
@@ -196,13 +166,14 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
     ]
   };
 
-  function DisplayData(props) {
-
+  const  DisplayData = () => {
+    
+    if(props.data === undefined)
+       return <div></div>;
     const columns =[
       {title: 'Property', dataIndex: 'parameter', key: 'name'},
       {title: 'Value', dataIndex: 'value', key: 'value'}
     ];
-
 
     let datasource: any[] = [];
     props.data.forEach( (e,index) => {
@@ -223,6 +194,35 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
     const up = (checked===true?1:0);
     props.changeView(up);
   }
+  const layoutHandler = () => {
+    const layout_c = { 
+      modebardisplay: false,
+      showlegend: false,
+      autosize: true,
+      height: 530,
+      hovermode: "closest",
+      uirevision:  currentGroup.toString(), // will keep the zoom if not changed
+      margin: {
+        l: 70,
+        r: 50,
+        b: 50,
+        t: 50,
+        pad: 4
+      },
+      plot_bgcolor: '#fdfdfd',
+      xaxis: {
+        title: {
+          text: props.axisLabel.xlabel
+        }
+      },
+      yaxis: {
+        title: {
+          text: props.axisLabel.ylabel
+        }
+      }
+    };
+    return layout_c;
+  }
 
   return(
     <>
@@ -237,7 +237,7 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
       
       <PlotlyChart
         data = { dataPlot }
-        layout = { layout }
+        layout = { layoutHandler() }
         config = { config }
         onClick = {AddPoint}
       />
@@ -245,8 +245,7 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
     
 
     <div>
-    <DisplayData
-       data={props.data}/>
+    <DisplayData/>
     </div>
     </>
    
