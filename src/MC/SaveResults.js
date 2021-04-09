@@ -27,7 +27,9 @@ class SaveResults extends React.Component {
             sourceData:[],
             targetKeys:[],
             targetClassMap:{},
-            selected_resProp:{}
+            selected_resProp:{},
+            projects:[],
+            selectedProject:{}
         }
         this.sendData = this.sendData.bind(this);
         this.handlePrevious = this.handlePrevious.bind(this);
@@ -218,8 +220,23 @@ class SaveResults extends React.Component {
         
     }
 
+    onProjectChange(checkedValues){
+        this.props.propState.projects.map((val,index)=>{
+            if(val.oid === checkedValues){
+                this.state.selectedProject = val;
+            }
+        })
+        let json = {
+        current: 3,
+        previous: false,
+        selectedProject: this.state.selectedProject,
+    }
+    this.sendData(json);
+    }
+
       onResultVar(checkedValues, data) {
         let valArray = this.props.propState.res_var1[data];
+        this.state.selected_resProp = this.props.propState.selected_resProp;
         valArray.map((val,index)=>{
             if(val.property === checkedValues){
                 this.state.selected_resProp[data] = val;
@@ -352,6 +369,7 @@ class SaveResults extends React.Component {
             unitSystem: this.props.propState.unitSystem,
             xQuantityType: this.props.propState.xQuantityType,
             yQuantityType:this.props.propState.yQuantityType,
+            projects: this.props.propState.projects,
         })
     
 
@@ -461,7 +479,24 @@ let attributeTable = !(this.props.propState.targetClass && this.props.propState.
             )
 
         })
-    }
+    }{
+                <tr key={'projectTr'}>
+                     <td  key={'projectdlabel'} className="MatData"> <span> {"Project" }</span></td>
+                     <td>
+                     
+                     <Select size='small' value={this.props.propState.selectedProject.oid} style={{width: '100%'}} onChange={(e)=>this.onProjectChange(e)}>
+                        {
+                        this.props.propState.projects.map( (project,index) => {
+                            return(<Select.Option key={'project'+index} value={project.oid}>{project.name}</Select.Option>);
+                        })
+                        }
+                    </Select>
+                    </td>
+                </tr>
+            
+
+        }
+    
     </tbody>            
 </table>
 

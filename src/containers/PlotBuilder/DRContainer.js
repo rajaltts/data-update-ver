@@ -29,6 +29,7 @@ class DRContainer extends React.Component {
             plotBuildModel:{},
             propLabelMap:{},
             selected_resProp:{},
+            selectedProject:{},
             salt:props.modelState.salt,
             widget:props.modelState.widgetId,
             hidId:props.modelState.hidId,
@@ -110,6 +111,7 @@ class DRContainer extends React.Component {
             yQuantityType:childData.yQuantityType,
             precision:childData.precision,
             measurement: childData.measurement,
+            projects: childData.projects,
        });
        this.updateState();
     }
@@ -133,6 +135,7 @@ class DRContainer extends React.Component {
         current: childData.current,
          previous: childData.previous,
          selected_resProp: childData.selected_resProp,
+         selectedProject: childData.selectedProject,
    });
    this.updateState();
 }
@@ -169,6 +172,7 @@ class DRContainer extends React.Component {
             res_curve: this.state.res_curve,
             res_var1: this.state.res_var1,
             selected_resProp: this.state.selected_resProp,
+            selectedProject: this.state.selectedProject,
             targetClass: this.state.targetClass,
             xunit: this.state.xunit,
             yunit: this.state.yunit,
@@ -177,7 +181,8 @@ class DRContainer extends React.Component {
             yQuantityType:this.state.yQuantityType,
             widget:this.state.widget,
             newLoad:false,
-            measurement: this.state.measurement
+            measurement: this.state.measurement,
+            projects: this.state.projects,
         }
         if(this.state.res_var1!==undefined && this.state.res_curve!==undefined){
           if(JSON.stringify(this.state.selected_resProp) === JSON.stringify({})||(this.state.selected_resProp===undefined)){
@@ -189,6 +194,13 @@ class DRContainer extends React.Component {
            })
           }
         }
+        if(this.state.projects!==undefined){
+          if(JSON.stringify(this.state.selectedProject) === JSON.stringify({})||(this.state.selectedProject===undefined)){
+            this.state.selectedProject = {};
+            this.state.selectedProject = this.state.projects[0]
+          }
+        }
+
         let saveResultsJson ={
           query:this.props.modelState.query,
           url:this.props.modelState.url,
@@ -218,6 +230,8 @@ class DRContainer extends React.Component {
           newLoad:false,
           precision:this.state.precision,
           measurement: this.state.measurement,
+          projects: this.state.projects,
+          selectedProject: this.state.selectedProject,
       }
 
         let tensile_template = require('../../data/template_tensile.json');
