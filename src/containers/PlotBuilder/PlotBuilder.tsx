@@ -75,7 +75,9 @@ const dataReducer = (currentData: Data, action: Action) => {
                         const curve_data: CurveData = { title: curve_d.label,key: '',icon: <LineOutlined style={{fontSize: '24px', color: colors[index_c]}}/>};
                         curve_data.key = index_g.toString()+'-'+index_c.toString();
                         group_d.treeData.push(curve_data);
-                        //group_d.keys.push(curve_data.key);
+                        if(initState){
+                            group_d.keys.push(curve_data.key);
+                        }
                     } else {
                         const curve_d: Curve = { id: index_c,
                             x: [...c.x], y: [...c.y],
