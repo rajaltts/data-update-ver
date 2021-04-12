@@ -112,6 +112,7 @@ class DRContainer extends React.Component {
             precision:childData.precision,
             measurement: childData.measurement,
             projects: childData.projects,
+            selectedProject: childData.selectedProject,
        });
        this.updateState();
     }

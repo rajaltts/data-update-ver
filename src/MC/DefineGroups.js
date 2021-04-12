@@ -147,6 +147,7 @@ class DefineGroups extends React.Component {
             yQuantityType:this.state.yQuantityType,
             measurement: this.state.measurement,
             projects: this.state.projects,
+            selectedProject: this.state.selectedProject,
         }
         this.sendData(json);
     }
@@ -178,6 +179,7 @@ class DefineGroups extends React.Component {
             precision:this.state.precision,
             measurement: this.state.measurement,
             projects: this.state.projects,
+            selectedProject: this.state.selectedProject,
         }
         this.sendData(json);
     }
@@ -347,6 +349,7 @@ class DefineGroups extends React.Component {
                     stateChanged: false,
                     measurement: res.measurement,
                     projects: res.projects,
+                    selectedProject: res.selectedProject
                 })
 
 
@@ -401,6 +404,7 @@ class DefineGroups extends React.Component {
             measurement: this.state.measurement,
             stateChanged: false,
             projects: this.state.projects,
+            selectedProject: this.state.selectedProject,
         }
         this.sendData(json);
     }

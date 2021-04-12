@@ -479,24 +479,7 @@ let attributeTable = !(this.props.propState.targetClass && this.props.propState.
             )
 
         })
-    }{
-                <tr key={'projectTr'}>
-                     <td  key={'projectdlabel'} className="MatData"> <span> {"Project" }</span></td>
-                     <td>
-                     
-                     <Select size='small' value={this.props.propState.selectedProject.oid} style={{width: '100%'}} onChange={(e)=>this.onProjectChange(e)}>
-                        {
-                        this.props.propState.projects.map( (project,index) => {
-                            return(<Select.Option key={'project'+index} value={project.oid}>{project.name}</Select.Option>);
-                        })
-                        }
-                    </Select>
-                    </td>
-                </tr>
-            
-
-        }
-    
+    }    
     </tbody>            
 </table>
 
@@ -649,9 +632,25 @@ this.state.groups.map((group, index)=>{
                 <div id='DefineGroup' className="DefineGroup">
                     <Space direction='vertical'>
                     <div  className="AnalysisTypeContainer">
-                    <span className='AnalysisResultLabel'> Analysis Result Type </span>
-                        <Input className='InputAttribute' size='small' value={this.props.propState.targetType} style={{width:'60%'}} disabled='true' >                      
-                        </Input>
+                    <table> <tbody><tr>
+                      <td>
+                    <span className='AnalysisResultLabel'> Analysis Result Type </span></td>  
+                        <td><Input className='InputAttribute' size='small' value={this.props.propState.targetType}  disabled='true' >                      
+                        </Input></td></tr>
+                    <tr><td>
+                    <span  className='AnalysisResultLabel'> Project</span></td><td>
+                        <Select size='small' value={this.props.propState.selectedProject.oid} style={{width:'100%'}}  onChange={(e)=>this.onProjectChange(e)}>
+                            {
+                            this.props.propState.projects.map( (project,index) => {
+                                return(<Select.Option key={'project'+index} value={project.oid}>{project.name}</Select.Option>);
+                            })
+                            }
+                        </Select>
+                        </td>
+                        </tr>
+                   
+                    </tbody>
+                    </table>   
                     </div>
                     <div className="DropContainerButton">
                     <Button type="primary" className='SingleButton' onClick={e => { this.openClassificationAttribute() }}>Add Attribute</Button>
