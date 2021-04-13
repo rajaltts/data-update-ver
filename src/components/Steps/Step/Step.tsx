@@ -1,5 +1,5 @@
 import React from 'react'
-import {Select, Alert } from 'antd';
+import {Select, Alert, Tooltip } from 'antd';
 import { Operation } from '../../../template.model';
 import DisplayParametersForms from './DisplayParametersForms'
 import { Parameter as parameter_type } from '../../../template.model';
@@ -70,7 +70,13 @@ const Step: React.FC<StepProps> = (props) => {
     <Select value={props.selected_method} size="small" className="step-select-method"  onChange={changeMethodHandler} >{
             props.methods.map( met => {
                 return(
-                        <Option key={met.type} value={met.type} className="step-select-method">{met.label}</Option>
+                        <Option key={met.type} value={met.type} className="step-select-method">
+                            <Tooltip title={met.tip}>
+                                {met.label}
+                            </Tooltip>
+                        </Option>
+            
+                        
                 );
             })
         }

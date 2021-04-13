@@ -3,6 +3,7 @@ export type Selection = {
  label: string;
   name: string;
   link?: string;
+  tip?: string;
 };
 
 export type Range = {
@@ -13,6 +14,7 @@ export type Range = {
 export type Parameter = {
     label: string;
     name: string;
+    tip?: string;
     selection?: Selection[];
     range?: Range;
     value: any; // number or number[]

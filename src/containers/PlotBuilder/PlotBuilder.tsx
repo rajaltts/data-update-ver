@@ -584,7 +584,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                                     matDataLabel: curves[ic].matDataLabel,
                                     x: curves[ic].x,
                                     y: curves[ic].y,
-                                    name: 'curve'+String(ic+1),
+                                    name: curves[ic].name,
                                     label: curves[ic].label,
                                     selected: curves[ic].selected,
                                     opacity: curves[ic].opacity,

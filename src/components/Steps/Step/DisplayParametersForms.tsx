@@ -1,7 +1,7 @@
 import React , {useState, useEffect} from 'react'
 import { Parameter as parameter_type } from '../../../template.model';
 import '../../../App.css';
-import {Select, Button, Space,  Row, Col, InputNumber} from 'antd';
+import {Select, Button, Space,  Row, Col, InputNumber, Tooltip} from 'antd';
 // npm install --save rfdc @types/rfdc
 const clone = require('rfdc')();
 
@@ -80,7 +80,9 @@ const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, on
         else if( 'selection' in p){  
             return (
                 <Row key={p.label}>
-                <Col span={10}>{p.label}</Col>
+                <Col span={10}>
+                <Tooltip title={p.tip}>{p.label}</Tooltip>
+                </Col>
                 <Col span={10}>
                     <Select placeholder="Default value"
                          value={p.selection[p.value].name}
@@ -88,7 +90,11 @@ const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, on
                          size="small"
                          onChange={ (e) => selectParamHandler(e,p.name,p)}>{
                             p.selection.map( (elm,index) => {
-                                return(<Option value={elm.name} key={elm.name} className="step-select-method">{elm.label}</Option>);
+                                return(<Option value={elm.name} key={elm.name} className="step-select-method">
+                                    <Tooltip title={elm.tip}>
+                                        {elm.label}
+                                    </Tooltip>
+                                    </Option>);
                             })
                         }
                     </Select>
@@ -98,7 +104,8 @@ const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, on
         } else if ('range' in p) {
             return(
                 <Row key={p.label}>
-                <Col span={10}> {p.label}</Col>
+                <Col span={10}> 
+                <Tooltip title={p.tip}>{p.label}</Tooltip></Col>
                 <Col span={10}>
                     <InputNumber
                         key={p.label}
@@ -125,7 +132,9 @@ const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, on
                 if(ii!==-1){
                     return(
                         <Row key={p.label}>
-                        <Col span={10}> {p.label}</Col>
+                        <Col span={10}>
+                        <Tooltip title={p.tip}> {p.label}</Tooltip>
+                        </Col>
                         <Col span={10}>
                         <InputNumber
                             key={p.name}
@@ -143,7 +152,9 @@ const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, on
             } else  {
                 return(
                    <Row key={p.label}>
-                   <Col span={10}> {p.label}</Col>
+                   <Col span={10}>
+                    <Tooltip title={p.tip}>{p.label}</Tooltip>
+                    </Col>
                    <Col span={10}>
                    <InputNumber
                        key={p.name}

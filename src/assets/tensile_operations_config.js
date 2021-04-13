@@ -12,26 +12,31 @@ export const tensile_operations_config = [
             {
                 label: 'Max Stress',
                 type: 'Y_Max',
+                tip: 'Remove after maximum stress',
                 params: []
             },
             {
                 label: 'Max Strain',
                 type: 'X_Max',
+                tip: 'Remove after maximum strain',
                 params: []
             },
             {
                 label: 'User Defined Strain',
                 type: 'Max_X',
+                tip: 'Remove after a given stress',
                 params: [{label: 'Value', name: 'value',  value: 0.05, float: true }]
             },
             {
                 label: 'User Defined Stress',
                 type: 'Max_Y',
+                tip: 'Remove after a given strain',
                 params: [{label: 'Value', name: 'value',  value: 1000, float: true}]
             },
             {
                 label: 'User Defined Point',
                 type: 'Max_Xs',
+                tip: 'Remove after a selected point',
                 params: [ {label: '', name: 'value', value: [], curveId: []}]
             }
         ],
@@ -51,17 +56,20 @@ export const tensile_operations_config = [
             {
                 label: 'User Defined Strain',
                 type: 'X_shift_defined',
+                tip: 'Shift all curves by a given value',
                 params: [{label: 'Value', name: 'value',  value: 0, float: true}]
             },
             {
                 label: 'Linear Regression Stress',
                 type: 'X_tangent_yrange',
+                tip: 'Shift each curve to ensure curve passing by the origin using points in a defined stress range',
                 params: [{label: 'Initial Stress', name: 'min', value: 0, float: true},
                          {label: 'Final Stress', name: 'max', value: undefined, float: true}]
             },
             {
-                label: 'Linear Regression Strain',
+                label: 'Linear Regression Stress',
                 type: 'X_tangent_xrange',
+                tip: 'Shift each curve to ensure curve passing by the origin using points in a defined strain range',
                 params: [{label: 'Initial Strain', name: 'min', value: 0, float: true},
                          {label: 'Final Strain',  name: 'max',value: 0.001, float: true}]
             }
@@ -82,47 +90,56 @@ export const tensile_operations_config = [
             {
                 label: 'Spline',
                 type: 'Spline',
-                params: [{label:'Number of Points', name: 'number_of_points',  value: 30},
-                         {label:'Number of Nodes', name: 'number_of_nodes', value: 10, range: {min: 5, max: 100}},
-                         {label:'Smoothing', name: 'regularization', value: 5, range: {min: 1, max: 9}},
-                         {label:'Averaging End Point', name: 'end_point',  selection: [{label:'User Defined Strain',name:'x_value',link:'end_point_value'},
-                                                                                              {label:'Min Max Strain', name:'min_max_x'}
-                                                                                             ],
-                                                                                             value: 1},
+                tip: 'Interpolate curves using cubic splines',
+                params: [{label:'Number of Points', name: 'number_of_points',  value: 30, tip: 'Number of averaging curve points'},
+                         {label:'Number of Splines', name: 'number_of_nodes', value: 10, range: {min: 5, max: 100}, tip: 'Number of cubic splines'},
+                         {label:'Smoothing', name: 'regularization', value: 5, range: {min: 1, max: 9}, tip: 'Smoothing effect'},
+                         {label:'Range for Averaging', name: 'end_point', tip: 'Strain range used to compute the averaged curve',
+                                selection: [{label:'User Defined Strain',name:'x_value',link:'end_point_value', tip:'Define the end strain range  to compute the averaged curve'},
+                                            {label:'Min Max Strain', name:'min_max_x', tip:'Compute the averaged curve on the largest possible strain range'}
+                                            ],
+                                value: 1},
                          {label:'Value', name: 'end_point_value',  value: undefined, float: true, conditional: 'end_point'},
-                         {label:'Extrapolation Method', name: 'extrapolation', selection:[{label:'None',name:'none'},
-                                                                                          {label:'Max Strain Curve', name:'based_on_curve'},
-                                                                                          {label:'Tangent', name:'tangent'}
-                                                                                         ],
-                                                                                         value: 1},
-                        {label: 'Extrapolation End Point', name: 'extrapolating_end_point', selection:[{label:'Mean Max Strain', name:'mean_max_x'},
-                                                                                                        {label:'Max Max Strain', name:'max_max_x'},
-                                                                                                        {label:'User Defined Strain',name:'x_value',link:'extrapolating_end_point_value'}
-                                                                                                      ],
-                                                                                                      value: 0},
+                         {label:'Extrapolation Method', name: 'extrapolation', tip: 'Define how the averaged curved is prolongated',
+                                selection:[{label:'None',name:'none'},
+                                           {label:'Max Strain Curve', name:'based_on_curve', tip: 'Use the shape of the largest strain curve'},
+                                           {label:'Tangent', name:'tangent', tip: 'Use a straight line to prologate'}
+                                           ],
+                                value: 1},
+                        {label: 'Extrapolation End Point', name: 'extrapolating_end_point', tip: 'Define the end strain value',
+                                selection:[{label:'Mean Max Strain', name:'mean_max_x', tip: 'Use the average of all  end strain values'},
+                                           {label:'Max Max Strain', name:'max_max_x', tip: 'Use the largest strain of all end strain values'},
+                                           {label:'User Defined Strain',name:'x_value',link:'extrapolating_end_point_value', tip: 'Define the largest strain value'}
+                                           ],
+                                value: 0},
                         {label:'Value', name: 'extrapolating_end_point_value',  value: undefined, float: true, conditional: 'extrapolating_end_point'},   
                          ]
             },
             {
                 label: 'Polynomial',
                 type: 'Polynomial',
-                params: [{label:'Number of points', name: 'number_of_points', value: 30},
-                         {label:'Order', name: 'order', value: 6},
-                         {label:'Averaging End Point', name: 'end_point',  selection: [{label:'User Defined Strain',name:'x_value',link:'end_point_value'},
-                                                                                              {label:'Min Max Strain', name:'min_max_x'}
-                                                                                            ], value: 1},
+                tip: 'Interpolate curves using a polynomial function',
+                params: [{label:'Number of points', name: 'number_of_points', value: 30, tip: 'Number of averaging curve points' },
+                         {label:'Order', name: 'order', value: 6, tip: 'Polynomial order of the interpolated curve'},
+                         {label:'Range for Averaging', name: 'end_point', tip: 'Strain range used to compute the averaged curve',
+                                selection: [{label:'User Defined Strain',name:'x_value',link:'end_point_value', tip:'Define the end strain range  to compute the averaged curve'},
+                                            {label:'Min Max Strain', name:'min_max_x', tip:'Compute the averaged curve on the largest possible strain range'}
+                                            ],
+                                value: 1},
                          {label:'Value', name: 'end_point_value',  value: undefined, float: true, conditional: 'end_point'},
-                         {label:'Extrapolation Method', name: 'extrapolation', selection:[{label:'None',name:'none'},
-                                                                                          {label:'Max Strain Curve', name:'based_on_curve'},
-                                                                                          {label:'Tangent', name:'tangent'}
-                                                                                        ],
-                                                                                        value: 1},
-                        {label: 'Extrapolation End Point', name: 'extrapolating_end_point', selection:[ {label:'Mean Max Strain', name:'mean_max_x'},
-                                                                                                        {label:'Max Max Strain', name:'max_max_x'},
-                                                                                                        {label:'User Defined Strain',name:'x_value',link:'extrapolating_end_point_value'}
-                                                                                                      ],
-                                                                                                      value: 0},
-                        {label:'Value', name: 'extrapolating_end_point_value', value: undefined, float: true, conditional: 'extrapolating_end_point'},   
+                         {label:'Extrapolation Method', name: 'extrapolation', tip: 'Define how the averaged curved is prolongated',
+                                selection:[{label:'None',name:'none'},
+                                           {label:'Max Strain Curve', name:'based_on_curve', tip: 'Use the shape of the largest strain curve'},
+                                           {label:'Tangent', name:'tangent', tip: 'Use a straight line to prologate'}
+                                           ],
+                                value: 1},
+                        {label: 'Extrapolation End Point', name: 'extrapolating_end_point', tip: 'Define the end strain value',
+                                selection:[{label:'Mean Max Strain', name:'mean_max_x', tip: 'Use the average of all  end strain values'},
+                                           {label:'Max Max Strain', name:'max_max_x', tip: 'Use the largest strain of all end strain values'},
+                                           {label:'User Defined Strain',name:'x_value',link:'extrapolating_end_point_value', tip: 'Define the largest strain value'}
+                                           ],
+                                value: 0},
+                        {label:'Value', name: 'extrapolating_end_point_value',  value: undefined, float: true, conditional: 'extrapolating_end_point'},    
                         ]
             }
         ],

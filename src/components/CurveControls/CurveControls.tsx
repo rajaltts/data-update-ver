@@ -45,7 +45,7 @@ const CurveControls: React.FC<CurveControlsProps> = (props) => {
             </Col>
             <Col  span={14}>
                 {(props.measurement==='engineering'?true:false)&&
-                <Tooltip title="WARNING: All results will be reset">
+                <Tooltip title="Convert all curves from engineering to true values. WARNING: All results will be reset">
                 <Button style={{fontSize: '11px',float: 'right'}} size="small"  type="primary"  disabled={(props.measurement==='engineering'?false:true)} onClick={submit}>Convert to True</Button>
                 </Tooltip>}
             </Col>
