@@ -68,6 +68,7 @@ const dataReducer = (currentData: Data, action: Action) => {
                                                  oid: c.oid,
                                                  selected: (initState?true:c.selected),
                                                  opacity: (initState?1:c.opacity),
+                                                 marker: (initState?undefined:c.marker),
                                                  x0: (initState?[...c.x]:[...c.x0]),
                                                  y0: (initState?[...c.y]:[...c.y0])};
                         group_c.curves.push(curve_d);
@@ -320,6 +321,14 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                     throw new Error("ERROR in tensile template: action not recognized.");
                 }
             });
+
+            // check if we must show the markers
+            const op_clean = template.operations.find( op => op.action === "Cleaning_ends");
+            if(op_clean.method === "Max_Xs"){
+                setShowMarkers(true); 
+                updatePlotHandler();
+            }
+
         }
     }
 
