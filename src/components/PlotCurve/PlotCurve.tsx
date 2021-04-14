@@ -77,7 +77,8 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
           if(props.curves[i].marker){
             const x_marker2 = props.curves[i].x0[props.curves[i].marker];
             const y_marker2 = props.curves[i].y0[props.curves[i].marker];
-            const point2 = { type: 'scatter', mode: 'markers', name: props.curves[i].name,  marker: { color: 'black', symbol: ['x'], size: 10 }, x: [x_marker2], y: [y_marker2] };
+            const opacity = (props.curves[i].selected?1.0:0.2);
+            const point2 = { type: 'scatter', mode: 'markers', name: props.curves[i].name, opacity: opacity, marker: { color: 'black', symbol: ['x'], size: 10 }, x: [x_marker2], y: [y_marker2] };
             data_.push(point2);
             
           }
@@ -104,7 +105,8 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
           if(props.curves[i].marker){
             const x_marker = props.curves[i].x[props.curves[i].marker];
             const y_marker = props.curves[i].y[props.curves[i].marker];
-            const point = { type: 'scatter', mode: 'markers', name: props.curves[i].name,  marker: { color: 'black', symbol: ['x'], size: 10 }, x: [x_marker], y: [y_marker] };
+            const opacity = (props.curves[i].selected?1.0:0.2);
+            const point = { type: 'scatter', mode: 'markers', name: props.curves[i].name, opacity: opacity, marker: { color: 'black', symbol: ['x'], size: 10 }, x: [x_marker], y: [y_marker] };
             data_.push(point);
           }
         }

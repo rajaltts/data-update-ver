@@ -220,6 +220,9 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
       // template is an input json file for dataclean library 
     const [template, setTemplate] = useState({"operations": []});
 
+    // current template
+    const [currentTemplate, setCurrentTemplate] = useState({});
+
     // need to manage the state to manage group changes
     // should be better to use useContext hook to share these state with Steps component
     const [current, setCurrent] = useState(0);
@@ -236,6 +239,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         // TODO init Operations with the right congig (tensile, compression, ...) depending on analysis_type given by props.analysisType 
         setOperations(tensile_operations_config); // init operations state with the tensile structure (default values)
         setTemplate(props.template_input); // init template from props
+        setCurrentTemplate(props.template_input);
         if(props.data_input.precision)
             setPrecision(props.data_input.precision);   
         if(props.data_input.measurement)
@@ -332,7 +336,10 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
             throw new Error('Action '+action+' not known');
         operationsUpdate[op_index].selected_method = selectedMethod;
         setOperations(operationsUpdate);
-        setShowMarkers((selectedMethod==='Max_Xs'?true:false));
+        if(action==='Cleaning_ends'){ // for other action we keep status defined in Cleaning_ends
+            setShowMarkers((selectedMethod==='Max_Xs'?true:false));
+        }
+        
         updatePlotHandler();
         
     };
@@ -545,7 +552,8 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         let json = {
             current: 3,
             previous: false,
-            data: data
+            data: data,
+            template: currentTemplate
         }
         sendData(json);
     }
@@ -718,6 +726,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                         
                     }
                     const template = {operations: ops};
+                    setCurrentTemplate(template);
                     let s = JSON.stringify(template);
                     console.log('Template '+s);
                     try{
@@ -917,10 +926,6 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
 
     const getAxisLabel = () => {
         let axis_label = { xlabel: data.xtype, ylabel: data.ytype };
-        if(data.xtype.split('_').length>1)
-            axis_label.xlabel = data.xtype.split('_')[0];
-        if(data.ytype.split('_').length>1)
-            axis_label.ylabel = data.ytype.split('_')[0];
         return axis_label;
     }
 

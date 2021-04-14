@@ -10,6 +10,8 @@ import SaveResults from '../../MC/SaveResults.js';
 
 const { Step } = Steps;
 
+const tensile_template = require('../../data/template_tensile.json');
+
 class DRContainer extends React.Component {
     constructor(props) {
         super(props);
@@ -34,7 +36,8 @@ class DRContainer extends React.Component {
             widget:props.modelState.widgetId,
             hidId:props.modelState.hidId,
             precision:6,
-            measurement: "engineering"
+            measurement: "engineering",
+            template: {}
         }
         this.updateState = this.updateState.bind(this);
         //this.getPropertyDef = this.getPropertyDef.bind(this);
@@ -61,6 +64,8 @@ class DRContainer extends React.Component {
        this.updateState();
        //console.log("callbackFunctionStep1 "+childData);
     }
+
+   
 
     callbackFunctionStep2 = (childData) => {
         //console.log("Parent recieved Selector Data: "+JSON.stringify(childData),childData.sections);
@@ -113,6 +118,7 @@ class DRContainer extends React.Component {
             measurement: childData.measurement,
             projects: childData.projects,
             selectedProject: childData.selectedProject,
+            template: tensile_template
        });
        this.updateState();
     }
@@ -124,7 +130,8 @@ class DRContainer extends React.Component {
           current: childData.current,
            previous: childData.previous,
            reloadStep2 : childData.stateChanged,
-           plotBuildModel : childData.data
+           plotBuildModel : childData.data,
+           template : childData.template
 
      });
      this.updateState();
@@ -235,7 +242,7 @@ class DRContainer extends React.Component {
           selectedProject: this.state.selectedProject,
       }
 
-        let tensile_template = require('../../data/template_tensile.json');
+        
 
         this.steps = [
             {
@@ -248,7 +255,7 @@ class DRContainer extends React.Component {
             },
             {
               title: 'Data Analysis',
-              content: <PlotBuilder  data_input = {this.state.plotBuildModel} template_input = {tensile_template} parentCallback = {this.callbackFunctionStep3}/>
+              content: <PlotBuilder  data_input = {this.state.plotBuildModel} template_input = {this.state.template/*tensile_template*/} parentCallback = {this.callbackFunctionStep3}/>
             },
             {
               title: 'Save Results',
