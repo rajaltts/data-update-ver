@@ -487,7 +487,7 @@ let table = <table className="Grid">
 <thead><tr key={'mattr01'}><th key='propCol0'></th>{
     
 this.state.groups.map((group, index)=>{
-    return(index!==0?<th style={{textAlign: 'center'}}  key={'propCol'+index+1}><Checkbox key={"checkbox"+index+1} checked={group.isSelected} onChange={(e)=>this.onCheckBoxChange(e.target.checked,index)}/>{group.label}</th>:"")
+    return(index!==0 && group.isSelected?<th style={{textAlign: 'center'}}  key={'propCol'+index+1}><Checkbox key={"checkbox"+index+1} checked={group.isSelected} onChange={(e)=>this.onCheckBoxChange(e.target.checked,index)}/>{group.label}</th>:"")
 })}</tr>
 </thead>
 <tbody>
@@ -501,7 +501,8 @@ this.state.groups.map((group, index)=>{
                      <td  key={'proptd'+index} className="MatData"> <span> {leftHeaderLabel }</span></td>
                      { 
                        values!==undefined?values.map((val,i)=>{
-                           return(<td><span className='AttributeValue' style={{width:'60%'}}>{val}</span></td>) 
+                           let grp = this.state.groups[i+1];
+                           return(grp.isSelected?<td><span className='AttributeValue' style={{width:'60%'}}>{val}</span></td>:"") 
 
                        }):""                         
                        
@@ -521,7 +522,8 @@ this.state.groups.map((group, index)=>{
                      <td  key={'proptd'+(index+this.state.selectedCriteria.length)} className="MatData"> <span> {leftHeaderLabel }</span></td>
                      { 
                        values!==undefined?values.map((val,i)=>{
-                           return(<td><Input className='InputAttribute' value={val} onChange={(e)=>this.updateAttribute(e.target.value,crObj.name,i)}style={{width:'60%'}} placeholder="" /></td>) 
+                        let grp = this.state.groups[i+1];
+                           return(grp.isSelected?<td><Input className='InputAttribute' value={val} onChange={(e)=>this.updateAttribute(e.target.value,crObj.name,i)}style={{width:'60%'}} placeholder="" /></td>:"") 
 
                        }):""                         
                        
@@ -536,7 +538,7 @@ this.state.groups.map((group, index)=>{
 <tr key={'mattr01'}><td key='propCol0'></td>{
     
 this.state.groups.map((group, index)=>{
-    return(index!==0?<td style={{textAlign: 'center'}}  key={'propCol'+index+1}></td>:"")
+    return(index!==0 && group.isSelected?<td style={{textAlign: 'center'}}  key={'propCol'+index+1}></td>:"")
 })}</tr>
 
         <tr key={'proptr_Curve'}> <td  key={'proptdColCurve'} className="MatData"> <span> {'Curve Result' }</span>
