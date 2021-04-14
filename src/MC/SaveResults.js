@@ -96,7 +96,7 @@ class SaveResults extends React.Component {
        group.curves.map((c,index2)=>{
         let curveArray1 =[];
         let curHeader = [];
-        curHeader[0] =  'Input Curve';
+        curHeader[0] =  c.matDataLabel;
         curHeader[1] = '';
         if(index2 === curvesSize-1){
             curHeader[0] =  'Average Curve';
