@@ -10,7 +10,7 @@ export type Curve = {
     oid: string;
     matDataLabel: string;
     label: string;
-    marker?: number;
+    markerId?: number;
 };
 
 

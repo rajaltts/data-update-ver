@@ -68,7 +68,7 @@ const dataReducer = (currentData: Data, action: Action) => {
                                                  oid: c.oid,
                                                  selected: (initState?true:c.selected),
                                                  opacity: (initState?1:c.opacity),
-                                                 marker: (initState?undefined:c.marker),
+                                                 markerId: c.markerId,
                                                  x0: (initState?[...c.x]:[...c.x0]),
                                                  y0: (initState?[...c.y]:[...c.y0])};
                         group_c.curves.push(curve_d);
@@ -161,15 +161,14 @@ const dataReducer = (currentData: Data, action: Action) => {
         }
         case 'SET_MARKER':{
             const group_new = [...currentData.groups];
-            group_new[currentData.tree.selectedGroup].curves.find( c => c.name === action.curve_name).marker = action.point_id;
-            //group_new[currentData.tree.selectedGroup].curves[action.curve_id].marker = action.point_id;
+            group_new[currentData.tree.selectedGroup].curves.find( c => c.name === action.curve_name).markerId = action.point_id;
             return {...currentData, groups: group_new};
         }
         case 'RESET_MARKERS': {
             const group_new = [...currentData.groups];
             group_new[action.group_id].curves.map( (val,index,arr) => {
-                if(val.marker)
-                val.marker = undefined;
+                if(val.markerId)
+                val.markerId = undefined;
             });
             return {...currentData, groups: group_new}
         }
@@ -236,11 +235,14 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
     //---------EFFECT-----------------------------------------
     // initialize the states (componentDidMount)
     useEffect( () => {
+       // console.log("useEffect data_input");
         dispatch({type: 'SET', input: props.data_input}); // init data(curves) state with props
         // TODO init Operations with the right congig (tensile, compression, ...) depending on analysis_type given by props.analysisType 
         setOperations(tensile_operations_config); // init operations state with the tensile structure (default values)
         setTemplate(props.template_input); // init template from props
         setCurrentTemplate(props.template_input);
+        // console.log("Template in PlotBuider");
+        // console.log(props.template_input);
         if(props.data_input.precision)
             setPrecision(props.data_input.precision);   
         if(props.data_input.measurement)
@@ -250,6 +252,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
     // use to update operations state from template state
     // update operations state from template state (componentDidUpdate)
     useEffect( () => {
+        // console.log("useEffect template");
         try { // if action/methods found in template does not correspond to value in operations state, the template is not used and default values for operations will appear. A console log error is used but we must inform the user with a notifications (TODO)
             initOperationsFromTemplate();
         } catch(e) {
@@ -262,6 +265,8 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
     // - in Operations value is always a number, for string value the value is a index in a selection array
     // - no Extrapolation action in Operations, it is inside Averaging
     const initOperationsFromTemplate = () => {
+        // console.log("initOperationsFromTemplate");
+        // console.log(template.operations);
         if(template.operations.length>1){
             // manage Averaging to put extrapolation parameters
             const op_avg = template.operations.find( op => op.action === "Averaging");
@@ -270,6 +275,8 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                 op_avg.parameters.push( {extrapolation: op_extr.method.toLowerCase()} );
                 op_extr.parameters.forEach( par => op_avg.parameters.push(par) );
             }
+
+            const operationsUpdated = clone(operations); // efficient deep copy
 
             template.operations.forEach( (elem,index) => {
                 // check if Action and Operations in template file are found in local operations
@@ -280,7 +287,6 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                     const meth_index = op.methods.findIndex( met => met.type === elem.method);
                     if(meth_index!==-1){
                         // update local operations with template file    
-                        const operationsUpdated = [...operations];
                         if('parameters' in elem) { // some operation has no parameters
                             const params_input= elem.parameters;
                             
@@ -305,22 +311,13 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                             operationsUpdated[op_index].methods[meth_index].params = param_new;
                         }
                         operationsUpdated[op_index].selected_method = elem.method;
-                        // check if we must convert the data, only if engineering type
-                        // if(elem.action === "Convert"){
-                        //     if(data.xtype.search("engineering") * data.ytype.search("engineering") < 0)
-                        //         throw new Error("ERROR in data definition: cannot mix true and engineering data type");
-                        //     if(data.xtype.search("engineering") < 0){ // not found 
-                        //         operationsUpdated[op_index].status = 'hide';
-                        //     }
-                        // }
-                        
-                        setOperations(operationsUpdated);         
                     } else if(elem.action!=='Extrapoling')
                         throw new Error("ERROR in tensile template: method not recognized.");
                 } else if (elem.action!=='Extrapoling'){
                     throw new Error("ERROR in tensile template: action not recognized.");
                 }
             });
+            setOperations(operationsUpdated); 
 
             // check if we must show the markers
             const op_clean = template.operations.find( op => op.action === "Cleaning_ends");
@@ -608,8 +605,8 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                                     x0: curves[ic].x0,
                                     y0: curves[ic].y0
                                 };
-                    if(curves[ic].marker){
-                        curve = {...curve, marker: curves[ic].marker};
+                    if(curves[ic].markerId){
+                        curve = {...curve, markerId: curves[ic].markerId};
                     }
                     newCurves.push(curve);
                 }
