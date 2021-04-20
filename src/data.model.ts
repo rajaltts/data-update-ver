@@ -28,6 +28,7 @@ export type Data = {
     ytype: string;
     xunit: string;
     yunit: string;
+    measurement: string;
     groups: Group[];
     tree: Tree;
 };

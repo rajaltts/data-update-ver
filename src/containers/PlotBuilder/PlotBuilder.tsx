@@ -1,6 +1,6 @@
 import React, {  useEffect, useState, useReducer } from 'react';
 import { Col, Row , Button } from 'antd';
-import {LineOutlined} from '@ant-design/icons'
+import {LineOutlined, PropertySafetyOutlined} from '@ant-design/icons'
 import 'antd/dist/antd.css';
 import PlotCurve from '../../components/PlotCurve/PlotCurve';
 import CurveControls from '../../components/CurveControls/CurveControls'
@@ -36,6 +36,7 @@ type Action =
     | {type: 'SET_MARKER', curve_name: string, point_id: number}
     | {type: 'RESET_MARKERS', group_id: number}
     | {type: 'SET_VIEW', val: number}
+    | {type: 'SET_MEASUREMENT', val: string}
     ;
 
 const dataReducer = (currentData: Data, action: Action) => {
@@ -48,6 +49,7 @@ const dataReducer = (currentData: Data, action: Action) => {
                                 ytype: action.input.ytype,
                                 xunit: action.input.xunit,
                                 yunit: action.input.yunit,
+                                measurement: action.input.measurement,
                                 groups: [],
                                 tree: { groupData: [],
                                         selectedGroup: 0}
@@ -177,6 +179,11 @@ const dataReducer = (currentData: Data, action: Action) => {
             newData.tree.groupData[currentData.tree.selectedGroup].resultsView = action.val;
             return newData;
         }
+        case 'SET_MEASUREMENT': {
+            const newData = {...currentData};
+            newData.measurement = action.val;
+            return newData;
+        }
         default:
             throw new Error('Not be reach this case'); 
    }
@@ -189,7 +196,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
     // datat represents the state related to curves management 
     const [data, dispatch]  =  useReducer(dataReducer,
         {
-            type: 'tensile', xtype: '', ytype: '', xunit: '', yunit: '',
+            type: 'tensile', xtype: '', ytype: '', xunit: '', yunit: '', measurement: 'engineering',
             groups: [{id: -1,
                       curves: [ {id: -1, x: [], y: [], name: 'toto', selected: false, opacity: 0, x0: [], y0: [], oid:'', matDataLabel:'', label:''} ],
                       data: [ {label: '', value: 0} ],
@@ -238,9 +245,24 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
        // console.log("useEffect data_input");
         dispatch({type: 'SET', input: props.data_input}); // init data(curves) state with props
         // TODO init Operations with the right congig (tensile, compression, ...) depending on analysis_type given by props.analysisType 
-        setOperations(tensile_operations_config); // init operations state with the tensile structure (default values)
-        setTemplate(props.template_input); // init template from props
-        setCurrentTemplate(props.template_input);
+        // 2 cases:
+        // 1 - props.template_input is a dataclean lib input file (from step2 to step3) { operations:[{...},{...}]}
+        // 2 - props.template_input i an opearion object from a previous result (from step4 to step3) [{...},{...}]
+        const isPreviousOperations =('operations' in props.template_input?false:true); 
+        if(isPreviousOperations){
+            const operations_init = clone(props.template_input); 
+            setOperations(operations_init);
+            // check if we must show the markers
+            const op_clean = props.template_input.find( op => op.action === "Cleaning_ends");
+            if(op_clean.selected_method === "Max_Xs"){
+                setShowMarkers(true); 
+                updatePlotHandler();
+            }
+        } else {
+            setOperations(tensile_operations_config); // init operations state with the tensile structure (default values)
+            setTemplate(props.template_input); // init template from props
+            //setCurrentTemplate(props.template_input);
+        }
         // console.log("Template in PlotBuider");
         // console.log(props.template_input);
         if(props.data_input.precision)
@@ -533,6 +555,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                 for(let gid=0; gid<data.groups.length;gid++){
                     restoreInitdataHandler(gid);
                 }
+                dispatch({ type: 'SET_MEASUREMENT', val: 'true'});
                 setPlotUpdate(!plotUpdate);
             });
         });
@@ -559,7 +582,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
             current: 3,
             previous: false,
             data: data,
-            template: currentTemplate
+            template: operations//currentTemplate
         }
         sendData(json);
     }
@@ -732,7 +755,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                         
                     }
                     const template = {operations: ops};
-                    setCurrentTemplate(template);
+                    //setCurrentTemplate(template);
                     let s = JSON.stringify(template);
                     console.log('Template '+s);
                     try{
