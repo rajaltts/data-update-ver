@@ -47,7 +47,10 @@ class DRContainer extends React.Component {
     }
     updateState =() =>{
       //console.log("Update State to JSF Widget: "+this.state);
-      window.updateDRState(this.state);
+      if (typeof  window.updateDRState == 'function') { 
+        window.updateDRState(this.state);
+      }
+     
     }
     callbackFunctionStep1 = (childData) => {
         //console.log("Parent recieved Selector Data: "+ childData);
@@ -60,8 +63,8 @@ class DRContainer extends React.Component {
             selectedAnalysisType: childData.selectedAnalysisType,
             propLabelMap: childData.propLabelMap,
             reloadStep2 : childData.stateChanged
-       });
-       this.updateState();
+       }, () => this.updateState());
+       
        //console.log("callbackFunctionStep1 "+childData);
     }
 
@@ -119,8 +122,7 @@ class DRContainer extends React.Component {
             projects: childData.projects,
             selectedProject: childData.selectedProject,
             template: tensile_template
-       });
-       this.updateState();
+       }, () => this.updateState());
     }
 
     callbackFunctionStep3 = (childData) => {
@@ -132,8 +134,7 @@ class DRContainer extends React.Component {
            reloadStep2 : childData.stateChanged,
            plotBuildModel : childData.data,
            template : (childData.previous?tensile_template:childData.template)
-     });
-     this.updateState();
+     }, () => this.updateState());
   }
 
   callbackFunctionStep4 = (childData) => {
@@ -143,8 +144,7 @@ class DRContainer extends React.Component {
          previous: childData.previous,
          selected_resProp: childData.selected_resProp,
          selectedProject: childData.selectedProject,
-   });
-   this.updateState();
+   }, () => this.updateState());
 }
 
     render() {
