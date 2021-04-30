@@ -53,12 +53,12 @@ export const tensile_operations_config = [
                 type: 'None',
                 params: []
             },
-            {
-                label: 'User Defined Strain',
-                type: 'X_shift_defined',
-                tip: 'Shift all curves by a given value',
-                params: [{label: 'Value', name: 'value',  value: 0, float: true}]
-            },
+            // {
+            //     label: 'User Defined Strain',
+            //     type: 'X_shift_defined',
+            //     tip: 'Shift all curves by a given value',
+            //     params: [{label: 'Value', name: 'value',  value: 0, float: true}]
+            // },
             {
                 label: 'Linear Regression Stress',
                 type: 'X_tangent_yrange',
@@ -96,7 +96,7 @@ export const tensile_operations_config = [
                          {label:'Smoothing', name: 'regularization', value: 5, range: {min: 1, max: 9}, tip: 'Smoothing effect'},
                          {label:'Range for Averaging', name: 'end_point', tip: 'Strain range used to compute the averaged curve',
                                 selection: [{label:'User Defined Strain',name:'x_value',link:'end_point_value', tip:'Define the end strain range  to compute the averaged curve'},
-                                            {label:'Min Max Strain', name:'min_max_x', tip:'Compute the averaged curve on the largest possible strain range'}
+                                            {label:'Default', name:'min_max_x', tip:'Compute the averaged curve on the largest possible strain range'}
                                             ],
                                 value: 1},
                          {label:'Value', name: 'end_point_value',  value: undefined, float: true, conditional: 'end_point'},
@@ -107,9 +107,9 @@ export const tensile_operations_config = [
                                            ],
                                 value: 1},
                         {label: 'Extrapolation End Point', name: 'extrapolating_end_point', tip: 'Define the end strain value',
-                                selection:[{label:'Mean Max Strain', name:'mean_max_x', tip: 'Use the average of all  end strain values'},
-                                           {label:'Max Max Strain', name:'max_max_x', tip: 'Use the largest strain of all end strain values'},
-                                           {label:'User Defined Strain',name:'x_value',link:'extrapolating_end_point_value', tip: 'Define the largest strain value'}
+                                selection:[{label:'Mean Strain', name:'mean_max_x', tip: 'Use the average of all  end strain values'},
+                                           {label:'Max Strain', name:'max_max_x', tip: 'Use the largest strain of all end strain values'},
+                                           {label:'User Defined Strain',name:'x_value',link:'extrapolating_end_point_value', tip: 'Define the largest strain value.\nWARNING: Can be larger than max strain. No check performed.'}
                                            ],
                                 value: 0},
                         {label:'Value', name: 'extrapolating_end_point_value',  value: undefined, float: true, conditional: 'extrapolating_end_point'},   
@@ -123,7 +123,7 @@ export const tensile_operations_config = [
                          {label:'Order', name: 'order', value: 6, tip: 'Polynomial order of the interpolated curve'},
                          {label:'Range for Averaging', name: 'end_point', tip: 'Strain range used to compute the averaged curve',
                                 selection: [{label:'User Defined Strain',name:'x_value',link:'end_point_value', tip:'Define the end strain range  to compute the averaged curve'},
-                                            {label:'Min Max Strain', name:'min_max_x', tip:'Compute the averaged curve on the largest possible strain range'}
+                                            {label:'Default', name:'min_max_x', tip:'Compute the averaged curve on the largest possible strain range'}
                                             ],
                                 value: 1},
                          {label:'Value', name: 'end_point_value',  value: undefined, float: true, conditional: 'end_point'},
@@ -134,9 +134,9 @@ export const tensile_operations_config = [
                                            ],
                                 value: 1},
                         {label: 'Extrapolation End Point', name: 'extrapolating_end_point', tip: 'Define the end strain value',
-                                selection:[{label:'Mean Max Strain', name:'mean_max_x', tip: 'Use the average of all  end strain values'},
-                                           {label:'Max Max Strain', name:'max_max_x', tip: 'Use the largest strain of all end strain values'},
-                                           {label:'User Defined Strain',name:'x_value',link:'extrapolating_end_point_value', tip: 'Define the largest strain value'}
+                                selection:[{label:'Mean Strain', name:'mean_max_x', tip: 'Use the average of all  end strain values'},
+                                           {label:'Max Strain', name:'max_max_x', tip: 'Use the largest strain of all end strain values'},
+                                           {label:'User Defined Strain',name:'x_value',link:'extrapolating_end_point_value', tip: 'Define the largest strain value.\nWARNING: Can be larger than max strain. No check performed.'}
                                            ],
                                 value: 0},
                         {label:'Value', name: 'extrapolating_end_point_value',  value: undefined, float: true, conditional: 'extrapolating_end_point'},    

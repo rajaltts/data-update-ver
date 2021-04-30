@@ -703,7 +703,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                         let par: object[] = [];
                         method.params.forEach( param => {
                             // do not add parameter for extrapolation, manage after
-                            const extra_index = param.label.toLowerCase().indexOf('extrapolation')
+                            const extra_index = param.name.toLowerCase().indexOf('extrapolat')
                             if( extra_index === -1){
                                 if(typeof param.value !== 'undefined'&& param.value!==null){ 
                                     const name = param.name;
@@ -745,7 +745,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                             if(extrapolation_method !== 'none'){ // !none
                                 const params: object[] = [];
                                 avg_method.params.forEach( param => {
-                                    const extra_index = param.label.toLowerCase().indexOf('extrapolation')
+                                    const extra_index = param.name.toLowerCase().indexOf('extrapolat')
                                     if(extra_index !== -1 && param.name !== 'extrapolation'){
                                         if(typeof param.value !== 'undefined'){
                                             const name = param.name;
