@@ -67,7 +67,7 @@ export const tensile_operations_config = [
                          {label: 'Final Stress', name: 'max', value: undefined, float: true}]
             },
             {
-                label: 'Linear Regression Stress',
+                label: 'Linear Regression Strain',
                 type: 'X_tangent_xrange',
                 tip: 'Shift each curve to ensure curve passing by the origin using points in a defined strain range',
                 params: [{label: 'Initial Strain', name: 'min', value: 0, float: true},
