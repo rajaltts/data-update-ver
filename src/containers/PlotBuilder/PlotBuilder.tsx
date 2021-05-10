@@ -844,7 +844,18 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                     vecX_out.delete();
                     vecY_out.delete();
 
-                    // DataAnaytics
+                     // DataAnaytics
+                     // create DataProcess
+                     const dp_data = new Module.DataProcess(dataset_out);
+                     // create operation                   
+                     const op_slope = new Module.Operation(Module.ActionType.DATA_ANALYTICS,Module.MethodType.SLOPE_POINT);
+                     // apply operation
+                     const check = dp_data.apply(op_slope);
+                     const dp_data_out = dp_data.getOutputDataset();
+                     const curve_data_out = dp_data_out.getCurve('averaging');
+                     let vecY_data_out = curve_data_out.getY();
+                     const young = vecY_data_out.get(0).toExponential(precision);
+/*
                     // create DataProcess for post
                     const dataset_post = new Module.Dataset();
                     const curve_avg = dataset_out.getCurve('averaging');
@@ -882,7 +893,13 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                         vec_b.push_back(coef_b);
                         console.log("young range = ["+ x_begin + " , " + x_end + "]");
                         const young = vecX_data_young_out.get(0).toExponential(precision);
+*/
                         console.log("Young ="+young);
+                        data_analytics.length = 0;
+                    data_analytics.push({label: "Young's Modulus", value: young, name: "young"});
+                    op_slope.delete();
+                    dp_data.delete();
+ /*                       
                         data_analytics.push({label: "Young's Modulus ", value: young, name: "young"});
                     }
                     op_slope_young.delete();
@@ -920,9 +937,13 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                     vec_a.delete();
                     vec_b.delete();
                     vec_b2.delete();
-
+*/
+                    // create DataProcess
+                    const dp_data_end = new Module.DataProcess(dataset_out);
+ /*                   
                     // Break
-                    const dp_data_end = new Module.DataProcess(dataset_post);                 
+                    const dp_data_end = new Module.DataProcess(dataset_post);
+*/                 
                     const op_end = new Module.Operation(Module.ActionType.DATA_ANALYTICS,Module.MethodType.END_POINT);
                     const check_end = dp_data_end.apply(op_end);
                     const dp_data_end_out = dp_data_end.getOutputDataset();
@@ -936,8 +957,12 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                     op_end.delete();
                     dp_data_end.delete();
 
+                     // create DataProcess
+                     const dp_data_max = new Module.DataProcess(dataset_out); 
+/*
                     // Ultimate strength
-                    const dp_data_max = new Module.DataProcess(dataset_post);                 
+                    const dp_data_max = new Module.DataProcess(dataset_post);      
+*/           
                     const op_max = new Module.Operation(Module.ActionType.DATA_ANALYTICS,Module.MethodType.MAX_POINT);
                     const check_max = dp_data_max.apply(op_max);
                     const dp_data_max_out = dp_data_max.getOutputDataset();
@@ -950,8 +975,10 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                     data_analytics.push({label: "Strength at  Ultimate Strength", value: stress_at_ultimate_strength, name: "stress_at_ultimate_strength"});
                     op_max.delete();
                     dp_data_max.delete();
-
+/*
                     dataset_post.delete();
+*/
+                    
                 }
 
                 // update the state with the new curves
