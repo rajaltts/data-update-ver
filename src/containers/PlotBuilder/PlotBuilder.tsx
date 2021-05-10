@@ -159,6 +159,7 @@ const dataReducer = (currentData: Data, action: Action) => {
                 group_new[action.groupid].curves.splice(index_avg,1); 
             // remove all data (young, ...)
             group_new[action.groupid].data.length = 0;
+            group_new[action.groupid].result = false;
             return {...currentData, groups: group_new}
         }
         case 'SET_MARKER':{
@@ -238,6 +239,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
     const [ measurement, setMeasurement] = useState("engineering");
     const [plotUpdate, setPlotUpdate] = useState(false);
     const [showMarkers, setShowMarkers] = useState(false);
+    const [disableNextButton,setDisableNextButton] = useState(true);
 
     //---------EFFECT-----------------------------------------
     // initialize the states (componentDidMount)
@@ -970,6 +972,10 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                 }
                 setOperations(operationsUpdate);
                 updatePlotHandler();
+                // check if all group have data
+                let results_true = true;
+                data.groups.forEach( g => { if(g.result==false){ results_true=false; }});
+                setDisableNextButton(!results_true);
             }
 
             const todoOperationFailed = (dataprocess) => {
@@ -1021,22 +1027,12 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         const operationsUpdate = [...operations];
         operationsUpdate.forEach( (val,index,arr) => {arr[index].status='waiting'});
         setOperations(operationsUpdate);
+        setDisableNextButton(true);
     }
 
     const getAxisLabel = () => {
         let axis_label = { xlabel: data.xtype, ylabel: data.ytype };
         return axis_label;
-    }
-
-    const tempgroups = [...data.groups];
-    let disableNextBtn = false;
-    for(let ic=0; ic<tempgroups.length; ic++){
-        if(tempgroups[ic].data.length===0 ||tempgroups[ic].data[0].name===undefined){
-            disableNextBtn = true;
-            break;
-        }
-        
-
     }
 
     const dataTypeHandler = () => {
@@ -1096,7 +1092,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                         <Button  onClick={e => { handlePrevious() }}>Previous</Button>
                     </div>
                     <div className="ButtonNext">
-                        <Button type="primary" disabled={disableNextBtn} onClick={e => { handleNext() }}>Next</Button>
+                        <Button type="primary" disabled={disableNextButton} onClick={e => { handleNext() }}>Next</Button>
                     </div>
                 </div>
     </>
