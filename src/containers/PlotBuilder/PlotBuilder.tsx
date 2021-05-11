@@ -388,29 +388,24 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         const pt_index = data_plot.points[0].pointIndex;
         const curve_name = data_plot.points[0].data.name;
 
-        
-    
-       // set operations parameters
-       const operationsUpdate = [...operations];
-       const a = operationsUpdate.find( (el) => el.action === action/*"Cleaning_ends"*/);
-       const sm = a.selected_method;
-       const m = a.methods.find( e => e.type === sm);
+        // set operations parameters
+        const operationsUpdate = [...operations];
+        const a = operationsUpdate.find( (el) => el.action === "Cleaning_ends");
+        const sm = a.selected_method;
+        const m = a.methods.find( e => e.type === sm);
 
-       if(action==="Averaging"){
-           //initialize weighted_curveId and weight parameters 
-       } else if(action==="Cleaning_ends") {
-           if(m.type!=='Max_Xs')
-             return false;
-           //  check if already inserted
-           const group_id = data.tree.selectedGroup;
-           const index = m.params[0].curveId.findIndex( e => (e.curveName === curve_name && e.groupId === group_id) );
-           if(index===-1){
-              m.params[0].value = [...m.params[0].value,  pt_index]; // pt_index
-              m.params[0].curveId = [...m.params[0].curveId, {groupId: group_id,curveName: curve_name}];
-           } else {
-              m.params[0].value[index] =  pt_index; 
-           }
-       }
+        if(m.type!=='Max_Xs')
+            return false;
+        //  check if already inserted
+        const group_id = data.tree.selectedGroup;
+        const index = m.params[0].curveId.findIndex( e => (e.curveName === curve_name && e.groupId === group_id) );
+        if(index===-1){
+            m.params[0].value = [...m.params[0].value,  pt_index]; // pt_index
+            m.params[0].curveId = [...m.params[0].curveId, {groupId: group_id,curveName: curve_name}];
+        } else {
+            m.params[0].value[index] =  pt_index; 
+        }
+       
 
       
        setOperations(operationsUpdate);
