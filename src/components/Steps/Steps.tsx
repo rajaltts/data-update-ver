@@ -80,6 +80,7 @@ const Steps: React.FC<StepsProps> = (props) => {
 
     const changeOperationsHandler = (new_ops: Operation[]) => { 
         props.changeOperations(new_ops);
+        paramsRef.current.length=0; // reset ref
      }
 
     const removeAllPointsHandler = () => {
