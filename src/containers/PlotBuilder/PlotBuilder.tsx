@@ -64,7 +64,7 @@ const dataReducer = (currentData: Data, action: Action) => {
                     if(c.name!=='average'){
                         const curve_d: Curve = { id: index_c,
                                                  x: [...c.x], y: [...c.y],
-                                                 name: (c.matDataLabel?c.matDataLabel:c.label),
+                                                 name: index_c.toString(),
                                                  label: (c.matDataLabel?c.matDataLabel:c.label),
                                                  matDataLabel: c.matDataLabel,
                                                  oid: c.oid,
