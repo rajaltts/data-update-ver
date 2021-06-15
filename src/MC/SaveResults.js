@@ -1,12 +1,12 @@
 import React from 'react';
-import { Col, Row, Descriptions, Button, Checkbox ,Skeleton, Layout, Modal, Input, Space, Select, Transfer } from 'antd';
+import { Col, Row, Button, Checkbox ,Skeleton, Layout, Modal, Input, Space, Select, Transfer, Spin } from 'antd';
 import 'antd/dist/antd.css';
 import axios from '../axios-orders';
 import PlotCurve from '../components/PlotCurveComponent/PlotCurve';
 import "../App.css";
-import DragNDrop  from '../components/DragNDrop/DragNDrop.js'
 import * as FileSaver from 'file-saver';
 import * as XLSX from 'xlsx';
+import {Loading3QuartersOutlined } from '@ant-design/icons';
 
 class SaveResults extends React.Component {
     constructor(props) {
@@ -29,7 +29,8 @@ class SaveResults extends React.Component {
             targetClassMap:{},
             selected_resProp:{},
             projects:[],
-            selectedProject:{}
+            selectedProject:{},
+            loadingIcon:false,
         }
         this.sendData = this.sendData.bind(this);
         this.handlePrevious = this.handlePrevious.bind(this);
@@ -164,14 +165,21 @@ class SaveResults extends React.Component {
         let selectedAnalysisType = this.props.propState.selectedAnalysisType.title;
         const url = this.props.propState.url;
         this.state.classificationLoaded = false;
-        axios.get(url + '/servlet/rest/dr/get_Attribute?analysisType='+selectedAnalysisType+'&format=json&user=smroot&passwd=sdm')
+        let newUrl =url + '/servlet/rest/dr/get_Attribute?analysisType='+selectedAnalysisType+'&format=json';
+        let devURL = process.env.NODE_ENV === 'production'?'':'&user=smroot&passwd=sdm';
+        newUrl = newUrl + devURL;
+        this.setState({
+            loadingIcon:true
+        });
+        axios.get(newUrl)
             .then(response => {
                 //console.log(response);
                 const res = response.data;
                 this.setState({
                     schemaAttributes: res.schemaAttributes,
                     classificationLoaded:true,
-                    showAttributeDialog: true
+                    showAttributeDialog: true,
+                    loadingIcon: false
                 })
             })
      }
@@ -318,6 +326,9 @@ class SaveResults extends React.Component {
             propState: this.props.propState,
             currentState: this.state,
         }
+        this.setState({
+            loadingIcon:true
+        });
         //console.log(json);
         axios.post(url +'/servlet/rest/dr/save',{data:json},{headers:{'Content-Type': 'application/json',clientAppType:'REST_API', salt:saltId}})
             .then(response => {
@@ -621,11 +632,12 @@ this.state.groups.map((group, index)=>{
             this.state.sourceData.push(obj);
         });
     }
-
+    const antIcon = <Loading3QuartersOutlined style={{ fontSize: 24 }} spin />;
 
         return (
             <> 
                 <Layout className="DRLayout">
+                <Spin spinning={this.state.loadingIcon} indicator={antIcon} >   
                 <div className="OuterDivSaveScroll">
                <Row className="DefineGroupsDiv">
                 <Col>              
@@ -708,7 +720,7 @@ this.state.groups.map((group, index)=>{
                     </div>
                 </div>
 
-
+                </Spin>
                 </Layout>
                 
             </>

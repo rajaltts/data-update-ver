@@ -1,10 +1,11 @@
 import React from 'react';
-import { Col, Row, Button, Checkbox ,Skeleton, Layout, Modal, Input, Space} from 'antd';
+import { Spin, Button, Checkbox ,Skeleton, Layout, Modal, Input, Space} from 'antd';
 import 'antd/dist/antd.css';
 import axios from '../axios-orders';
 import PlotCurve from '../components/PlotCurveComponent/PlotCurve';
 import "../App.css";
 import DragNDrop  from '../components/DragNDrop/DragNDrop.js'
+import {Loading3QuartersOutlined } from '@ant-design/icons';
 
 const colors =["#e51c23", // red
 "#3f51b5", // indigo
@@ -60,6 +61,7 @@ class DefineGroups extends React.Component {
             xtype: props.propState.xtype,
             ytype: props.propState.ytype,
             precision: 6,
+            loadingIcon:false,
         }
         this.getCurves = this.getCurves.bind(this);
         this.handleNext = this.handleNext.bind(this);
@@ -321,8 +323,13 @@ class DefineGroups extends React.Component {
         let selectedPropDefStr =selectedPropDef.join("','");
         selectedPropDefStr = "'"+selectedPropDefStr+"'";
         let selectedAnalysisType = this.props.propState.selectedAnalysisType.title;
-
-        axios.get(url + '/servlet/rest/dr/get_Curve?query='+ query + '&analysisType='+selectedAnalysisType+'&propDef='+selectedPropDefStr+'&format=json&user=smroot&passwd=sdm')
+        let newUrl =url + '/servlet/rest/dr/get_Curve?query='+ query + '&analysisType='+selectedAnalysisType+'&propDef='+selectedPropDefStr+'&format=json';
+        let devURL = process.env.NODE_ENV === 'production'?'':'&user=smroot&passwd=sdm';
+        newUrl = newUrl + devURL;
+        this.setState({
+            loadingIcon:true
+        });
+        axios.get(newUrl)
             .then(response => {
                 //console.log(response);
                 const res = response.data;
@@ -349,7 +356,8 @@ class DefineGroups extends React.Component {
                     stateChanged: false,
                     measurement: res.measurement,
                     projects: res.projects,
-                    selectedProject: res.selectedProject
+                    selectedProject: res.selectedProject,
+                    loadingIcon: false,
                 })
 
 
@@ -604,11 +612,14 @@ this.state.groups.map((group, index)=>{
                             }
                         }
                         })
-     
+    const antIcon = <Loading3QuartersOutlined style={{ fontSize: 24 }} spin />;
+
 
         return (
             <> 
                 <Layout className="DRLayout">
+                <Spin spinning={this.state.loadingIcon} indicator={antIcon} >   
+    
                 <div className="OuterDivScroll">
                     <table className="DefineTable">
                     <tbody>
@@ -675,7 +686,7 @@ this.state.groups.map((group, index)=>{
                     </div>
                 </div>
 
-               
+               </Spin>
                 </Layout>
                 
             </>

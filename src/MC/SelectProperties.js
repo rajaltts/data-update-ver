@@ -1,9 +1,9 @@
 import React from 'react';
-import { Col, Row, Descriptions, Button, Checkbox,Skeleton, Layout, Select } from 'antd';
+import { Col, Row, Descriptions, Button, Checkbox,Skeleton, Layout, Select,Spin } from 'antd';
 import 'antd/dist/antd.css';
 import axios from '../axios-orders';
 import "../App.css";
-import { CheckCircleOutlined, CheckOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined, CheckOutlined, Loading3QuartersOutlined } from '@ant-design/icons';
 
 class SelectProperties extends React.Component {
     constructor(props) {
@@ -14,7 +14,8 @@ class SelectProperties extends React.Component {
             loaded:false,
             analysisTypes:[],
             selectedAnalysisType:{mat:[]},
-            propLabelMap:{}
+            propLabelMap:{},
+            loadingIcon:false,
         }
         this.getPropertyDef = this.getPropertyDef.bind(this);
         this.handleNext = this.handleNext.bind(this);
@@ -78,7 +79,13 @@ class SelectProperties extends React.Component {
        // console.log(this.props.propState);
         const url = this.props.propState.url;
         const query = this.props.propState.query;
-        axios.get(url + '/servlet/rest/dr/get_PropertyDef?query=' + query + '&format=json&user=smroot&passwd=sdm')
+        let newUrl =url + '/servlet/rest/dr/get_PropertyDef?query=' + query + '&format=json';
+        let devURL = process.env.NODE_ENV === 'production'?'':'&user=smroot&passwd=sdm';
+        newUrl = newUrl + devURL;
+        this.setState({
+            loadingIcon:true
+        });
+        axios.get(newUrl)
             .then(response => {
                 //console.log(response);
                 const res = response.data;
@@ -90,7 +97,8 @@ class SelectProperties extends React.Component {
                     analysisTypes: res.analysis,
                     selectedAnalysisType: res.selectedAnalysisType,
                     propLabelMap: res.propLabelMap,
-                    selectedPropDef: propDefSelected
+                    selectedPropDef: propDefSelected,
+                    loadingIcon: false
                 })
 
 
@@ -144,12 +152,14 @@ class SelectProperties extends React.Component {
                 })}
             </tbody>
         </table>
+        const antIcon = <Loading3QuartersOutlined style={{ fontSize: 24 }} spin />;
         
         return (
             <>
                 <Layout className="DRLayout">
                 <div className="OuterDivScroll">  
                 <div id='PropertyDef' className="PropertyDef">
+                <Spin spinning={this.state.loadingIcon} indicator={antIcon} >   
                 <Skeleton loading={!this.state.loaded}>
                    <Row className="AnalysisClass">
                    <Select size='small' value={this.state.selectedAnalysisType.title} style={{width: 150}} onChange={(e)=>this.onAnalysisTypeChange(e,this.state.selectedAnalysisType)}>
@@ -170,7 +180,7 @@ class SelectProperties extends React.Component {
                           </Row>
                         </Skeleton>
 
-            
+                        </Spin> 
                 </div>
                 </div>  
                 <div className="ButtonPanel">

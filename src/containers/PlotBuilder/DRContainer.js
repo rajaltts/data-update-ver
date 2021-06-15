@@ -2,7 +2,6 @@ import React, { Fragment, useEffect, useState, useReducer } from 'react';
 import { Col, Row, Descriptions, Button, Checkbox , Steps} from 'antd';
 import 'antd/dist/antd.css';
 
-import ReactDOM from "react-dom";
 import SelectProperties from '../../MC/SelectProperties.js'
 import DefineGroups from '../../MC/DefineGroups.js';
 import PlotBuilder from './PlotBuilder';

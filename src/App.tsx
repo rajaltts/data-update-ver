@@ -9,7 +9,7 @@ import ReactDOM from 'react-dom';
 
 //<DRContainer modelState={modelState}/>
 //let modelState = require('./data/data1.json');
-const modelState={newLoad:true,url:"http://localhost:7050/MaterialCenter",query:"3;9tQADr7gA:ADASOg,9tQAEOUxQ:ADASOg,9tQADy4MQ:ADASOg,9tQAEAuIg:ADASOg,9tQAER4MQ:ADASOg,9tQAEAlMw:ADASOg,9tQAEHldQ:ADASOg;this"};
+const modelState={newLoad:true,url:"http://localhost:7050/MaterialCenter",query:"3;YZ4AE40Aw:AEjKjA,YZ4AE40dA:AEjKjA,YZ4AE402A:AEjKjA,YZ4AE407w:AEjKjA,YZ4AE40_A:AEjKjA,YZ4AE404g:AEjKjA;this"};
 //const modelState={url:"http://localhost:7050/MaterialCenter",query:"3;AdlUUQ:AIY,jLgAAPvPA:elM,AcehFw:AIY,jLgAAPviw:elM;this"};
 /*<Layout>
     <Header> </Header>
@@ -39,10 +39,11 @@ const App: React.FC = () => {
   */
  
    // App with default files, no input files needed 
+        let drContainer = process.env.NODE_ENV === 'production'?'':<DRContainer modelState={modelState}/>;
   return (
     <Layout style={{height:"90%"}}>
       <Content >
-      <DRContainer modelState={modelState}/>
+      {drContainer}
 
       </Content>
     </Layout>
@@ -53,6 +54,17 @@ const App: React.FC = () => {
 
 
 function renderDRContainer(model, element) {
+  //Comment this piece of code to activate logging
+  if (process.env.NODE_ENV === 'production') {
+    const noop = () => {}
+    ['assert', 'clear', 'count', 'debug', 'dir', 'dirxml',
+      'group', 'groupCollapsed', 'groupEnd', 'info', 'log',
+      'markTimeline', 'profile', 'profileEnd', 'table', 'time', 'timeEnd',
+      'timeline', 'timelineEnd', 'timeStamp', 'trace',
+    ].forEach((method) => {
+      window.console[method] = noop
+    })
+  }
   ReactDOM.render(<DRContainer modelState={model} />, element);
 //  ReactDOM.render(
    // React.createElement(DRContainer, {modelState: model}, null),element);
