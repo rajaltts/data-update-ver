@@ -289,7 +289,7 @@ class SaveResults extends React.Component {
         let upDatedGroups =this.state.groups.map((grp, grpI) =>  { 
             
             if(e === grpI){
-                 grp.isSaveSelected = checked;
+                 grp.isSelected = checked;
             }
             return grp;
         }
@@ -298,8 +298,8 @@ class SaveResults extends React.Component {
             groups:upDatedGroups
         })
         let json = {
-            current: 3,
-            previous: false,
+            current: 4,
+            previous: true,
             selectedCurves: this.state.selectedCurves,
             groups: this.state.groups,
             type: this.state.xyDisplayScale,
@@ -396,13 +396,6 @@ class SaveResults extends React.Component {
 
 
     render() {
-
-        let grps =this.state.groups.map((grp, grpI) =>  { 
-            if(grp.isSaveSelected === undefined)
-                 grp.isSaveSelected = grp.isSelected;
-            return grp;
-        })
-        this.state.groups = grps;
 
           let allCurves = [];
           let colorsArray = [];
@@ -505,7 +498,7 @@ let table = <table className="Grid">
 <thead><tr key={'mattr01'}><th key='propCol0'></th>{
     
 this.state.groups.map((group, index)=>{
-    return(index!==0 && group.isSelected?<th style={{textAlign: 'center'}}  key={'propCol'+index+1}><Checkbox key={"checkbox"+index+1} checked={group.isSaveSelected} onChange={(e)=>this.onCheckBoxChange(e.target.checked,index)}/>{group.label}</th>:"")
+    return(index!==0 && group.isSelected?<th style={{textAlign: 'center'}}  key={'propCol'+index+1}><Checkbox key={"checkbox"+index+1} checked={group.isSelected} onChange={(e)=>this.onCheckBoxChange(e.target.checked,index)}/>{group.label}</th>:"")
 })}</tr>
 </thead>
 <tbody>
