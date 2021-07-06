@@ -30,7 +30,7 @@ class DRContainer extends React.Component {
             plotBuildModel:{},
             propLabelMap:{},
             selected_resProp:{},
-            selectedProject:{},
+            selectedProject:props.modelState.selectedProject,
             salt:props.modelState.salt,
             widget:props.modelState.widgetId,
             hidId:props.modelState.hidId,

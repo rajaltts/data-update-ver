@@ -29,7 +29,7 @@ class SaveResults extends React.Component {
             targetClassMap:{},
             selected_resProp:{},
             projects:[],
-            selectedProject:{},
+            selectedProject:this.props.propState.selectedProject,
             loadingIcon:false,
         }
         this.sendData = this.sendData.bind(this);
@@ -313,6 +313,7 @@ class SaveResults extends React.Component {
             selectedCriteria:this.state.selectedCriteria,
             groupsCriteria:this.state.groupsCriteria,
             criteria:this.state.criteria,
+            selectedProject: this.state.selectedProject,
         }
      this.sendData(json);
  }
@@ -660,7 +661,7 @@ this.state.groups.map((group, index)=>{
                         </Input></td></tr>
                     <tr><td>
                     <span  className='AnalysisResultLabel'> Project</span></td><td>
-                        <Select size='small' value={this.props.propState.selectedProject.oid} style={{width:'100%'}}  onChange={(e)=>this.onProjectChange(e)}>
+                        <Select size='small' value={this.state.selectedProject.oid} style={{width:'100%'}}  onChange={(e)=>this.onProjectChange(e)}>
                             {
                             this.props.propState.projects.map( (project,index) => {
                                 return(<Select.Option key={'project'+index} value={project.oid}>{project.name}</Select.Option>);
