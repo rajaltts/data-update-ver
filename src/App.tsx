@@ -7,10 +7,23 @@ import ImportFromDisk from './components/ImportFromDisk/ImportFromDisk'
 import PlotBuilder from './containers/PlotBuilder/PlotBuilder'
 import ReactDOM from 'react-dom';
 
+//<DRContainer modelState={modelState}/>
 //let modelState = require('./data/data1.json');
 const modelState={newLoad:true,url:"http://localhost:7050/MaterialCenter",query:"3;YZ4AE40Aw:AEjKjA,YZ4AE40dA:AEjKjA,YZ4AE402A:AEjKjA,YZ4AE407w:AEjKjA,YZ4AE40_A:AEjKjA,YZ4AE404g:AEjKjA;this"};
 //const modelState={url:"http://localhost:7050/MaterialCenter",query:"3;AdlUUQ:AIY,jLgAAPvPA:elM,AcehFw:AIY,jLgAAPviw:elM;this"};
-
+/*<Layout>
+    <Header> </Header>
+    <Layout>
+      <Content>
+      <DRContainer modelState={modelState}/>
+      </Content>
+    </Layout>
+  </Layout>
+  <PlotBuilder 
+            data_input = {data_file}
+            template_input = {tensile_template} parentCallback = {""}/>
+  
+  */
 
 const App: React.FC = () => {
   const { Header, Footer, Sider, Content } = Layout;
@@ -24,30 +37,19 @@ const App: React.FC = () => {
     <ImportFromDisk template_input={tensile_template} data_input={data_file}/>
   );
   */
-  const {REACT_APP_VERSION} = process.env;
-  console.log("VERSION :"+process.env.NODE_ENV);
-  console.log("VERSION :"+process.env.REACT_APP_VERSION);
+ 
+   // App with default files, no input files needed 
+        let drContainer = process.env.NODE_ENV === 'production'?'':<DRContainer modelState={modelState}/>;
+  return (
+    <Layout style={{height:"90%"}}>
+      <Content >
+      {drContainer}
 
-  if(process.env.REACT_APP_VERSION === 'standalone'){
-    return (
-      <Layout style={{height:"90%"}}>
-        <Content >
-        <PlotBuilder 
-              data_input = {data_file}
-              template_input = {tensile_template} parentCallback = {() => {}}
-        />
-        </Content>
-      </Layout>
-   );
-  } else if(process.env.REACT_APP_VERSION === 'materialcenter'){
-    return (
-      <Layout style={{height:"90%"}}>
-        <Content >
-          <DRContainer modelState={modelState}/>
-        </Content>
-      </Layout>
-    );
-  }
+      </Content>
+    </Layout>
+ );
+ 
+
 }
 
 

@@ -62,6 +62,8 @@ class DefineGroups extends React.Component {
             ytype: props.propState.ytype,
             precision: 6,
             loadingIcon:false,
+            projects: this.props.propState.projects,
+            selectedProject: this.props.propState.selectedProject,
         }
         this.getCurves = this.getCurves.bind(this);
         this.handleNext = this.handleNext.bind(this);
@@ -103,6 +105,8 @@ class DefineGroups extends React.Component {
             xQuantityType: this.state.xQuantityType,
             yQuantityType:this.state.yQuantityType,
             measurement: this.state.measurement,
+            selectedProject: this.state.selectedProject,
+            projects: this.state.projects,
         }
         this.sendData(json);
     }

@@ -348,6 +348,7 @@ class SaveResults extends React.Component {
             res_curve: this.state.res_curve,
             res_var1: this.state.res_var1,
             targetClass: this.state.targetClass,
+            selectedProject: this.state.selectedProject,
         }
         this.sendData(json);
     } 
@@ -382,6 +383,7 @@ class SaveResults extends React.Component {
             xQuantityType: this.props.propState.xQuantityType,
             yQuantityType:this.props.propState.yQuantityType,
             projects: this.props.propState.projects,
+            selectedProject: this.state.selectedProject,
         })
     
 
