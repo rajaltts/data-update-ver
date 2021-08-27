@@ -38,16 +38,35 @@ const App: React.FC = () => {
   );
   */
  
-   // App with default files, no input files needed 
-        let drContainer = process.env.NODE_ENV === 'production'?'':<DRContainer modelState={modelState}/>;
-  return (
-    <Layout style={{height:"90%"}}>
-      <Content >
-      {drContainer}
+  // App with default files, no input files needed 
+  let drContainer = process.env.NODE_ENV === 'production'?'':<DRContainer modelState={modelState}/>;
 
-      </Content>
-    </Layout>
- );
+  const {REACT_APP_VERSION} = process.env;
+  console.log("VERSION :"+process.env.NODE_ENV);
+  console.log("VERSION :"+process.env.REACT_APP_VERSION);
+  if(process.env.REACT_APP_VERSION === 'standalone'){
+    return (
+      <Layout style={{height:"90%"}}>
+        <Content >
+        <PlotBuilder 
+              data_input = {data_file}
+              template_input = {tensile_template} parentCallback = {() => {}}
+        />
+        </Content>
+      </Layout>
+    );
+  }
+  else 
+  {
+    return (
+      <Layout style={{height:"90%"}}>
+        <Content >
+        {drContainer}
+        </Content>
+      </Layout>
+   );
+
+  }      
  
 
 }

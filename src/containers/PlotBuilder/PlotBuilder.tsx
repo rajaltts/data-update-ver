@@ -805,9 +805,6 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                         x_new.push(vecX_out.get(i));
                         y_new.push(vecY_out.get(i));
                     }
-                    //console.log("----------new X,Y-------------");
-                    //console.log("new size:"+x_new.length);
-                
                     // update selected curves
                     if(newCurves[curve_idx].selected){
                         // reset x and y
@@ -839,141 +836,51 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                     vecX_out.delete();
                     vecY_out.delete();
 
-                     // DataAnaytics
-                     // create DataProcess
-                     const dp_data = new Module.DataProcess(dataset_out);
-                     // create operation                   
-                     const op_slope = new Module.Operation(Module.ActionType.DATA_ANALYTICS,Module.MethodType.SLOPE_POINT);
-                     // apply operation
-                     const check = dp_data.apply(op_slope);
-                     const dp_data_out = dp_data.getOutputDataset();
-                     const curve_data_out = dp_data_out.getCurve('averaging');
-                     let vecY_data_out = curve_data_out.getY();
-                     const young = vecY_data_out.get(0).toExponential(precision);
-/*
-                    // create DataProcess for post
-                    const dataset_post = new Module.Dataset();
-                    const curve_avg = dataset_out.getCurve('averaging');
-                    dataset_post.addCurve(curve_avg);
+                    // DataAnaytics 
+                    let young = 0;
+                    let yield_strength = 0;
+                    let strain_at_break = 0;
+                    let stress_at_break = 0;
+                    let strain_at_ultimate_strength = 0;
+                    let stress_at_ultimate_strength = 0;
+                    const dp_data = new Module.DataProcess(dataset_out);                
+                    const op_slope = new Module.Operation(Module.ActionType.DATA_ANALYTICS,Module.MethodType.NONE);
+                    op_slope.addParameterString("stiffness","averaging");
+                    op_slope.addParameterString("last_point","averaging");
+                    op_slope.addParameterString("point_max_y","averaging");
+                    op_slope.addParameterString("offset_yield_strength","averaging");
+                    op_slope.addParameterString("slope_range","first_point"); // not use range to avoid not enough points
 
-                    // Young modulus
-                    const dp_data_young = new Module.DataProcess(dataset_post);                   
-                    const op_slope_young = new Module.Operation(Module.ActionType.DATA_ANALYTICS,Module.MethodType.SLOPE_RANGE_POINT);
-                    let i0 = x_avg.findIndex( v => v > 0.0005);
-                    let i1: number;
-                    for(let i=x_avg.length;i>=0;i--){
-                        if(x_avg[i]<0.0025){
-                            i1=i;
-                            break;
-                        }
+                    const check = dp_data.apply(op_slope); 
+                    if(!check){
+                        console.log("ERROR: "+dp_data.getErrorMessage());
+                        console.log("LOG: "+dp_data.logfile());
                     }
-                    i1 = (i1===i0&&i0<x_avg.length-1?i0+1:i1);
-                    if(i1<i0)
-                        [i0,i1]=[i1,i0];
-                    const x_begin = x_avg[i0];
-                    const x_end = x_avg[i1];
-                    op_slope_young.addParameterFloat("x_begin",x_begin);
-                    op_slope_young.addParameterFloat("x_end",x_end);
-                    const check_young = dp_data_young.apply(op_slope_young);
-                    var vec_a = new Module.VectorDouble();
-                    var vec_b = new Module.VectorDouble();
-                    if(check_young){
-                        const dp_data_young_out = dp_data_young.getOutputDataset();
-                        const curve_data_young_out = dp_data_young_out.getCurve('averaging');
-                        let vecY_data_young_out = curve_data_young_out.getY();
-                        let vecX_data_young_out = curve_data_young_out.getX();
-                        const coef_a  = vecX_data_young_out.get(0);
-                        const coef_b  = vecY_data_young_out.get(0);
-                        vec_a.push_back(coef_a);
-                        vec_b.push_back(coef_b);
-                        console.log("young range = ["+ x_begin + " , " + x_end + "]");
-                        const young = vecX_data_young_out.get(0).toExponential(precision);
-*/
-                        console.log("Young ="+young);
-                        data_analytics.length = 0;
+                    else {
+                        const report_test = dp_data.getReport();
+                        const stiffness = report_test.getPropertyFirst(Module.ActionType.DATA_ANALYTICS,"averaging","stiffness");
+                        young = stiffness.toExponential(precision);
+                        const offset_yield_strength = report_test.getPropertySecond(Module.ActionType.DATA_ANALYTICS,"averaging","offset_yield_strength");
+                        yield_strength = offset_yield_strength.toExponential(precision);
+                        const last_point_x = report_test.getPropertyFirst(Module.ActionType.DATA_ANALYTICS,"averaging","last_point");
+                        const last_point_y = report_test.getPropertySecond(Module.ActionType.DATA_ANALYTICS,"averaging","last_point");
+                        strain_at_break = last_point_x.toExponential(precision);
+                        stress_at_break = last_point_y.toExponential(precision);
+                        const point_max_y_x = report_test.getPropertyFirst(Module.ActionType.DATA_ANALYTICS,"averaging","point_max_y");
+                        const point_max_y_y = report_test.getPropertySecond(Module.ActionType.DATA_ANALYTICS,"averaging","point_max_y");
+                        strain_at_ultimate_strength = point_max_y_x.toExponential(precision);
+                        stress_at_ultimate_strength = point_max_y_y.toExponential(precision);
+                    }
+        
+                    data_analytics.length = 0;
                     data_analytics.push({label: "Young's Modulus", value: young, name: "young"});
-                    op_slope.delete();
-                    dp_data.delete();
- /*                       
-                        data_analytics.push({label: "Young's Modulus ", value: young, name: "young"});
-                    }
-                    op_slope_young.delete();
-                    dp_data_young.delete();
-
-                    // Yield strength
-                    const delta = 0.002;
-                    const new_b = vec_b.get(0) - vec_a.get(0) * delta;
-                    var vec_b2 = new Module.VectorDouble();
-                    vec_b2.push_back(new_b);
-                    // Intersection point with line a X + b in a given range [x_begin,x_end]
-                    // return 1 point : (x_intersection,y_intersection)
-                    const dp_data_yield = new Module.DataProcess(dataset_post);                   
-                    const op_yield = new Module.Operation(Module.ActionType.DATA_ANALYTICS,Module.MethodType.LINE_INTERSECTION_POINT);
-                    op_yield.addParameterFloat("x_begin", 0.0005);
-                    op_yield.addParameterFloat("x_end", 1.);
-                    op_yield.addParameterRangeFloat("a", vec_a);
-                    op_yield.addParameterRangeFloat("b", vec_b2);
-                    const check_yield = dp_data_yield.apply(op_yield);
-                    if(check_yield){
-                        const dp_data_yield_out = dp_data_yield.getOutputDataset();
-                        const curve_data_yield_out = dp_data_yield_out.getCurve('averaging');
-                        let vecY_data_yield_out = curve_data_yield_out.getY();
-                        let vecX_data_yield_out = curve_data_yield_out.getX();
-                        const oys_x  = vecX_data_yield_out.get(0).toExponential(precision);
-                        const oys_y  = vecY_data_yield_out.get(0).toExponential(precision);
-                        console.log("Yield = ["+ oys_x + " , "+oys_y + "]");
-                        data_analytics.push({label: "Yield Strength ", value: oys_y, name: "yield"});
-                    } else  {
-                        console.log("ERROR KO"+dp_data_yield.getErrorMessage());
-                        console.log("LOG OK:"+dp_data_yield.logfile());
-                    }
-                    op_yield.delete();
-                    dp_data_yield.delete();
-                    vec_a.delete();
-                    vec_b.delete();
-                    vec_b2.delete();
-*/
-                    // create DataProcess
-                    const dp_data_end = new Module.DataProcess(dataset_out);
- /*                   
-                    // Break
-                    const dp_data_end = new Module.DataProcess(dataset_post);
-*/                 
-                    const op_end = new Module.Operation(Module.ActionType.DATA_ANALYTICS,Module.MethodType.END_POINT);
-                    const check_end = dp_data_end.apply(op_end);
-                    const dp_data_end_out = dp_data_end.getOutputDataset();
-                    const curve_data_end_out = dp_data_end_out.getCurve('averaging');
-                    const vecX_data_end_out = curve_data_end_out.getX();
-                    const vecY_data_end_out = curve_data_end_out.getY();
-                    const strain_at_break = vecX_data_end_out.get(0).toExponential(precision);
-                    const stress_at_break = vecY_data_end_out.get(0).toExponential(precision);
+                    data_analytics.push({label: "Yield Strength", value: yield_strength, name: "yield_strength"});
                     data_analytics.push({label: "Strain at Break", value: strain_at_break, name: "strain_at_break"});
                     data_analytics.push({label: "Strength at Break", value: stress_at_break, name: "stress_at_break"});
-                    op_end.delete();
-                    dp_data_end.delete();
-
-                     // create DataProcess
-                     const dp_data_max = new Module.DataProcess(dataset_out); 
-/*
-                    // Ultimate strength
-                    const dp_data_max = new Module.DataProcess(dataset_post);      
-*/           
-                    const op_max = new Module.Operation(Module.ActionType.DATA_ANALYTICS,Module.MethodType.MAX_POINT);
-                    const check_max = dp_data_max.apply(op_max);
-                    const dp_data_max_out = dp_data_max.getOutputDataset();
-                    const curve_data_max_out = dp_data_max_out.getCurve('averaging');
-                    const vecX_data_max_out = curve_data_max_out.getX();
-                    const vecY_data_max_out = curve_data_max_out.getY();
-                    const strain_at_ultimate_strength = vecX_data_max_out.get(0).toExponential(precision);
-                    const stress_at_ultimate_strength = vecY_data_max_out.get(0).toExponential(precision);
                     data_analytics.push({label: "Strain at Ultimate Strength", value: strain_at_ultimate_strength, name: "strain_at_ultimate_strength"});
-                    data_analytics.push({label: "Strength at  Ultimate Strength", value: stress_at_ultimate_strength, name: "stress_at_ultimate_strength"});
-                    op_max.delete();
-                    dp_data_max.delete();
-/*
-                    dataset_post.delete();
-*/
-                    
+                    data_analytics.push({label: "Strength at Ultimate Strength", value: stress_at_ultimate_strength, name: "stress_at_ultimate_strength"});
+                    op_slope.delete();
+                    dp_data.delete();
                 }
 
                 // update the state with the new curves
@@ -1030,7 +937,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
 
             const promise = applyOperation(dataprocess);
             promise.then(todoAfterOperationApplied,todoOperationFailed).then( () => {
-                   // console.log("Second then");
+                    console.log("Second then");
                 });
         });
         
