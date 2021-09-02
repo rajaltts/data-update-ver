@@ -1,4 +1,4 @@
-export type Curve = {
+export interface Curve  {
     id: number;
     x: number[];
     y: number[];
@@ -14,7 +14,7 @@ export type Curve = {
 };
 
 
-export type Group = {
+export interface Group {
     id: number;
     curves: Curve[]; 
     data: any[];
@@ -22,7 +22,7 @@ export type Group = {
     result: boolean; // true if we have a result (averaging curve)
 };
 
-export type Data = {
+export interface Data {
     type: string;
     xtype: string;
     ytype: string;
@@ -34,20 +34,20 @@ export type Data = {
 };
 
 // use to initialize ant Tree component
-export type CurveData = {
+export interface CurveData {
     title: string; // curve name
     key: string;   // group_id-curve_id
     icon: any;
 };
 
-export type GroupData = {
+export interface GroupData  {
     title: string; // group name
     treeData: CurveData[];
     keys: string[];
     resultsView: number;
 }
 
-export type Tree = {
+export interface Tree  {
     groupData: GroupData[] ;
     selectedGroup: number;
 };

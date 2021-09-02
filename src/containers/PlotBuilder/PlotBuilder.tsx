@@ -12,6 +12,12 @@ import {colors} from '../../assets/colors';
 import { tensile_operations_config } from '../../assets/tensile_operations_config.js';
 const clone = require('rfdc')();
 
+import dataReducer from './Model/Reducer';
+import initalModel from './Model/InitialModel';
+import actions from './Model/Actions';
+
+import useModel from './UseModel';
+
 //---------INTERFACE-----------------------------
 interface EmscriptenModule {
     [key: string]: any    
@@ -23,197 +29,14 @@ interface PlotBuilderProps {
     parentCallback: any;
 };
 
-//--------REDUCER-----------------------------------
-
-// use discriminated union type
-type Action = 
-    | {type: 'CHECK_CURVES', keys: string[], groupid: number}
-    | {type: 'SET', input: any}
-    | {type: 'UPDATE_CURVES', curves: Curve[], data: any[], result: boolean }
-    | {type: 'UPDATE_ALL_CURVES', groups: Group[] }
-    | {type: 'RESET_CURVES', input: any}
-    | {type: 'RESET_CURVES_INIT', groupid: number}
-    | {type: 'SET_MARKER', curve_name: string, point_id: number}
-    | {type: 'RESET_MARKERS', group_id: number}
-    | {type: 'SET_VIEW', val: number}
-    | {type: 'SET_MEASUREMENT', val: string}
-    ;
-
-const dataReducer = (currentData: Data, action: Action) => {
-   switch (action.type) {
-        case 'SET':{
-            if(action.input === undefined)
-                return currentData;
-            const data: Data = {type: action.input.type,
-                                xtype: action.input.xtype,
-                                ytype: action.input.ytype,
-                                xunit: action.input.xunit,
-                                yunit: action.input.yunit,
-                                measurement: action.input.measurement,
-                                groups: [],
-                                tree: { groupData: [],
-                                        selectedGroup: 0}
-                                };
-            const initState = (action.input.tree === undefined?true:false);
-            action.input.groups.forEach( (g,index_g) => {
-                const group_c: Group = { id: index_g, curves: [], data: [], label:g.label, result: (initState?false:g.result)};
-                const group_d: GroupData = { title: g.label, treeData: [], keys: (initState?[]:[...action.input.tree.groupData[index_g].keys]), 
-                                             resultsView: (initState?0:action.input.tree.groupData[index_g].resultsView)};
-
-                g.curves.forEach( (c, index_c) => {
-                    if(c.name!=='average'){
-                        const curve_d: Curve = { id: index_c,
-                                                 x: [...c.x], y: [...c.y],
-                                                 name: index_c.toString(),
-                                                 label: (c.matDataLabel?c.matDataLabel:c.label),
-                                                 matDataLabel: c.matDataLabel,
-                                                 oid: c.oid,
-                                                 selected: (initState?true:c.selected),
-                                                 opacity: (initState?1:c.opacity),
-                                                 markerId: c.markerId,
-                                                 x0: (initState?[...c.x]:[...c.x0]),
-                                                 y0: (initState?[...c.y]:[...c.y0])};
-                        group_c.curves.push(curve_d);
-                        // insert in GroupData
-                        const curve_data: CurveData = { title: curve_d.label,key: '',icon: <LineOutlined style={{fontSize: '24px', color: colors[index_c]}}/>};
-                        curve_data.key = index_g.toString()+'-'+index_c.toString();
-                        group_d.treeData.push(curve_data);
-                        if(initState){
-                            group_d.keys.push(curve_data.key);
-                        }
-                    } else {
-                        const curve_d: Curve = { id: index_c,
-                            x: [...c.x], y: [...c.y],
-                            name: 'average',
-                            label: (c.matDataLabel?c.matDataLabel:c.label),
-                            matDataLabel: c.matDataLabel,
-                            oid: c.oid,
-                            selected: true, opacity: 1
-                        };
-                        group_c.curves.push(curve_d);
-                    }
-                });
-                if(initState)
-                    group_c.data.push({label:'',value: 0});
-                else{
-                    const data_c = clone(g.data); // efficient deep copy
-                    group_c.data =  data_c;
-                }
-                       
-                data.groups.push(group_c);
-                data.tree.groupData.push(group_d);
-            });
-            return data;
-        }
-        case 'CHECK_CURVES':{
-            const newData = {...currentData};
-            // input: keys is the array of selected curves
-            // output: modify current curves selected and opacity properties
-            newData.groups[action.groupid].curves.forEach( (item,i) => {
-                if(item.name&&item.name.indexOf('average')===-1){
-                    item.selected = false;
-                    item.opacity = 0.2;
-                }
-            });
-            action.keys.forEach( (item,i) => {
-               const index_curve = parseInt(item.split('-')[1]);
-               newData.groups[action.groupid].curves[index_curve].selected = true;
-               newData.groups[action.groupid].curves[index_curve].opacity = 1; 
-            });
-            newData.tree.groupData[action.groupid].keys = action.keys;
-            newData.tree.selectedGroup = action.groupid;
-            return newData;
-        }
-        case 'UPDATE_CURVES':{
-            // input: curves
-            // output: replace current curves by the input curves
-            console.log('UPDATE_CURVES');
-            //console.log(currentData);
-            const group_new = [...currentData.groups];
-            group_new[currentData.tree.selectedGroup].curves = action.curves;
-            group_new[currentData.tree.selectedGroup].data = action.data;
-            group_new[currentData.tree.selectedGroup].result = action.result;
-            //console.log(group_new);
-            return {...currentData, groups: group_new};
-        }
-        case 'UPDATE_ALL_CURVES':{
-            let groups_new = [...currentData.groups];
-            groups_new = action.groups;
-            return {...currentData, groups: groups_new};
-        }
-        case 'RESET_CURVES': {
-             const group_new = [...currentData.groups];
-             group_new[action.input.groupId].curves = action.input.curves;
-             return {...currentData, groups: group_new}
-        }
-        case 'RESET_CURVES_INIT':{
-            console.log('RESET_CURVES_INIT');
-            const group_new = [...currentData.groups];
-            group_new[action.groupid].curves.map( (val,index,arr) => {
-                if(val.name !== 'average') { 
-                    arr[index].x = [...arr[index].x0];  arr[index].y = [...arr[index].y0];
-                }});
-            // remove additional curve (average curve)
-            const index_avg =  group_new[action.groupid].curves.findIndex( e => e.name ==='average');
-            if(index_avg !== -1)
-                group_new[action.groupid].curves.splice(index_avg,1); 
-            // remove all data (young, ...)
-            group_new[action.groupid].data.length = 0;
-            group_new[action.groupid].result = false;
-            return {...currentData, groups: group_new}
-        }
-        case 'SET_MARKER':{
-            const group_new = [...currentData.groups];
-            group_new[currentData.tree.selectedGroup].curves.find( c => c.name === action.curve_name).markerId = action.point_id;
-            return {...currentData, groups: group_new};
-        }
-        case 'RESET_MARKERS': {
-            const group_new = [...currentData.groups];
-            group_new[action.group_id].curves.map( (val,index,arr) => {
-                if(val.markerId)
-                val.markerId = undefined;
-            });
-            return {...currentData, groups: group_new}
-        }
-        case 'SET_VIEW': {
-            const newData = {...currentData};
-            newData.tree.groupData[currentData.tree.selectedGroup].resultsView = action.val;
-            return newData;
-        }
-        case 'SET_MEASUREMENT': {
-            const newData = {...currentData};
-            newData.measurement = action.val;
-            return newData;
-        }
-        default:
-            throw new Error('Not be reach this case'); 
-   }
-};
-
 //--------COMPONENT-----------------------------------------
 const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
 
     //-----------STATE----------------------------------------
     // datat represents the state related to curves management 
-    const [data, dispatch]  =  useReducer(dataReducer,
-        {
-            type: 'tensile', xtype: '', ytype: '', xunit: '', yunit: '', measurement: 'engineering',
-            groups: [{id: -1,
-                      curves: [ {id: -1, x: [], y: [], name: 'toto', selected: false, opacity: 0, x0: [], y0: [], oid:'', matDataLabel:'', label:''} ],
-                      data: [ {label: '', value: 0} ],
-                      label:'',
-                      result: false
-                     }
-                    ],
-            tree: { groupData: [ {title:'group1',
-                                  treeData: [{title: 'curve1', key: '0-0', icon: <LineOutlined/>}],
-                                  keys: [],
-                                  resultsView: 0
-                                  }
-                                ],
-                    selectedGroup: 0}
-        }
-        );
+    //const [data, dispatch]  =  useReducer(dataReducer,initalModel);
+    const [data,dispatch,
+        getMeasurement] = useModel();
    
     // operations represent the state related to actions/methods/parameters
     // Each action has:
@@ -236,7 +59,6 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
     const [current, setCurrent] = useState(0);
     const [precision,setPrecision] = useState(3);
     const [action,setAction]= useState("");
-    const [ measurement, setMeasurement] = useState("engineering");
     const [plotUpdate, setPlotUpdate] = useState(false);
     const [showMarkers, setShowMarkers] = useState(false);
     const [disableNextButton,setDisableNextButton] = useState(true);
@@ -245,7 +67,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
     // initialize the states (componentDidMount)
     useEffect( () => {
        // console.log("useEffect data_input");
-        dispatch({type: 'SET', input: props.data_input}); // init data(curves) state with props
+        dispatch(actions.setModel(props.data_input)); // init data(curves) state with props
         // TODO init Operations with the right congig (tensile, compression, ...) depending on analysis_type given by props.analysisType 
         // 2 cases:
         // 1 - props.template_input is a dataclean lib input file (from step2 to step3) { operations:[{...},{...}]}
@@ -270,7 +92,8 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         if(props.data_input.precision)
             setPrecision(props.data_input.precision);   
         if(props.data_input.measurement)
-            setMeasurement(props.data_input.measurement);      
+            dispatch(actions.setMeasurement(props.data_input.measurement));
+            //setMeasurement(props.data_input.measurement);      
     },[props.data_input]);
 
     // use to update operations state from template state
@@ -410,12 +233,12 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
       
        setOperations(operationsUpdate);
        // add marker in the curve
-       dispatch({type: 'SET_MARKER', curve_name: curve_name, point_id: pt_index });
+       dispatch(actions.setMarker(curve_name,pt_index ));
        return true;
     }
 
     const changeViewHandler = (val: number) => {
-        dispatch({type: 'SET_VIEW', val: val });
+        dispatch(actions.setView(val));
         console.log(data);
     }
 
@@ -439,7 +262,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
             m.params[0].value = [...new_value];
             m.params[0].curveId = [...new_id];
         }
-        dispatch({type: 'RESET_MARKERS', group_id: group_id});
+        dispatch(actions.resetMarkers(group_id));
         updatePlotHandler();
     }
 
@@ -457,7 +280,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                 }  
             });
         }
-        dispatch({ type: 'CHECK_CURVES', keys: keys, groupid: group_id});
+        dispatch(actions.checkCurves(keys,group_id));
         // check result status of the group
         const result_status = data.groups[group_id].result;
         if(!result_status){ // if no result reset data and set to first step
@@ -466,6 +289,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         }
     };
 
+    
     // convert all curves in all groups
     const convertToTrueHandler = () => {
 
@@ -548,7 +372,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                         ic++;
                     }
                 }
-               setMeasurement('true');
+               dispatch(actions.setMeasurement('true'));
             }
             const todoOperationFailed = (dataprocess: any) => {
                 console.log("ERROR KO"+dataprocess.getErrorMessage());
@@ -560,14 +384,14 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                 for(let gid=0; gid<data.groups.length;gid++){
                     restoreInitdataHandler(gid);
                 }
-                dispatch({ type: 'SET_MEASUREMENT', val: 'true'});
-                setPlotUpdate(!plotUpdate);
+                updatePlotHandler();
             });
         });
     }
 
     const updatePlotHandler = () => {
-        setPlotUpdate(!plotUpdate);
+        console.log("UPDATE PLOT");
+        setPlotUpdate( prevState => !prevState);
     }
 
     const handlePrevious = () =>{
@@ -885,7 +709,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
 
                 // update the state with the new curves
                 //console.log("UPDATE STATE");
-                dispatch({type: 'UPDATE_CURVES', curves: newCurves, data: data_analytics, result: result_flag});
+                dispatch(actions.updateCurves(newCurves,data_analytics,result_flag));
                 // flag status operation
                 const operationsUpdate = [...operations];
                 if(action==='Template'){
@@ -951,7 +775,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         else
             group_id = gid;
         //const group_id = data.tree.selectedGroup;
-        dispatch({type: 'RESET_CURVES_INIT',groupid: group_id}); 
+        dispatch(actions.resetCurves(group_id)); 
          // flag waiting status for all operations
         const operationsUpdate = [...operations];
         operationsUpdate.forEach( (val,index,arr) => {arr[index].status='waiting'});
@@ -1008,7 +832,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                     <CurveControls 
                         groupData={data.tree.groupData}
                         onCheck={checkDataTreeHandler}
-                        measurement={measurement}
+                        measurement={getMeasurement()}
                         convertToTrue={convertToTrueHandler}
                         />
                         
