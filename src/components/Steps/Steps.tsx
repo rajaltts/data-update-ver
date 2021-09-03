@@ -12,9 +12,6 @@ interface StepsProps {
     updatedCurve: (a: string) => void;
     changeOperations: (a: Operation[]) => void;
     restoreInitdata: any;
-    currentIn: number;
-    changeCurrent: (v: number) => void;
-    setAction: (a: string) => void;
     updatePlot: () => void;
     removeAllPoints: () => void;
     dataType: string;
@@ -26,9 +23,6 @@ const Steps: React.FC<StepsProps> = (props) => {
     const paramsRef = useRef([]);
 
     //---------EFFECT------------------------------------------
-    useEffect(() => {
-        setCurrent(props.currentIn);
-    },[props.currentIn]);
 
     //---------HANDLER----------------------------------------
     const saveParamsHandler = (p: parameter_type[] ) => {
@@ -54,8 +48,6 @@ const Steps: React.FC<StepsProps> = (props) => {
         changeParametersHandler();
         const action = props.operations[current].action;
         setCurrent(current);
-        props.changeCurrent(current);
-        props.setAction(action);
     }
 
     const changeSelectedMethod2 = (select:string, action: string) => {
