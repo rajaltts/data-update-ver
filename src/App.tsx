@@ -32,11 +32,7 @@ const App: React.FC = () => {
   let data_file = require('./data/data.json'); // default curve file, only for Development
 
   // App with compenent for curve loading from the local disk - Standalone version
-  /*
-  return (
-    <ImportFromDisk template_input={tensile_template} data_input={data_file}/>
-  );
-  */
+ 
  
   // App with default files, no input files needed 
   let drContainer = process.env.NODE_ENV === 'production'?'':<DRContainer modelState={modelState}/>;
@@ -48,10 +44,7 @@ const App: React.FC = () => {
     return (
       <Layout style={{height:"90%"}}>
         <Content >
-        <PlotBuilder 
-              data_input = {data_file}
-              template_input = {tensile_template} parentCallback = {() => {}}
-        />
+        <ImportFromDisk/>
         </Content>
       </Layout>
     );

@@ -1,6 +1,7 @@
 import React, {useEffect, useState } from 'react';
 import {  Button } from 'antd';
 import { Operation } from '../../template.model';
+import { Data  } from '../../data.model';
 import { tensile_operations_config } from '../../assets/tensile_operations_config.js';
 import actions from './Model/Actions';
 import useModel from './UseModel';
@@ -9,7 +10,7 @@ const clone = require('rfdc')();
 
 //---------INTERFACE-----------------------------
 interface PlotBuilderProps {
-    data_input: any;
+    data_input: Data;
     template_input: any;
     parentCallback: any;
 };
@@ -20,11 +21,11 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
     //-----------MODEL----------------------------------------
     const [data,dispatch,
            operations,setOperations,
-           convertToTrue,updatedCurve] = useModel();
+           convertToTrue,updatedCurve,
+           initOperationsFromTemplate] = useModel();
    
     // template is an input json file for dataclean library 
     const [template, setTemplate] = useState({"operations": []});
-    const [precision,setPrecision] = useState(3);
     const [plotUpdate, setPlotUpdate] = useState(false);
     const [showMarkers, setShowMarkers] = useState(false);
     const [disableNextButton,setDisableNextButton] = useState(true);
@@ -44,22 +45,15 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
             setOperations(operations_init);
             // check if we must show the markers
             const op_clean = props.template_input.find( op => op.action === "Cleaning_ends");
-            if(op_clean.selected_method === "Max_Xs"){
-                setShowMarkers(true); 
-                updatePlotHandler();
-            }
+            showCurveMarkers(op_clean.selected_method);
         } else {
-            setOperations(tensile_operations_config); // init operations state with the tensile structure (default values)
-            setTemplate(props.template_input); // init template from props
-            //setCurrentTemplate(props.template_input);
+            if(operations[0].action==='None'){
+                setOperations(tensile_operations_config); // init operations state with the tensile structure (default values)
+                setTemplate(props.template_input); // init template from props
+            }
         }
-        // console.log("Template in PlotBuider");
-        // console.log(props.template_input);
-        if(props.data_input.precision)
-            setPrecision(props.data_input.precision);   
         if(props.data_input.measurement)
-            dispatch(actions.setMeasurement(props.data_input.measurement));
-            //setMeasurement(props.data_input.measurement);      
+            dispatch(actions.setMeasurement(props.data_input.measurement));    
     },[props.data_input]);
 
     // use to update operations state from template state
@@ -67,81 +61,21 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
     useEffect( () => {
         // console.log("useEffect template");
         try { // if action/methods found in template does not correspond to value in operations state, the template is not used and default values for operations will appear. A console log error is used but we must inform the user with a notifications (TODO)
-            initOperationsFromTemplate();
+            initOperationsFromTemplate(template);
+            // check if we must show the markers
+            const op_clean = template.operations.find( op => op.action === "Cleaning_ends");
+            showCurveMarkers(op_clean.method);
         } catch(e) {
             console.log("ERROR: Input template not valid."+e.message+" Operations are set to default value");
         }
     },[template]);
-    //------------FUNCTIONS-------------------------------------
-    // initialize the Operations state with a dataclean input json file
-    // Several diffences between structure of Operations and template file
-    // - in Operations value is always a number, for string value the value is a index in a selection array
-    // - no Extrapolation action in Operations, it is inside Averaging
-    const initOperationsFromTemplate = () => {
-        // console.log("initOperationsFromTemplate");
-        // console.log(template.operations);
-        if(template.operations.length>1){
-            // manage Averaging to put extrapolation parameters
-            const op_avg = template.operations.find( op => op.action === "Averaging");
-            const op_extr = template.operations.find( op => op.action === "Extrapoling");
-            if(op_extr){
-                op_avg.parameters.push( {extrapolation: op_extr.method.toLowerCase()} );
-                op_extr.parameters.forEach( par => op_avg.parameters.push(par) );
-            }
-
-            const operationsUpdated = clone(operations); // efficient deep copy
-
-            template.operations.forEach( (elem,index) => {
-                // check if Action and Operations in template file are found in local operations
-                const op_index = operations.findIndex( op => op.action === elem.action );
-                let params_extrapolating: object[] = [];
-                if(op_index!==-1){
-                    const op = operations[op_index];
-                    const meth_index = op.methods.findIndex( met => met.type === elem.method);
-                    if(meth_index!==-1){
-                        // update local operations with template file    
-                        if('parameters' in elem) { // some operation has no parameters
-                            const params_input= elem.parameters;
-                            
-                            const param_cur = operationsUpdated[op_index].methods[meth_index].params;
-                            const param_new = [];
-                            for(let i=0; i<param_cur.length;i++ ){
-                                const name_c = param_cur[i].name;
-                                const param_temp = params_input.find( p => Object.keys(p)[0]===name_c);
-                                if(param_temp !== undefined ){ // param found in the input template
-                                    let param_value = Object.values(param_temp)[0];
-                                    if(param_cur[i].selection){
-                                        param_value = param_cur[i].selection.findIndex( e => e.name===param_value)
-                                    }
-                                    const new_param ={...param_cur[i], value: param_value};
-                                    param_new.push(new_param);
-                                } else { // keep the default
-                                    const default_param={...param_cur[i]};
-                                    param_new.push(default_param);
-                                }
-                            }
-                            operationsUpdated[op_index].methods[meth_index].params.length = 0;
-                            operationsUpdated[op_index].methods[meth_index].params = param_new;
-                        }
-                        operationsUpdated[op_index].selected_method = elem.method;
-                    } else if(elem.action!=='Extrapoling')
-                        throw new Error("ERROR in tensile template: method not recognized.");
-                } else if (elem.action!=='Extrapoling'){
-                    throw new Error("ERROR in tensile template: action not recognized.");
-                }
-            });
-            setOperations(operationsUpdated); 
-
-            // check if we must show the markers
-            const op_clean = template.operations.find( op => op.action === "Cleaning_ends");
-            if(op_clean.method === "Max_Xs"){
-                setShowMarkers(true); 
-                updatePlotHandler();
-            }
-
+    //------------HELPER FUNCTIONS-------------------------------
+    const showCurveMarkers = (method: string) => {
+        if(method=== "Max_Xs"){
+            setShowMarkers(true); 
+            updatePlotHandler();
         }
-    }
-
+    };
     //---------HANDLER-------------------------------------------
     const changeOperationsHandler = (new_ops: Operation[]) => { 
         setOperations(new_ops);
@@ -158,9 +92,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         if(action==='Cleaning_ends'){ // for other action we keep status defined in Cleaning_ends
             setShowMarkers((selectedMethod==='Max_Xs'?true:false));
         }
-        
         updatePlotHandler();
-        
     };
 
     // Curve handler
@@ -195,8 +127,6 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
             m.params[0].value[index] =  pt_index; 
         }
        
-
-      
        setOperations(operationsUpdate);
        // add marker in the curve
        dispatch(actions.setMarker(curve_name,pt_index ));
@@ -294,7 +224,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
             setDisableNextButton(!results_true);
         }
 
-        updatedCurve(action,group_id,op_target,precision,postUpdate);
+        updatedCurve(action,group_id,op_target,data.precision,postUpdate);
     }
 
     // restore initial curves

@@ -29,8 +29,9 @@ export interface Data {
     xunit: string;
     yunit: string;
     measurement: string;
+    precision: number;
     groups: Group[];
-    tree: Tree;
+    tree?: Tree;
 };
 
 // use to initialize ant Tree component

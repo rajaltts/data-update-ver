@@ -1,10 +1,12 @@
 import {useState,useReducer} from 'react';
 import dataReducer from './Model/Reducer';
-import initalModel from './Model/InitialModel';
+import initalData from './Model/InitialData';
+import initialOperation from './Model/InitialOperation';
 import { Operation } from '../../template.model';
 import { Data, Group, Curve, Tree, GroupData, CurveData } from '../../data.model';
 import ReactWasm from '../../assets/dataclean/dataclean.js'
 import actions from './Model/Actions';
+const clone = require('rfdc')();
 
 interface EmscriptenModule {
     [key: string]: any    
@@ -12,19 +14,14 @@ interface EmscriptenModule {
 
 const useModel = () => {
     // datat represents the state related to curves management 
-    const [data, dispatch]  =  useReducer(dataReducer,initalModel);
+    const [data, dispatch]  =  useReducer(dataReducer,initalData);
     // operations represent the state related to actions/methods/parameters
     // Each action has:
     // status: 'waiting' (initial value), 'failed', 'success' depending on the success of the action 
-    const [operations, setOperations] = useState<Operation[]>([{
-            action: 'None', 
-            action_label: 'None',
-            methods: [{label: 'None', type: 'None', params: []}],
-            selected_method: 'None',
-            status: 'waiting',
-            error: ''}]);
+    const [operations, setOperations] = useState<Operation[]>([initialOperation]);
     
-    const convertToTrue = (post) => {
+    // ----Functions for Data-----
+    const convertToTrue = (post: any) => {
 
         const Module: EmscriptenModule  = {};
         ReactWasm(Module).then( () => {   
@@ -118,7 +115,7 @@ const useModel = () => {
         });
     }
 
-    const updatedCurve = (action,group_id,op_target,precision,post) => { 
+    const updatedCurve = (action: string,group_id: number,op_target: number ,precision: number,post: any) => { 
            
          // use dataClean C++ lib 
         const Module: EmscriptenModule  = {};
@@ -448,9 +445,80 @@ const useModel = () => {
         
     };
 
+    // ----Functions for Operation---
+    // initialize the Operations state with a dataclean input json file
+    // Several diffences between structure of Operations and template file
+    // - in Operations value is always a number, for string value the value is a index in a selection array
+    // - no Extrapolation action in Operations, it is inside Averaging
+    const initOperationsFromTemplate = (template: any) => {
+        // console.log("initOperationsFromTemplate");
+        // console.log(template.operations);
+        if(template.operations.length>1){
+            // manage Averaging to put extrapolation parameters
+            const op_avg = template.operations.find( op => op.action === "Averaging");
+            const op_extr = template.operations.find( op => op.action === "Extrapoling");
+            if(op_extr){
+                op_avg.parameters.push( {extrapolation: op_extr.method.toLowerCase()} );
+                op_extr.parameters.forEach( par => op_avg.parameters.push(par) );
+            }
+
+            const operationsUpdated = clone(operations); // efficient deep copy
+
+            template.operations.forEach( (elem,index) => {
+                // check if Action and Operations in template file are found in local operations
+                const op_index = operations.findIndex( op => op.action === elem.action );
+                let params_extrapolating: object[] = [];
+                if(op_index!==-1){
+                    const op = operations[op_index];
+                    const meth_index = op.methods.findIndex( met => met.type === elem.method);
+                    if(meth_index!==-1){
+                        // update local operations with template file    
+                        if('parameters' in elem) { // some operation has no parameters
+                            const params_input= elem.parameters;
+                            
+                            const param_cur = operationsUpdated[op_index].methods[meth_index].params;
+                            const param_new = [];
+                            for(let i=0; i<param_cur.length;i++ ){
+                                const name_c = param_cur[i].name;
+                                const param_temp = params_input.find( p => Object.keys(p)[0]===name_c);
+                                if(param_temp !== undefined ){ // param found in the input template
+                                    let param_value = Object.values(param_temp)[0];
+                                    if(param_cur[i].selection){
+                                        param_value = param_cur[i].selection.findIndex( e => e.name===param_value)
+                                    }
+                                    const new_param ={...param_cur[i], value: param_value};
+                                    param_new.push(new_param);
+                                } else { // keep the default
+                                    const default_param={...param_cur[i]};
+                                    param_new.push(default_param);
+                                }
+                            }
+                            operationsUpdated[op_index].methods[meth_index].params.length = 0;
+                            operationsUpdated[op_index].methods[meth_index].params = param_new;
+                        }
+                        operationsUpdated[op_index].selected_method = elem.method;
+                    } else if(elem.action!=='Extrapoling')
+                        throw new Error("ERROR in tensile template: method not recognized.");
+                } else if (elem.action!=='Extrapoling'){
+                    throw new Error("ERROR in tensile template: action not recognized.");
+                }
+            });
+            setOperations(operationsUpdated); 
+
+            // // check if we must show the markers
+            // const op_clean = template.operations.find( op => op.action === "Cleaning_ends");
+            // if(op_clean.method === "Max_Xs"){
+            //     setShowMarkers(true); 
+            //     updatePlotHandler();
+            // }
+
+        }
+    }
+
     return [data,dispatch,
             operations,setOperations,
-            convertToTrue,updatedCurve] as const; // as const to ensure argument order not guaranteed
+            convertToTrue,updatedCurve,
+            initOperationsFromTemplate] as const; // as const to ensure argument order not guaranteed
 };
 
 export default useModel;

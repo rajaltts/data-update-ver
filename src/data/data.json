@@ -5,6 +5,7 @@
     "xunit": "no",
     "yunit": "MPa",
     "measurement": "engineering",
+    "precision": 3,
     "groups": [{"label": "my_group1",
       "curves": [
         {
