@@ -6,6 +6,7 @@ import PlotCurve from '../components/PlotCurveComponent/PlotCurve';
 import "../App.css";
 import DragNDrop  from '../components/DragNDrop/DragNDrop.js'
 import {Loading3QuartersOutlined } from '@ant-design/icons';
+import ReactDragListView from 'react-drag-listview';
 
 const colors =["#e51c23", // red
 "#3f51b5", // indigo
@@ -78,6 +79,18 @@ class DefineGroups extends React.Component {
         this.removeExistingGroup = this.removeExistingGroup.bind(this);
         this.createGroup = this.createGroup.bind(this);
         this.updateAttribute = this.updateAttribute.bind(this);
+        const that = this;
+        this.dragProps = {
+            onDragEnd(fromIndex, toIndex) {
+                const groups = [...that.state.groups];
+                const item = groups.splice(fromIndex, 1)[0];
+                groups.splice(toIndex, 0, item);
+                that.setState({
+                    groups
+                });
+            },
+            nodeSelector: "th"
+        };
     }
 
     handlePrevious() {
@@ -580,7 +593,7 @@ let table = !(this.state.showGroupCriteria && this.state.selectedCriteria.length
 <thead><tr key={'mattr01'}><th key='propCol0'></th>{
     
 this.state.groups.map((group, index)=>{
-    return(index!==0?<th style={{textAlign: 'center'}}  key={'propCol'+index+1}>{group.label}</th>:"")
+    return(index!==0?<th style={{textAlign: 'center', cursor:'move'}}  key={'propCol'+index+1}>{index+" "+group.label}</th>:"")
 })}</tr>
 </thead>
 <tbody>
@@ -657,7 +670,9 @@ this.state.groups.map((group, index)=>{
                     </div>
 
                     <div className="DropContainer">
+                    <ReactDragListView.DragColumn {...this.dragProps}>
                        { table}
+                       </ReactDragListView.DragColumn>
                     </div>
 
                     
