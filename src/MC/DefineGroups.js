@@ -82,6 +82,8 @@ class DefineGroups extends React.Component {
         const that = this;
         this.dragProps = {
             onDragEnd(fromIndex, toIndex) {
+                if(fromIndex === 0 || toIndex === 0)
+                    return;
                 const groups = [...that.state.groups];
                 const item = groups.splice(fromIndex, 1)[0];
                 groups.splice(toIndex, 0, item);
@@ -589,7 +591,7 @@ let criteriaGrp = {};
 
 
           
-let table = !(this.state.showGroupCriteria && this.state.selectedCriteria.length>0)?"":<table className="Grid">
+let table = !(this.state.groups.length>1)?"":<table className="Grid">
 <thead><tr key={'mattr01'}><th key='propCol0'></th>{
     
 this.state.groups.map((group, index)=>{
