@@ -1,9 +1,9 @@
-import { Group, Curve } from '../../../data.model';
+import { Group, Curve } from './data.model';
 // Action is a Union Type
 type Action = 
 | {type: 'CHECK_CURVES', keys: string[], groupid: number} 
 | {type: 'SET', input: any}
-| {type: 'UPDATE_CURVES', curves: Curve[], data: any[], result: boolean }
+| {type: 'UPDATE_CURVES', gid: number,curves: Curve[], data: any[], result: boolean }
 | {type: 'UPDATE_ALL_CURVES', groups: Group[] }
 | {type: 'RESET_CURVES', input: any}
 | {type: 'RESET_CURVES_INIT', groupid: number}

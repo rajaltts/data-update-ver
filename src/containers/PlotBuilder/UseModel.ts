@@ -1,10 +1,11 @@
 import {useState,useReducer} from 'react';
 import dataReducer from './Model/Reducer';
 import initalData from './Model/InitialData';
-import initialOperation from './Model/InitialOperation';
-import { Operation } from '../../template.model';
-import { Data, Group, Curve, Tree, GroupData, CurveData } from '../../data.model';
-import ReactWasm from '../../assets/dataclean/dataclean.js'
+import {InitialOperation,InitialOperations} from './Model/InitialOperation';
+import { Operation, Operations } from './Model/template.model';
+import { ACTION } from '../../assets/tensile_operations_config';
+import { Data, Group, Curve, Tree, GroupData, CurveData } from './Model/data.model';
+import ReactWasm, { Module } from '../../assets/dataclean/dataclean.js'
 import actions from './Model/Actions';
 const clone = require('rfdc')();
 
@@ -15,12 +16,158 @@ interface EmscriptenModule {
 const useModel = () => {
     // datat represents the state related to curves management 
     const [data, dispatch]  =  useReducer(dataReducer,initalData);
+    const [interpolationData,setInterpolationData] = useState<{x: number[], y: number[]}>( {x: [], y:[]});
+    const [strainAtBreak,setStrainAtBreak] = useState<{curve: string, value: number}[]>([]);
     // operations represent the state related to actions/methods/parameters
     // Each action has:
     // status: 'waiting' (initial value), 'failed', 'success' depending on the success of the action 
-    const [operations, setOperations] = useState<Operation[]>([initialOperation]);
+    const [operationsType, setOperationsType] = useState<Operation[]>([InitialOperation]);
+    const [allOperations, setAllOperations] = useState<Operations[]>([InitialOperations]);
+    const [backupAllOperations, setBackupAllOperations] = useState<Operations[]>([]);
     
     // ----Functions for Data-----
+    const adjustCurves = (algo: string, curves: string[],parameters: {curve: string, parameter: string, value: number}[], post: () => void) => {
+        
+        const allOpsBU = clone(allOperations); // efficient deep copy
+        setBackupAllOperations(allOpsBU);
+
+        for(let gid=0; gid<data.groups.length;gid++){
+            const ind = curves.findIndex(e => e===data.groups[gid].label);
+            if(ind!==-1){
+                const allOpsUp = allOperations;
+                const action_id = ACTION.Averaging;
+                const selected_method = allOpsUp[gid].operations[action_id].selected_method;
+                const method = allOpsUp[gid].operations[action_id].methods.find( m => m.type === selected_method);
+                if(algo==='failure'){
+                    const param_extrapolation = method.params.find( p => p.name === 'extrapolation');
+                    param_extrapolation.value = 2; // tangent method
+                    const param_extrapolation_end_point = method.params.find( p => p.name === 'extrapolating_end_point');
+                    param_extrapolation_end_point.value = 2; // user defined
+                    const param_extrapolation_end_point_value = method.params.find( p => p.name === 'extrapolating_end_point_value');
+                    param_extrapolation_end_point_value.value = +strainAtBreak[gid].value.toPrecision(6);          
+                } else if(algo==='stiffness'){
+                    const p1 = parameters.find(e => (e.curve===curves[ind]&&e.parameter==='young'));
+                    const p2 = parameters.find(e => (e.curve===curves[ind]&&e.parameter==='strain'));
+                    if(p1&&p2){
+                        const param_linear_correction_stiffness = method.params.find( p => p.name === 'linear_correction_stiffness');
+                        param_linear_correction_stiffness.value = p1.value;
+                        const param_linear_correction_strain = method.params.find( p => p.name === 'linear_correction_strain');
+                        param_linear_correction_strain.value = p2.value;
+                        const param_linear_correction = method.params.find( p => p.name === 'linear_correction');
+                        param_linear_correction.value = 1;
+                    }
+                }
+                setAllOperations(allOpsUp);
+                updatedCurve('Averaging',gid,action_id,data.precision,post);
+            }
+        }
+    }
+
+    const cancelAdjustCurves = (post: () => void) => {
+        const action_id = ACTION.Averaging;
+        for(let gid=0; gid<data.groups.length;gid++){
+            updatedCurve('Averaging',gid,action_id,data.precision,post,backupAllOperations);
+        }
+        //setAllOperations( () => backupAllOperations);
+        setBackupAllOperations([]);
+    }
+
+    const failureInterpolation = (selectedCurves: string[],post: any) => {
+        let x_int: number[] = [];
+        let y_int: number[] = [];
+        if(selectedCurves.length===3||selectedCurves.length==2){
+            const Module: EmscriptenModule  = {};
+            ReactWasm(Module).then( () => {   
+                // create a datase
+                const dataset = new Module.Dataset();
+                for(let gid=0; gid<data.groups.length;gid++){
+                    const curve = data.groups[gid].curves.find(c => c.name==='average');
+                    if(curve){
+                        const curve_name = data.groups[gid].label;
+                        const curve_ds = new Module.Curve(curve_name/*gid.toString()*/);
+                        const vecX = new Module.VectorDouble();
+                        const vecY = new Module.VectorDouble();
+                        for(let i=0; i<curve.x.length;i++){
+                            vecX.push_back(curve.x[i]);
+                            vecY.push_back(curve.y[i]);
+                        }
+                        curve_ds.setPoints(vecX,vecY);
+                        dataset.addCurve(curve_ds);
+                        curve_ds.delete();
+                        vecX.delete();
+                        vecY.delete();
+                    }
+                }
+                // create DataProcess
+                const dataprocess = new Module.DataProcess(dataset);
+                let error_msg: string;
+                let log: string;
+                const applyOperation = (dataprocess) => {
+                    return new Promise((success,failure) => {
+                        let check = true;
+                        const convert_op = JSON.stringify(
+                            {"operations":[
+                                {"action":"FailureInterpolation",
+                                "method":"None",
+                                "parameters":[ {"number_of_points": 30},
+                                                {"selected_curve": selectedCurves/*["0","1","2"]*/}
+                                            ]
+                                }]
+                            }
+                        );
+                        console.log('Failure interpolation '+convert_op);
+                        try{
+                            const op = new Module.Operation(convert_op);
+                            check = dataprocess.apply(op);
+                            op.delete();
+                        } catch {
+                            console.log("Error during convert engineering to true");
+                        }
+                        if(check) {
+                            success(dataprocess);
+                        } else {
+                            failure(dataprocess);
+                        }
+                    });
+                }
+                const todoAfterOperationApplied = (dataprocess: any) => { 
+                    const dataset_out = dataprocess.getOutputDataset();
+                    const curve_interpolation = dataset_out.getCurve("interpolation");
+                    let vecX_out = curve_interpolation.getX();
+                    let vecY_out = curve_interpolation.getY();
+                    
+                    for(let i=0; i< vecX_out.size(); i++){
+                        x_int.push(vecX_out.get(i));
+                        y_int.push(vecY_out.get(i));
+                    }
+                    setInterpolationData({x:x_int,y: y_int});
+
+                    const report = dataprocess.getReport();
+                    let res: {curve: string, value: number}[] = [];
+                    for(let gid=0; gid<data.groups.length;gid++){
+                        const curve_name = data.groups[gid].label;
+                        const strain_at_break = report.getPropertyFirst(Module.ActionType.FAILURE_INTERPOLATION,curve_name,'failure_point');
+                        res.push({curve: curve_name, value: strain_at_break});
+                    }
+                    setStrainAtBreak(res);
+                }
+                const todoOperationFailed = (dataprocess: any) => {
+                    const report = dataprocess.getReport();
+                    const log = report.executionLog();
+                    console.log("REPORT :"+log);
+                    console.log("ERROR KO"+dataprocess.getErrorMessage());
+                    console.log("LOG OK:"+dataprocess.logfile());
+                    x_int.push(0.001);
+                    y_int.push(0.001);
+                }
+                const promise = applyOperation(dataprocess);
+                promise.then(todoAfterOperationApplied,todoOperationFailed).then( () => {
+                    post();
+                });
+            });
+        }
+    }
+
     const convertToTrue = (post: any) => {
 
         const Module: EmscriptenModule  = {};
@@ -105,6 +252,9 @@ const useModel = () => {
                 dispatch(actions.setMeasurement('true'));
             }
             const todoOperationFailed = (dataprocess: any) => {
+                const report = dataprocess.getReport();
+                const log = report.executionLog();
+                console.log("REPORT :"+log);
                 console.log("ERROR KO"+dataprocess.getErrorMessage());
                 console.log("LOG OK:"+dataprocess.logfile());
             }
@@ -115,7 +265,7 @@ const useModel = () => {
         });
     }
 
-    const updatedCurve = (action: string,group_id: number,op_target: number ,precision: number,post: any) => { 
+    const updatedCurve = (action: string,group_id: number,op_target: number ,precision: number,post: any,allOpsIn: Operations[] = undefined) => { 
            
          // use dataClean C++ lib 
         const Module: EmscriptenModule  = {};
@@ -178,6 +328,12 @@ const useModel = () => {
                
                 //curve.setXCoordinateType(core.CoordinateType.LINEAR);
                 // set unit  -> TODO to read in the UI and defiend for each curve
+                if(data.xunit==='POURCENT'){
+                    curve.setXUnit(Module.Unit.POURCENT);
+                } else {
+                    curve.setXUnit(Module.Unit.NO);
+                }
+
                 curve.setPoints(vecX,vecY);   
                 dataset.addCurve(curve);
                 // delete C++ object (not done automatically)
@@ -199,15 +355,26 @@ const useModel = () => {
                     // create a template file from operations and run 
                     let ops: object[] = [];
                     for(let op_index=0; op_index <= op_target; op_index++){
-                        const op = operations[op_index];
+                        //const op = allOperations[group_id].operations[op_index]; //operations[op_index];
+                        let op: any;
+                        if(allOpsIn===undefined){
+                            op = allOperations[group_id].operations[op_index];
+                        } else {
+                            op = allOpsIn[group_id].operations[op_index];
+                            allOperations[group_id].operations[op_index] = op;
+                        }
                         const action = op.action;
                         const method = op.methods.find( e => e.type === op.selected_method);
                         const params = method.params;
                         let par: object[] = [];
                         method.params.forEach( param => {
                             // do not add parameter for extrapolation, manage after
-                            const extra_index = param.name.toLowerCase().indexOf('extrapolat')
-                            if( extra_index === -1){
+                            // Should be better to have a property in params to do the difference between basic param (to be included)
+                            // and additional parameter like extrapolation, linear_correction, averaging_type
+                            const extra_index = param.name.toLowerCase().indexOf('extrapolat');
+                            const lin_corr_index = param.name.toLowerCase().indexOf('linear_correction');
+                            const averaging_type_index = param.name.toLowerCase().indexOf('averaging_type');
+                            if( extra_index === -1 && lin_corr_index === -1 && averaging_type_index === -1 ){
                                 if(typeof param.value !== 'undefined'&& param.value!==null){ 
                                     const name = param.name;
                                     if(param.selection){
@@ -255,12 +422,26 @@ const useModel = () => {
                                             if(param.selection) {
                                                 params.push( {[name] : param.selection[param.value].name});
                                             } else {
-                                                (param.float?    params.push( {[name] : (param.value+1e-8/param.value)}):params.push( {[name] : param.value}));
+                                                (param.float?    params.push( {[name] : (param.value*(1+1e-15))}):params.push( {[name] : param.value}));
                                             }
                                         }
                                     }
                                 });
                                 ops.push({action: 'Extrapoling' , method: extrapolation_method, parameters: params, result: 'Shifting'})
+                            }
+                            // Add Transform operation
+                            const lin_corr_parm = avg_method.params.find( e => e.name === 'linear_correction');
+                            const lin_corr_method = lin_corr_parm.selection[lin_corr_parm.value].name;
+                            if(lin_corr_method === 'linear_correction_yes'){ 
+                                const params: object[] = [];
+                                const stiffness = avg_method.params.find( e => e.name === 'linear_correction_stiffness');
+                                const strain = avg_method.params.find( e => e.name === 'linear_correction_strain');
+                                params.push( {selected_curves:['averaging'],
+                                              stiffness: [stiffness.value*(1.+1e-15)],
+                                              strain: [strain.value*(1.+1e-15)],
+                                              strategy: "fixed_failure_point"});
+                               
+                                ops.push({action: 'Transform' , method: 'None', parameters: params})
                             }
                         }
                         
@@ -325,6 +506,8 @@ const useModel = () => {
                     vecX_out.delete();
                     vecY_out.delete();
                 }
+                let error_in_data_analytics = false;
+                let error_msg_in_data_analytics = '';
                 if(dataset_out.hasCurve('averaging')){
                     result_flag = true;
                     const curve_out = dataset_out.getCurve('averaging');
@@ -345,29 +528,36 @@ const useModel = () => {
                     // DataAnaytics 
                     let young = 0;
                     let yield_strength = 0;
+                    let yield_strain = 0;
                     let strain_at_break = 0;
                     let stress_at_break = 0;
                     let strain_at_ultimate_strength = 0;
                     let stress_at_ultimate_strength = 0;
+                    let proportional_limit_strain = 0;
                     const dp_data = new Module.DataProcess(dataset_out);                
                     const op_slope = new Module.Operation(Module.ActionType.DATA_ANALYTICS,Module.MethodType.NONE);
                     op_slope.addParameterString("stiffness","averaging");
                     op_slope.addParameterString("last_point","averaging");
                     op_slope.addParameterString("point_max_y","averaging");
                     op_slope.addParameterString("offset_yield_strength","averaging");
-                    op_slope.addParameterString("slope_range","first_point"); // not use range to avoid not enough points
+                   // op_slope.addParameterString("slope_range","first_point"); // not use range to avoid not enough points
+                    op_slope.addParameterString("proportional_limit","averaging");
 
                     const check = dp_data.apply(op_slope); 
+                    console.log("LOG: "+dp_data.logfile());
                     if(!check){
-                        console.log("ERROR: "+dp_data.getErrorMessage());
-                        console.log("LOG: "+dp_data.logfile());
+                        error_in_data_analytics = true;
+                        error_msg_in_data_analytics = dp_data.getErrorMessage();
+                        console.log("ERROR: "+error_msg_in_data_analytics);
                     }
                     else {
                         const report_test = dp_data.getReport();
                         const stiffness = report_test.getPropertyFirst(Module.ActionType.DATA_ANALYTICS,"averaging","stiffness");
                         young = stiffness.toExponential(precision);
                         const offset_yield_strength = report_test.getPropertySecond(Module.ActionType.DATA_ANALYTICS,"averaging","offset_yield_strength");
+                        const offset_yield_strain = report_test.getPropertyFirst(Module.ActionType.DATA_ANALYTICS,"averaging","offset_yield_strength");
                         yield_strength = offset_yield_strength.toExponential(precision);
+                        yield_strain = offset_yield_strain.toExponential(precision);
                         const last_point_x = report_test.getPropertyFirst(Module.ActionType.DATA_ANALYTICS,"averaging","last_point");
                         const last_point_y = report_test.getPropertySecond(Module.ActionType.DATA_ANALYTICS,"averaging","last_point");
                         strain_at_break = last_point_x.toExponential(precision);
@@ -376,24 +566,31 @@ const useModel = () => {
                         const point_max_y_y = report_test.getPropertySecond(Module.ActionType.DATA_ANALYTICS,"averaging","point_max_y");
                         strain_at_ultimate_strength = point_max_y_x.toExponential(precision);
                         stress_at_ultimate_strength = point_max_y_y.toExponential(precision);
+                        const proportional_limit = report_test.getPropertyFirst(Module.ActionType.DATA_ANALYTICS,"averaging","proportional_limit");
+                        proportional_limit_strain = proportional_limit.toExponential(precision);
+
                     }
         
                     data_analytics.length = 0;
-                    data_analytics.push({label: "Young's Modulus", value: young, name: "young"});
-                    data_analytics.push({label: "Yield Strength", value: yield_strength, name: "yield_strength"});
-                    data_analytics.push({label: "Strain at Break", value: strain_at_break, name: "strain_at_break"});
-                    data_analytics.push({label: "Strength at Break", value: stress_at_break, name: "stress_at_break"});
-                    data_analytics.push({label: "Strain at Ultimate Strength", value: strain_at_ultimate_strength, name: "strain_at_ultimate_strength"});
-                    data_analytics.push({label: "Strength at Ultimate Strength", value: stress_at_ultimate_strength, name: "stress_at_ultimate_strength"});
+                    data_analytics.push({label: "Young's Modulus", value: young, name: "young", hide: false});
+                    data_analytics.push({label: "Yield Strength", value: yield_strength, name: "yield_strength", hide: false});
+                    data_analytics.push({label: "Yield Strain", value: yield_strain, name: "yield_strain", hide: true});
+                    data_analytics.push({label: "Proportional limit", value: proportional_limit_strain, name: "proportional_limit_strain", hide: true});
+                    data_analytics.push({label: "Strain at Break", value: strain_at_break, name: "strain_at_break", hide: false});
+                    data_analytics.push({label: "Strength at Break", value: stress_at_break, name: "stress_at_break", hide: false});
+                    data_analytics.push({label: "Strain at Ultimate Strength", value: strain_at_ultimate_strength, name: "strain_at_ultimate_strength", hide: false});
+                    data_analytics.push({label: "Strength at Ultimate Strength", value: stress_at_ultimate_strength, name: "stress_at_ultimate_strength", hide: false});
                     op_slope.delete();
                     dp_data.delete();
                 }
 
                 // update the state with the new curves
                 //console.log("UPDATE STATE");
-                dispatch(actions.updateCurves(newCurves,data_analytics,result_flag));
+                dispatch(actions.updateCurves(group_id,newCurves,data_analytics,result_flag));
                 // flag status operation
-                const operationsUpdate = [...operations];
+                // replace by a useReducer
+                const allOpsUp = [...allOperations];
+                const operationsUpdate = allOpsUp[group_id].operations;
                 if(action==='Template'){
                     operationsUpdate.forEach( e => e.status='success');
                 } else {
@@ -405,15 +602,25 @@ const useModel = () => {
                         operationsUpdate[i].status = 'waiting';
                     }
                 }
-                setOperations(operationsUpdate);
-               
+                // update for data anayltics
+                if(error_in_data_analytics){
+                    operationsUpdate[operationsUpdate.length-1].status = 'failed';
+                    operationsUpdate[operationsUpdate.length-1].error = error_msg_in_data_analytics;
+                }
+                allOpsUp[group_id]={gid:group_id, operations: operationsUpdate};
+                setAllOperations(allOpsUp);          
             }
 
             const todoOperationFailed = (dataprocess) => {
+                const report = dataprocess.getReport();
+                const log = report.executionLog();
+                console.log("REPORT :"+log);
                 console.log("ERROR KO"+dataprocess.getErrorMessage());
                 console.log("LOG OK:"+dataprocess.logfile());
                 // flag status operation
-                const operationsUpdate = [...operations];
+                // replace by a useReducer
+                const allOpsUp = [...allOperations];
+                const operationsUpdate = allOpsUp[group_id].operations;
                 const error_msg = dataprocess.getErrorMessage();
                 let action_error = action;
                 if(action==='Template'){
@@ -426,15 +633,15 @@ const useModel = () => {
                         action_error = err.substring(i0+1,i1);
                     }
                     else {
-                        action_error = operations[operations.length-1].action;
+                        action_error = operationsUpdate[operationsUpdate.length-1].action;
                     }
                 }
                 if(action_error==="Extrapoling")
                     action_error = "Averaging";
                 operationsUpdate.find( (el) => el.action === action_error).status = 'failed';
                 operationsUpdate.find( (el) => el.action === action_error).error = error_msg;
-                
-                setOperations(operationsUpdate);
+                allOpsUp[group_id]={gid:group_id, operations: operationsUpdate};
+                setAllOperations(allOpsUp);
             }
 
             const promise = applyOperation(dataprocess);
@@ -450,7 +657,7 @@ const useModel = () => {
     // Several diffences between structure of Operations and template file
     // - in Operations value is always a number, for string value the value is a index in a selection array
     // - no Extrapolation action in Operations, it is inside Averaging
-    const initOperationsFromTemplate = (template: any) => {
+    const initOperationsFromTemplate = (template: any, nbGroups: number) => {
         // console.log("initOperationsFromTemplate");
         // console.log(template.operations);
         if(template.operations.length>1){
@@ -462,14 +669,14 @@ const useModel = () => {
                 op_extr.parameters.forEach( par => op_avg.parameters.push(par) );
             }
 
-            const operationsUpdated = clone(operations); // efficient deep copy
+            const operationsUpdated = clone(operationsType); // efficient deep copy
 
             template.operations.forEach( (elem,index) => {
                 // check if Action and Operations in template file are found in local operations
-                const op_index = operations.findIndex( op => op.action === elem.action );
+                const op_index = operationsType.findIndex( op => op.action === elem.action );
                 let params_extrapolating: object[] = [];
                 if(op_index!==-1){
-                    const op = operations[op_index];
+                    const op = operationsType[op_index];
                     const meth_index = op.methods.findIndex( met => met.type === elem.method);
                     if(meth_index!==-1){
                         // update local operations with template file    
@@ -503,7 +710,15 @@ const useModel = () => {
                     throw new Error("ERROR in tensile template: action not recognized.");
                 }
             });
-            setOperations(operationsUpdated); 
+            console.log("Number groups:"+nbGroups);
+            //setOperations(operationsUpdated); 
+
+            let opsAllup = new Array<Operations>();
+            for(let i =0; i<nbGroups; i++){
+                const ops = clone(operationsUpdated);
+                opsAllup.push( { gid: i, operations: ops});
+            }
+            setAllOperations(opsAllup);
 
             // // check if we must show the markers
             // const op_clean = template.operations.find( op => op.action === "Cleaning_ends");
@@ -516,8 +731,10 @@ const useModel = () => {
     }
 
     return [data,dispatch,
-            operations,setOperations,
-            convertToTrue,updatedCurve,
+            interpolationData,
+            setOperationsType,
+            allOperations,setAllOperations,
+            convertToTrue,updatedCurve,failureInterpolation,adjustCurves,cancelAdjustCurves,
             initOperationsFromTemplate] as const; // as const to ensure argument order not guaranteed
 };
 

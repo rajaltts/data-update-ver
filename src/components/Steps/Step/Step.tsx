@@ -1,8 +1,8 @@
 import React from 'react'
 import {Select, Alert, Tooltip } from 'antd';
-import { Operation } from '../../../template.model';
+import { Operation } from '../../../containers/PlotBuilder/Model/template.model';
 import DisplayParametersForms from './DisplayParametersForms'
-import { Parameter as parameter_type } from '../../../template.model';
+import { Parameter as parameter_type } from '../../../containers/PlotBuilder/Model/template.model';
 import '../Steps.css';
 
 interface StepProps {

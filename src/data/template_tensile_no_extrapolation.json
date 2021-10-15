@@ -13,7 +13,7 @@
 {"action":"Averaging",
   "method":"Spline",
   "parameters":[
-    {"number_of_points": 30 },
+    {"number_of_points": 50 },
     {"number_of_nodes": 10 },
     {"regularization": 5}
   ]

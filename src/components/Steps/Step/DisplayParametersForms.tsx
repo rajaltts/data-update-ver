@@ -1,9 +1,12 @@
 import React , {useState, useEffect} from 'react'
-import { Parameter as parameter_type } from '../../../template.model';
+import { Parameter as parameter_type } from '../../../containers/PlotBuilder/Model/template.model';
 import '../../../App.css';
-import {Select, Button, Space,  Row, Col, InputNumber, Tooltip} from 'antd';
+import '../Steps.css';
+import {Select, Button, Space,  Row, Col, InputNumber, Tooltip, Collapse} from 'antd';
 // npm install --save rfdc @types/rfdc
 const clone = require('rfdc')();
+
+const { Panel } = Collapse;
 
 interface DisplayParameterProps {
     initParams: parameter_type[];
@@ -31,7 +34,7 @@ const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, on
             if('selection' in p){
                 const l = p.selection[p.value].link;
                 if(l){
-                    linked_init.push( {parameter: p.name, value: [l]});
+                    linked_init.push( {parameter: p.name, value: [...l]});
                 } else {
                     linked_init.push( {parameter: p.name, value: []});
                 }
@@ -63,7 +66,8 @@ const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, on
         const link = par.selection[value_num].link;
         if(t){
             if(link)
-              t.value.push(link);
+             // t.value.push(link);
+              t.value = [...t.value, ...link];
             else
               t.value=[]; 
             setLinked(linked_curr);
@@ -73,7 +77,7 @@ const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, on
         fontSize: '12px',
     };
 
-    const displayParameters = params.map( p => {
+    const displayParameter = (p: parameter_type) => {
         if( p.label.length==0){
             return;
         }
@@ -170,6 +174,20 @@ const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, on
                );
             }
         }
+
+    }
+
+    const displayParameters = params.map( p => {
+        if('advanced' in p === false){
+            return displayParameter(p);
+        }          
+    }
+    );
+
+    const displayAdvancedParameters = params.map( p => {
+        if('advanced' in p === true){
+            return displayParameter(p);
+        }          
     }
     );
 
@@ -182,12 +200,19 @@ const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, on
     const resetPoints = (e: any) => {
         removeAllPoints();
     }
+       // <div  style={{...fontStyle,height: '270px',borderStyle: 'dashed', borderWidth: '0px', paddingBottom: '0px',paddingLeft: '7px'}} >
 
     return(
         <>
-        <div  style={{...fontStyle,height: '270px',borderStyle: 'dashed', borderWidth: '0px', paddingBottom: '0px',paddingLeft: '7px'}} >
+        <div className = "display-parameters-forms">   
         {displayParameters}
         <br/>
+        {action==='Averaging'&&
+        <Collapse bordered={false} ghost style={{ fontSize: '12px'}}>
+            <Collapse.Panel key='advanced' header='Advanced' >
+                {displayAdvancedParameters}
+            </Collapse.Panel>
+        </Collapse>}
         </div>
         <div>
         <Space style={{ float: 'right', paddingRight: '7px', paddingBottom: '10px'}}>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Data, Group, Curve, GroupData, CurveData } from '../../../data.model';
+import { Data, Group, Curve, GroupData, CurveData } from './data.model';
 import ActionTypes from './ActionTypes';
 const clone = require('rfdc')();
 
@@ -107,9 +107,9 @@ const dataReducer = (currentData: Data, action: any) => {
              console.log('UPDATE_CURVES');
              //console.log(currentData);
              const group_new = [...currentData.groups];
-             group_new[currentData.tree.selectedGroup].curves = action.curves;
-             group_new[currentData.tree.selectedGroup].data = action.data;
-             group_new[currentData.tree.selectedGroup].result = action.result;
+             group_new[action.gid/*currentData.tree.selectedGroup*/].curves = action.curves;
+             group_new[action.gid].data = action.data;
+             group_new[action.gid].result = action.result;
              //console.log(group_new);
              return {...currentData, groups: group_new};
          }

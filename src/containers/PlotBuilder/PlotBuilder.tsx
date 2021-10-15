@@ -1,8 +1,8 @@
 import React, {useEffect, useState } from 'react';
 import {  Button } from 'antd';
-import { Operation } from '../../template.model';
-import { Data  } from '../../data.model';
-import { tensile_operations_config } from '../../assets/tensile_operations_config.js';
+import { Operation } from './Model/template.model';
+import { Data  } from './Model/data.model';
+import { tensile_operations_config } from '../../assets/tensile_operations_config';
 import actions from './Model/Actions';
 import useModel from './UseModel';
 import PlotBuilderView from './PlotBuilderView';
@@ -20,8 +20,10 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
 
     //-----------MODEL----------------------------------------
     const [data,dispatch,
-           operations,setOperations,
-           convertToTrue,updatedCurve,
+           interpolationData,
+           setOperationsType,
+           allOperations,setAllOperations,
+           convertToTrue,updatedCurve,failureInterpolation,adjustCurves,cancelAdjustCurves,
            initOperationsFromTemplate] = useModel();
    
     // template is an input json file for dataclean library 
@@ -29,6 +31,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
     const [plotUpdate, setPlotUpdate] = useState(false);
     const [showMarkers, setShowMarkers] = useState(false);
     const [disableNextButton,setDisableNextButton] = useState(true);
+    const [plotMode,setPlotMode] = useState<string>('normal');
 
     //---------EFFECT-----------------------------------------
     // initialize the states (componentDidMount)
@@ -42,13 +45,15 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         const isPreviousOperations =('operations' in props.template_input?false:true); 
         if(isPreviousOperations){
             const operations_init = clone(props.template_input); 
-            setOperations(operations_init);
+            alert("This workflow does not work. The application will freeze");
+            // ATTENTION this must be adapted because we must received operations fro all groups
+            setAllOperations(operations_init);
             // check if we must show the markers
             const op_clean = props.template_input.find( op => op.action === "Cleaning_ends");
             showCurveMarkers(op_clean.selected_method);
         } else {
-            if(operations[0].action==='None'){
-                setOperations(tensile_operations_config); // init operations state with the tensile structure (default values)
+            if(operations()[0].action==='None'){
+                setOperationsType(tensile_operations_config); // init operations state with the tensile structure (default values)
                 setTemplate(props.template_input); // init template from props
             }
         }
@@ -61,14 +66,14 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
     useEffect( () => {
         // console.log("useEffect template");
         try { // if action/methods found in template does not correspond to value in operations state, the template is not used and default values for operations will appear. A console log error is used but we must inform the user with a notifications (TODO)
-            initOperationsFromTemplate(template);
+            initOperationsFromTemplate(template,props.data_input.groups.length);
             // check if we must show the markers
             const op_clean = template.operations.find( op => op.action === "Cleaning_ends");
             showCurveMarkers(op_clean.method);
         } catch(e) {
-            console.log("ERROR: Input template not valid."+e.message+" Operations are set to default value");
+            console.log("ERROR: Input template not valid.");
         }
-    },[template]);
+    },[template,props.data_input]);
     //------------HELPER FUNCTIONS-------------------------------
     const showCurveMarkers = (method: string) => {
         if(method=== "Max_Xs"){
@@ -76,14 +81,35 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
             updatePlotHandler();
         }
     };
+    const currentGroup = () => {
+        data.tree.selectedGroup;
+    }
+    const setOperations = (new_ops: Operation[]) => {
+        const allOpsUp = [...allOperations];
+        allOpsUp[data.tree.selectedGroup]={gid:data.tree.selectedGroup, operations: new_ops};
+        setAllOperations(allOpsUp);
+    }
+    // function operationsCurrentGroup():Operation[] {
+    //     return allOperations[data.tree.selectedGroup].operations;
+    // } 
+    const operations = () => {
+        return allOperations[data.tree.selectedGroup].operations;
+    } 
+        
     //---------HANDLER-------------------------------------------
+    const changeCollapseHandler = (key: string | string[]) => {
+        const mod = (key==='2'?'average':'normal');
+        setPlotMode(mod);
+    }
+
     const changeOperationsHandler = (new_ops: Operation[]) => { 
         setOperations(new_ops);
+       // setOperationsCurrentGroup(new_ops);
      }
 
     const changeSelectedMethodHandler = (selectedMethod: string,action: string) => {
         console.log(selectedMethod+"--"+action);
-        const operationsUpdate = [...operations]; //copy
+        const operationsUpdate = [...operations()]; //copy
         const op_index = operationsUpdate.findIndex(op => op.action === action );
         if( op_index === -1)
             throw new Error('Action '+action+' not known');
@@ -98,39 +124,45 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
     // Curve handler
     const clickPointHandler = (data_plot) : boolean =>  { // should be replace by a call to updateCurveHandler with the right ALGO/METHOD and id
         console.log("CLICK POINT HANDLER");
-        //console.log(data_plot);
+        console.log(plotMode);
+        
+        if(plotMode==='average') { // consolidation
 
-        // check if we click on a merker
-        const isMarker = (data_plot.points[0].data.mode==='markers'?true:false);
-        if(isMarker)
-           return false;
-
-        const x = data_plot.points[0].x;
-        const pt_index = data_plot.points[0].pointIndex;
-        const curve_name = data_plot.points[0].data.name;
-
-        // set operations parameters
-        const operationsUpdate = [...operations];
-        const a = operationsUpdate.find( (el) => el.action === "Cleaning_ends");
-        const sm = a.selected_method;
-        const m = a.methods.find( e => e.type === sm);
-
-        if(m.type!=='Max_Xs')
+            
             return false;
-        //  check if already inserted
-        const group_id = data.tree.selectedGroup;
-        const index = m.params[0].curveId.findIndex( e => (e.curveName === curve_name && e.groupId === group_id) );
-        if(index===-1){
-            m.params[0].value = [...m.params[0].value,  pt_index]; // pt_index
-            m.params[0].curveId = [...m.params[0].curveId, {groupId: group_id,curveName: curve_name}];
-        } else {
-            m.params[0].value[index] =  pt_index; 
+        } else { // normal 
+            // check if we click on a merker
+            const isMarker = (data_plot.points[0].data.mode==='markers'?true:false);
+            if(isMarker)
+            return false;
+
+            const x = data_plot.points[0].x;
+            const pt_index = data_plot.points[0].pointIndex;
+            const curve_name = data_plot.points[0].data.name;
+
+            // set operations parameters
+            const operationsUpdate = [...operations()];
+            const a = operationsUpdate.find( (el) => el.action === "Cleaning_ends");
+            const sm = a.selected_method;
+            const m = a.methods.find( e => e.type === sm);
+
+            if(m.type!=='Max_Xs')
+                return false;
+            //  check if already inserted
+            const group_id = data.tree.selectedGroup;
+            const index = m.params[0].curveId.findIndex( e => (e.curveName === curve_name && e.groupId === group_id) );
+            if(index===-1){
+                m.params[0].value = [...m.params[0].value,  pt_index]; // pt_index
+                m.params[0].curveId = [...m.params[0].curveId, {groupId: group_id,curveName: curve_name}];
+            } else {
+                m.params[0].value[index] =  pt_index; 
+            }
+        
+            setOperations(operationsUpdate);
+            // add marker in the curve
+            dispatch(actions.setMarker(curve_name,pt_index ));
+            return true;
         }
-       
-       setOperations(operationsUpdate);
-       // add marker in the curve
-       dispatch(actions.setMarker(curve_name,pt_index ));
-       return true;
     }
 
     const changeViewHandler = (val: number) => {
@@ -141,7 +173,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
     const removeAllPoints = () => {
         const group_id = data.tree.selectedGroup;
        
-        const operationsUpdate = [...operations];
+        const operationsUpdate = [...operations()];
         const a = operationsUpdate.find( (el) => el.action === "Cleaning_ends");
         const m = a.methods.find( m => m.type=='Max_Xs');
         if(m){
@@ -185,6 +217,11 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         updatePlotHandler();
     };
 
+    const checkDataTreeAvgHandler =  (checkedKeys: string[]) => {
+        // set Data group selected property to specify if the averaging curve must be display
+        // Add a property data.group.selected
+    }
+
     // convert all curves in all groups
     const convertToTrueHandler = () => {
         const postConvert = () => {
@@ -202,17 +239,26 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         setPlotUpdate( prevState => !prevState);
     }
 
+     const failureInterpolationHandler  =  (curves: string[]) => {
+        const postConvert = () => {
+            console.log('Failure interpolation convert');
+            updatePlotHandler();
+        }
+        failureInterpolation(curves,postConvert);
+    } 
+
+
     //Operation Handler
-    const updatedCurveHandler = (action) => { 
+    const updatedCurveHandler = (action, post: () => void) => { 
         // always reset curve between update
         restoreInitdataHandler();
         const group_id = data.tree.selectedGroup;
         
         let op_target = 0;
         if(action==='Template'){ // last operation
-            op_target = operations.length-1;
+            op_target = operations().length-1;
         } else {
-            op_target = operations.findIndex( (el) => el.action === action);
+            op_target = operations().findIndex( (el) => el.action === action);
         }
 
         const postUpdate = () => {
@@ -222,9 +268,27 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
             let results_true = true;
             data.groups.forEach( g => { if(g.result==false){ results_true=false; }});
             setDisableNextButton(!results_true);
+            post();
         }
 
         updatedCurve(action,group_id,op_target,data.precision,postUpdate);
+    }
+
+    // Consolidation Adjust handler
+    const adjustCurvesHandler = (algo:string, curves:string[], parameters: {curve: string, parameter: string, value: number}[], post: () => void ) => {
+        const postUpdate = () => {
+            console.log('Finish adjust');
+            updatePlotHandler();
+            post();
+        }
+        adjustCurves(algo, curves,parameters,postUpdate);
+    }
+
+    const cancelAdjustCurvesHandler = () => {
+        const postUpdate = () => {
+            updatePlotHandler();
+        }
+        cancelAdjustCurves(postUpdate);
     }
 
     // restore initial curves
@@ -237,7 +301,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         //const group_id = data.tree.selectedGroup;
         dispatch(actions.resetCurves(group_id)); 
          // flag waiting status for all operations
-        const operationsUpdate = [...operations];
+        const operationsUpdate = [...operations()];
         operationsUpdate.forEach( (val,index,arr) => {arr[index].status='waiting'});
         setOperations(operationsUpdate);
         setDisableNextButton(true);
@@ -274,9 +338,11 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
     <>
         <PlotBuilderView
             data = {data}
-            operations={operations}
+            interpolationData = {interpolationData}
+            operations={operations()}
             plotUpdate={plotUpdate}
             showMarkers={showMarkers}
+            plotMode={plotMode}
             changeOperationsHandler_={changeOperationsHandler}
             changeSelectedMethodHandler_={changeSelectedMethodHandler}
             updatedCurveHandler_={updatedCurveHandler}
@@ -287,6 +353,10 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
             changeViewHandler_={changeViewHandler}
             checkDataTreeHandler_={checkDataTreeHandler}
             convertToTrueHandler_={convertToTrueHandler}
+            changeCollapseHandler_={changeCollapseHandler}
+            failureInterpolationHandler_={failureInterpolationHandler}
+            adjustCurvesHandler_={adjustCurvesHandler}
+            cancelAdjustCurvesHandler_={cancelAdjustCurvesHandler}
         />
         <div className="ButtonPanel">
             <div className="ButtonPrevious">

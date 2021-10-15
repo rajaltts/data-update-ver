@@ -10,7 +10,7 @@
 {"action":"Averaging",
   "method":"Spline",
   "parameters":[
-    {"number_of_points": 30 },
+    {"number_of_points": 50 },
     {"number_of_nodes": 5 },
     {"regularization": 4},
     {"end_point": "min_max_x"}

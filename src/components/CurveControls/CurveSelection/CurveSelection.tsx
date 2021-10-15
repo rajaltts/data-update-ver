@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Tree } from 'antd';
-import { CurveData } from '../../../data.model';
+import { CurveData } from '../../../containers/PlotBuilder/Model/data.model';
 import "../CurveControls.css"
 
 interface CurveSelection {

@@ -13,6 +13,12 @@ export interface Curve  {
     markerId?: number;
 };
 
+export interface DataAnalytics {
+    label: string;
+    value: number;
+    name: string;
+    hide: boolean;
+};
 
 export interface Group {
     id: number;

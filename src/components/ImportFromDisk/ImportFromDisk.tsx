@@ -5,7 +5,7 @@ import FileLoader from '../FileLoader/FileLoader.js';
 import initialData from '../../containers/PlotBuilder/Model/InitialData';
 import dataReducer from '../../containers/PlotBuilder/Model/Reducer';
 import actions from '../../containers/PlotBuilder/Model/Actions';
-import { Data, Curve, Group } from '../../data.model';
+import { Data, Curve, Group } from '../../containers/PlotBuilder/Model/data.model';
 import tensile_template from '../../data/template_tensile.json'
 
 const ImportFromDisk: React.FC = () => {
@@ -38,12 +38,14 @@ const ImportFromDisk: React.FC = () => {
         const nbr_curves = Math.floor(number_col/2);
         let grs = new Array<Group>();
         let curves_ = new Array<Curve>();
+        let strain_unit: string;
+        let stress_unit: string;
     
         for(let i=0; i<number_col/2; i++){
             
             let xs = new Array(number_row);
             let ys = new Array(number_row);
-            for(let j = index_strat; j<number_row; j++){
+            for(let j = index_strat; j<index_strat+number_row; j++){
                 xs[j-index_strat] = result[j].data[2*i];
                 ys[j-index_strat] = result[j].data[2*i+1];
             }
@@ -61,6 +63,8 @@ const ImportFromDisk: React.FC = () => {
             const name_y =  header_line1[2*i+1];
             const unit_x =  header_line2[2*i];
             const unit_y =  header_line2[2*i+1];
+            strain_unit = unit_x;
+            stress_unit = unit_y;
             const curve_id = i+1;
             const curve:Curve = { id: i+1, oid: (i+1).toString(), name: i.toString(),matDataLabel: i.toString() , selected: true, opacity: 1, x: xs_, y: ys_, label: 'curve_'+key+"_"+curve_id};
             curves_.push(curve);
@@ -75,8 +79,8 @@ const ImportFromDisk: React.FC = () => {
         let data_2 =  {type: "tensile",
                     xtype: "strain_engineering",
                     ytype: "stress_engineering",
-                    xunit: "no",
-                    yunit: "MPa",
+                    xunit: strain_unit,
+                    yunit: stress_unit,
                     measurement: "engineering",
                     precision: 3,
                     // groups: [{

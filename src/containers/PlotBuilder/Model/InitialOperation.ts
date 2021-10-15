@@ -7,4 +7,9 @@ const InitialOperation = {
     error: ''
 };
 
-export default InitialOperation;
+const InitialOperations = {
+    gid: 0,
+    operations: [InitialOperation]
+}
+
+export { InitialOperation, InitialOperations};

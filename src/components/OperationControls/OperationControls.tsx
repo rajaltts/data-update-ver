@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import OperationControl from './OperationControl/OperationControl';
 import { Tabs, Switch, Space, Button, message } from 'antd';
 import { CheckOutlined } from '@ant-design/icons';
-import { Operation, Parameter } from '../../template.model';
+import { Operation, Parameter } from '../../containers/PlotBuilder/Model/template.model';
 
 interface OperationControlsProps {
     operations:  any;

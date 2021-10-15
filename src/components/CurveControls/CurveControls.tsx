@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { GroupData } from '../../data.model';
+import { GroupData } from '../../containers/PlotBuilder/Model/data.model';
 import { Radio, Row, Col, Button, Tooltip } from 'antd';
 import { RadioChangeEvent } from 'antd/lib/radio';
 import CurveSelection from './CurveSelection/CurveSelection'
@@ -33,7 +33,7 @@ const CurveControls: React.FC<CurveControlsProps> = (props) => {
 
     return(
         <>
-        <div style={{height: '550px',borderStyle: 'solid', borderWidth: '2px',  borderColor: '#d9d9d9', margin: 'auto', padding: '10px', width: '100%'}}>
+        <div style={{height: '400px',borderStyle: 'solid', borderWidth: '2px',  borderColor: '#d9d9d9', margin: 'auto', padding: '10px', width: '100%'}}>
           <div className="curve-title">
             Curves
           </div>

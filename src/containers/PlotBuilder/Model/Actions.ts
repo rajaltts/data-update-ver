@@ -1,4 +1,4 @@
-import { Data } from '../../../data.model';
+import { Data } from './data.model';
 
 const setModel = (model: Data) => ({
         type: 'SET',
@@ -33,8 +33,9 @@ const setMeasurement = (val) => ({
 });
 
 
-const updateCurves = (newCurves,data_analytics,result_flag) => ({
+const updateCurves = (gid,newCurves,data_analytics,result_flag) => ({
     type: 'UPDATE_CURVES',
+    gid: gid,
     curves: newCurves,
     data: data_analytics,
     result: result_flag

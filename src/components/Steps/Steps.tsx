@@ -2,9 +2,9 @@ import React, {Fragment, useEffect, useState, useRef} from 'react'
 import {Button, Steps as AntSteps } from 'antd';
 import { CheckCircleFilled, RightCircleOutlined , ExclamationCircleTwoTone} from '@ant-design/icons';
 import Step from './Step/Step';
-import { Operation } from '../../template.model';
+import { Operation } from '../../containers/PlotBuilder/Model/template.model';
 import './Steps.css';
-import { Parameter as parameter_type } from '../../template.model';
+import { Parameter as parameter_type } from '../../containers/PlotBuilder/Model/template.model';
 
 interface StepsProps {
     operations: Operation[];
