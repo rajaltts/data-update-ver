@@ -1,16 +1,10 @@
 import React, {useState, useEffect}  from 'react';
 import PlotlyChart from 'react-plotlyjs-ts';
 import Plotly from 'plotly.js/dist/plotly';
-import {Table, Switch, Space } from 'antd';
-
+import { Switch, Space } from 'antd';
 import { Data, Curve } from '../../containers/PlotBuilder/Model/data.model';
 import { colors } from '../../assets/colors.js';
 import './PlotCurve.css';
-import { PropertySafetyOutlined } from '@ant-design/icons';
-import { NodeBuilderFlags } from 'typescript';
-import { SortableContainer, SortableElement, SortableHandle } from 'react-sortable-hoc';
-import { MenuOutlined, LineOutlined } from '@ant-design/icons';
-import { arrayMoveImmutable } from 'array-move';
 
 interface PlotCurveProps {
    data: Data;
@@ -27,7 +21,7 @@ interface PlotCurveProps {
    changeView: (v: number) => void;
    displayGids: string[];
    mode: string;
-   failureInterpolation: (curves: string[]) => void;
+   failureInterpolation: (curves: string[], post: () => void) => void;
 };
 
 const PlotCurve: React.FC<PlotCurveProps> = (props) => {
@@ -39,6 +33,7 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
   const [selectedLines,setSelectedLines] = useState<string[]>([]);
   //const [interpolationLine,setInterpolationLine] = useState();
   const [sortedTable,setSortedTable]= useState([]);
+  const [staticMode,setStaticMode] = useState(false);
 
   useEffect(() => {
 
@@ -172,9 +167,13 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
     } 
   },[props.curves,props.keys,displayInitCurves,props.plotUpdate,props.displayGids,props.mode]);
 
+  const postOp = () => {
+    setStaticMode(false);
+  }
   const AddPoint = (data_point: any) =>{
 
     if(props.mode==='average'){
+      setStaticMode(true);
       const line : string = data_point.points[0].data.name.toString();
       let update: string[];
       if(selectedLines.length<3){
@@ -190,12 +189,12 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
           data_up.splice(id,1);
           setDataPlot(data_up);
         } 
-        
+        postOp();
       }
       else if(update.length===2){
-        props.failureInterpolation(update);
+        props.failureInterpolation(update,postOp);
       } else if(update.length===3){
-        props.failureInterpolation(update);
+        props.failureInterpolation(update,postOp);
       }
 
     } else if(props.mode==='normal') {
@@ -223,6 +222,36 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
     
   }
 
+  const configHandler = () => {
+    const config = {
+      staticPlot: staticMode,
+      displaylogo: false, // remove plotly icon
+      reponsive: true,
+      modeBarButtonsToRemove: [ 'hoverClosestCartesian', 'hoverCompareCartesian', 'resetScale2d', 'lasso2d','select2d', 'toggleHover'],
+      modeBarButtonsToAdd: [
+        {
+          name: 'show markers',
+          icon: Plotly.Icons.drawcircle,
+          direction: 'up',
+          click: function(gd) {
+            var newMode = 'lines+markers';
+            Plotly.restyle(gd, 'mode', newMode);
+          }
+        },
+        {
+          name: 'hide markers',
+          icon: Plotly.Icons.eraseshape,
+          click: function(gd) {
+            console.log(gd);
+            var newMode = 'lines';
+            Plotly.restyle(gd, 'mode', newMode);
+          }
+        }
+      ]
+    };
+    return config;
+  }
+
   const config = {
     displaylogo: false, // remove plotly icon
     reponsive: true,
@@ -248,163 +277,6 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
       }
     ]
   };
-const DisplayDataAll = () => {
-
-  // check if we have results to display
-  const gid = props.data.groups.findIndex( g => g.result);
-  if(gid===-1)
-    return <div></div>;
-  
-  let columns: any[] = [ {title: 'Sort',dataIndex: 'sort', width:30, className: 'drag-visible', key: 'sort', render: () => <DragHandle />},
-                        {title: 'Curve', dataIndex: 'curve', className: 'drag-visible',  key: 'curve'}];
-  // data
-  let allResults = false;
-  allResults = true;
-  let datasource: any[] = [];
-  if(sortedTable.length===0){
-    props.data.groups.forEach( (g,idg: number) => {
-      const row = { curve: <Space size={0} direction='vertical'>{g.label} <LineOutlined style={{fontSize: '24px', verticalAlign: 'middle', color: colors[idg]}}/> </Space>, key: idg.toString(), index: idg};
-      g.data.forEach( (p,idp) => {
-        if(p.hide===false)
-          Object.assign(row, { [p.name.toString()]: p.value});
-      });
-      datasource.push(row);
-    });
-  } else {
-    datasource = [...sortedTable];
-    props.data.groups.forEach( (g,idg: number) => {
-      const r = datasource.find( r => r.index===idg);
-      g.data.forEach( (p,idp) => {
-        if(p.hide===false) {
-          r[p.name] = p.value;
-        }
-      });
-    });
-  }
-  // build a table for column color
-  const paramVec = [];
-  props.data.groups[gid].data.forEach( (p,ind) => {
-    if(p.hide===false){
-      paramVec.push( {name: p.name, value: []});
-    }
-  });
-  datasource.forEach( g => {
-    for(const r of paramVec){
-      if(g[r.name])
-         r.value.push(g[r.name]);
-    }
-  });
-
-  const columnColor = paramVec.map( r => {
-    const monotonus_inc = r.value.every( (e,i,a) => {if(i) return e >= a[i-1]; else return true;});
-    const monotonus_dec = r.value.every( (e,i,a) => {if(i) return e <= a[i-1]; else return true;});
-    if(monotonus_inc ||monotonus_dec) 
-        return {name: r.name, color: "green"};
-      else 
-        return {name: r.name, color: "red"};
-  });
-  const columnStyle = (paramName: string) => {
-    const e = columnColor.find( r => r.name===paramName);
-    if(e)
-      return { color: e.color };
-    else
-      return {};
-  };
-                         
-  props.data.groups[gid].data.forEach( (p,ind) => {
-    if(p.hide===false)
-      columns.push({title: p.label, dataIndex: p.name, render(text,record) {
-        return {
-               props: {
-                 style: columnStyle(p.name)
-               },
-               children: <div>{text}</div>
-             };
-      }});
-  });
-  
-  const DragHandle = SortableHandle(() => <MenuOutlined style={{ cursor: 'grab', color: '#999' }} />);
-  const SortableItem = SortableElement(props => <tr {...props} />);
-  const SortableContainer2 = SortableContainer(props => <tbody {...props} />);
-
-  class SortableTable extends React.Component {
-    state = {
-      dataSource: datasource,
-    };
-
-    onSortEnd = ({ oldIndex, newIndex }) => {
-      const { dataSource } = this.state;
-      if (oldIndex !== newIndex) {
-        const newData = arrayMoveImmutable([].concat(dataSource), oldIndex, newIndex).filter(el => !!el);
-        this.setState({ dataSource: newData });
-        setSortedTable(newData);
-      }
-    };
-
-    DraggableContainer = props => (
-      <SortableContainer2
-        useDragHandle
-        disableAutoscroll
-        helperClass="row-dragging"
-        onSortEnd={this.onSortEnd}
-        {...props}
-      />
-    );
-
-    DraggableBodyRow = ({ className, style, ...restProps }) => {
-      const { dataSource } = this.state;
-      // function findIndex base on Table rowKey props and should always be a right array index
-      const index = dataSource.findIndex(x => x.index === restProps['data-row-key']);
-      return <SortableItem index={index} {...restProps} />;
-    };
-
-    render() {
-      const { dataSource } = this.state;
-  
-      return (
-        <Table
-          style={{fontSize: '12px'}}
-          pagination={false}
-          size='small' bordered={true}
-          dataSource={dataSource}
-          columns={columns}
-          rowKey="index"
-          components={{
-            body: {
-              wrapper: this.DraggableContainer,
-              row: this.DraggableBodyRow,
-            },
-          }}
-        />
-      );
-    }
-  }
-  
-  return <SortableTable />
-}
-  
-  const  DisplayData = () => {
-    
-    if(props.postData === undefined)
-       return <div></div>;
-    const columns =[
-      {title: 'Property', dataIndex: 'parameter', key: 'name'},
-      {title: 'Value', dataIndex: 'value', key: 'value'}
-    ];
-
-    let datasource: any[] = [];
-    props.postData.forEach( (e,index) => {
-      if(e.label !== ''&&e.hide===undefined){
-        datasource.push({key: index.toString(), parameter: e.label, value:  e.value });
-      }
-    });
-
-    if(datasource.length>0){
-      return <Table dataSource={datasource} columns={columns} size='small' bordered={true} pagination={false}  style={{width: '500px', margin: 'auto', paddingTop: '20px'}}/>;
-    } else {
-      return <div></div>;
-    }    
-  } 
 
   const switchChange = (checked: boolean, event: Event) => {
     setDisplayInitCurves(checked);
@@ -456,21 +328,10 @@ const DisplayDataAll = () => {
       <PlotlyChart
         data = { dataPlot }
         layout = { layoutHandler() }
-        config = { config }
+        config = { configHandler() }
         onClick = {AddPoint}
       />
-
-    
-
-    {/* <div>
-    <DisplayData/>
-    </div> */}
-    <div>
-    <DisplayDataAll/>
-    </div>
     </>
-   
-
   );
 }
    
