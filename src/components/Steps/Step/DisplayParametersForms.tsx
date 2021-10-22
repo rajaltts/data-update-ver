@@ -26,7 +26,7 @@ const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, on
     useEffect( () => {
         //const param_init = [...initParams];  // it is a shallow copy
         //const param_init = JSON.parse(JSON.stringify(initParams)); // it is a deep copy
-        console.log("Action: "+action+" Method: "+method);
+        //console.log("Action: "+action+" Method: "+method);
         const param_init = clone(initParams); // efficient deep copy
         setParams(param_init);
         const linked_init = [];
@@ -207,12 +207,12 @@ const DisplayParametersFroms: React.FC<DisplayParameterProps> = ({initParams, on
         <div className = "display-parameters-forms">   
         {displayParameters}
         <br/>
-        {action==='Averaging'&&
+        {/* {action==='Averaging'&&
         <Collapse bordered={false} ghost style={{ fontSize: '12px'}}>
             <Collapse.Panel key='advanced' header='Advanced' >
                 {displayAdvancedParameters}
             </Collapse.Panel>
-        </Collapse>}
+        </Collapse>} */}
         </div>
         <div>
         <Space style={{ float: 'right', paddingRight: '7px', paddingBottom: '10px'}}>

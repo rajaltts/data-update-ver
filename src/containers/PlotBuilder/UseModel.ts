@@ -27,7 +27,6 @@ const useModel = () => {
     
     // ----Functions for Data-----
     const adjustCurves = (algo: string, curves: string[],parameters: {curve: string, parameter: string, value: number}[], post: () => void) => {
-        
         const allOpsBU = clone(allOperations); // efficient deep copy
         setBackupAllOperations(allOpsBU);
 
@@ -66,6 +65,7 @@ const useModel = () => {
     const cancelAdjustCurves = (post: () => void) => {
         const action_id = ACTION.Averaging;
         for(let gid=0; gid<data.groups.length;gid++){
+            dispatch(actions.resetCurves(gid));
             updatedCurve('Averaging',gid,action_id,data.precision,post,backupAllOperations);
         }
         //setAllOperations( () => backupAllOperations);
@@ -183,6 +183,11 @@ const useModel = () => {
                     const curve_ds = new Module.Curve(ic.toString());
                     curve_ds.setXName(Module.PhysicalMeasurement.STRAIN_ENGINEERING);
                     curve_ds.setYName(Module.PhysicalMeasurement.STRESS_ENGINEERING);
+                    if(data.xunit==='POURCENT'){
+                        curve_ds.setXUnit(Module.Unit.POURCENT);
+                    } else {
+                        curve_ds.setXUnit(Module.Unit.NO);
+                    }
                     const vecX = new Module.VectorDouble();
                     const vecY = new Module.VectorDouble();
                     for(let i=0; i<curve.x0.length;i++){

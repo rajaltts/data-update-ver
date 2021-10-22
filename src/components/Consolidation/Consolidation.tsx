@@ -46,6 +46,8 @@ const Consolidation: React.FC<IConsolidation> = (props) => {
     }
     
     const onClickAdjustHandler = () => {
+        if(checkedFailureCurves.length===0&&checkedStiffnessCurves.length===0)
+           return;
         const algo = (selectedTab==='1'?'failure':'stiffness');
         if(algo==='failure')
           props.adjustCurves(algo,checkedFailureCurves,null);
@@ -55,6 +57,13 @@ const Consolidation: React.FC<IConsolidation> = (props) => {
     }
 
     const onClickCancelAdjustHandler = () => {
+        if(checkedFailureCurves.length===0&&checkedStiffnessCurves.length===0)
+           return;
+        const algo = (selectedTab==='1'?'failure':'stiffness');
+        if(algo==='failure')
+           setCheckedFailureCurves([]);
+        else if(algo==='stiffness')
+           setCheckedStiffnessCurves([]);
         props.cancelAdjustCurves();
     }
 
@@ -80,8 +89,7 @@ const Consolidation: React.FC<IConsolidation> = (props) => {
     return (<>
     <div style={{height: '400px', fontWeight: 'normal', fontSize: '12px', borderStyle: 'solid', borderWidth: '2px', borderColor: '#d9d9d9', margin: 'auto', padding: '10px'}}>
     <Tabs 
-        style={{height: '350px', borderStyle: 'solid', borderWidth: '0px', borderColor: '#d9d9d9', margin: 'auto', padding: '10px'}}
-        size='small'
+        style={{ height: '350px', borderStyle: 'solid', borderWidth: '0px', borderColor: '#d9d9d9', margin: 'auto', padding: '10px'}}
         onChange={onChangeHandler} type="card">
         <TabPane tab="Failure" key="1">
             <Divider orientation='left' style={{fontSize: '12px'}}>Select 2 or 3 averaged curves</Divider>
@@ -90,8 +98,8 @@ const Consolidation: React.FC<IConsolidation> = (props) => {
                     if(props.listAvg[index]){
                       const dis = (props.selectedCurves.findIndex( e => e===g.title)===-1?false:true);
                       return(
-                        <Row>
-                          <Checkbox value={g.title} disabled={dis}> <LineOutlined style={{fontSize: '24px', verticalAlign: 'middle', color: colors[index]}}/>{g.title}</Checkbox>
+                        <Row key={'row'+index} >
+                          <Checkbox  style={{fontSize: '12px'}} value={g.title} disabled={dis}> <LineOutlined style={{fontSize: '24px', verticalAlign: 'middle', color: colors[index]}}/>{g.title}</Checkbox>
                         </Row>
                       )
                     }
@@ -101,7 +109,7 @@ const Consolidation: React.FC<IConsolidation> = (props) => {
         </TabPane>
 
         <TabPane tab="Stiffness" key="2">
-            <Row style={{fontWeight: 'bold', paddingBottom: '10px'}}>
+            <Row style={{fontSize: '12px', fontWeight: 'bold', paddingBottom: '10px'}}>
                 <Col span={8}>
                      Group
                 </Col>
@@ -115,12 +123,13 @@ const Consolidation: React.FC<IConsolidation> = (props) => {
             {props.groupData.map( (g,index) => {
              if(props.postData[index].length>1){
                  return(    
-                      <Row key={g.title}>
+                      <Row style={{fontSize: '12px'}} key={g.title}>
                           <Col span={8}>
                             <LineOutlined style={{fontSize: '24px', verticalAlign: 'middle', color: colors[index]}}/> {g.title}
                           </Col>
                           <Col span={8}>
                           <InputNumber
+                              style={{fontSize: '12px'}}
                               key='young'
                               size="small"
                               defaultValue={ (props.postData[index].find(p => p.name==='young')?props.postData[index].find(p => p.name==='young').value:0)}

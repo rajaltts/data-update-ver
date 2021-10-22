@@ -108,7 +108,6 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
      }
 
     const changeSelectedMethodHandler = (selectedMethod: string,action: string) => {
-        console.log(selectedMethod+"--"+action);
         const operationsUpdate = [...operations()]; //copy
         const op_index = operationsUpdate.findIndex(op => op.action === action );
         if( op_index === -1)
@@ -167,7 +166,6 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
 
     const changeViewHandler = (val: number) => {
         dispatch(actions.setView(val));
-        console.log(data);
     }
 
     const removeAllPoints = () => {
@@ -196,7 +194,6 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
 
     // DataTree handler
     const checkDataTreeHandler =  (checkedKeys: string[], group_id: number) => {
-        console.log('onCheck', checkedKeys);
         const keys = [];
         let group_index = '-1';
         if(checkedKeys.length>0){
@@ -223,13 +220,14 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
     }
 
     // convert all curves in all groups
-    const convertToTrueHandler = () => {
+    const convertToTrueHandler = (post: () => void) => {
         const postConvert = () => {
             console.log('Finish convert');
             for(let gid=0; gid<data.groups.length;gid++){
                 restoreInitdataHandler(gid);
             }
             updatePlotHandler();
+            post();
         }
 
         convertToTrue(postConvert);       
@@ -239,14 +237,13 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         setPlotUpdate( prevState => !prevState);
     }
 
-     const failureInterpolationHandler  =  (curves: string[]) => {
+     const failureInterpolationHandler  =  (curves: string[],post: () => void) => {
         const postConvert = () => {
-            console.log('Failure interpolation convert');
             updatePlotHandler();
+            post();
         }
         failureInterpolation(curves,postConvert);
     } 
-
 
     //Operation Handler
     const updatedCurveHandler = (action, post: () => void) => { 
@@ -277,16 +274,16 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
     // Consolidation Adjust handler
     const adjustCurvesHandler = (algo:string, curves:string[], parameters: {curve: string, parameter: string, value: number}[], post: () => void ) => {
         const postUpdate = () => {
-            console.log('Finish adjust');
             updatePlotHandler();
             post();
         }
         adjustCurves(algo, curves,parameters,postUpdate);
     }
 
-    const cancelAdjustCurvesHandler = () => {
+    const cancelAdjustCurvesHandler = (post: () => void ) => {
         const postUpdate = () => {
             updatePlotHandler();
+            post();
         }
         cancelAdjustCurves(postUpdate);
     }
@@ -319,7 +316,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
     }
 
     const handleNext= () =>{
-        console.log('handleNext'+data.groups[0].curves[0].x);
+        //console.log('handleNext'+data.groups[0].curves[0].x);
 
         let json = {
             current: 3,

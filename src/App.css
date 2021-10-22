@@ -395,3 +395,15 @@ div.OuterDivSaveScroll{
   vertical-align: middle;
   white-space: nowrap;
 }
+
+.PlotBuilderCollapse .ant-collapse-header{
+  font-size: 15px;
+  font-weight: bold;
+}
+
+.ant-collapse > .ant-collapse-item > .ant-collapse-header {
+    padding: 0px 16px;
+}
+.ant-collapse-content > .ant-collapse-content-box {
+  padding: 0px;
+}

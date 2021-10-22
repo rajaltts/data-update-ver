@@ -14,11 +14,10 @@ interface CurveSelection {
     const [autoExpandParent, setAutoExpandParent] = useState(true);
 
     const onSelect = (selectedKeys, info) => {
-        console.log('onSelect', info);
         setSelectedKeys(selectedKeys);
       };
     
-      const fontStyle = {
+    const fontStyle = {
         fontSize: '12px',
     };
 

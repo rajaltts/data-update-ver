@@ -43,8 +43,8 @@ const Steps: React.FC<StepsProps> = (props) => {
     }
 
     const stepsOnChangeHandler = (current) => {
-        console.log("useRef :");
-        paramsRef.current.forEach( p => console.log(p.name+" = "+p.value));
+        //console.log("useRef :");
+        //paramsRef.current.forEach( p => console.log(p.name+" = "+p.value));
         changeParametersHandler();
         const action = props.operations[current].action;
         setCurrent(current);
