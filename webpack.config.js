@@ -16,10 +16,7 @@ module.exports = (env) => {
     return {
         mode: 'development',
         target: 'web',
-        node: {
-            fs: 'empty'  // need to us plotly
-        },
-        
+        stats: 'errors-warnings',
         // The application entry point
         entry:{
             app: path.join(__dirname, 'src', 'index.tsx')
@@ -61,11 +58,22 @@ module.exports = (env) => {
         devtool: "inline-source-map",  //  need in tsconfig "sourceMap": true 
         // File extensions to support resolving
         resolve: {
-            extensions: ['*','.ts', '.tsx', '.js', '.jsx']
+            extensions: ['*','.ts', '.tsx', '.js', '.jsx'],
+            fallback : {
+                fs: false,
+                crypto: false,
+                path: false,
+                stream: false,
+                assert: false,
+                buffer: false
+            }
         },
         devServer: {
-            contentBase: path.join(__dirname, ""),
-            port: 3000
+           // contentBase: path.join(__dirname, ""),
+           static: {
+               directory: path.join(__dirname, ""),
+           },
+           port: 3000
         },
         plugins: [
             new HtmlWebpackPlugin(),

@@ -16,9 +16,7 @@ module.exports = (env) => {
     return{
         mode: 'production',
         target: 'web',
-        node: {
-            fs: 'empty'  // need to us plotly
-        },
+        stats: 'errors-warnings',
         optimization: {
             minimize: true // set to false to have a readable bundle.js file
         },
@@ -57,10 +55,18 @@ module.exports = (env) => {
             ]
         },
     
-        devtool: "none",  
+        devtool: false,  
         // File extensions to support resolving
         resolve: {
-            extensions: ['*','.ts', '.tsx', '.js', '.jsx']
+            extensions: ['*','.ts', '.tsx', '.js', '.jsx'],
+            fallback : {
+                fs: false,
+                crypto: false,
+                path: false,
+                stream: false,
+                assert: false,
+                buffer: false
+            }
         },
         plugins: [
             // to clean dist before 

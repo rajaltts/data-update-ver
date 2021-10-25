@@ -163,7 +163,7 @@ const useModel = () => {
                 const promise = applyOperation(dataprocess);
                 promise.then(todoAfterOperationApplied,todoOperationFailed).then( () => {
                     post();
-                });
+                }).catch(function () {console.log("Promise rejected");});
             });
         }
     }
@@ -266,7 +266,7 @@ const useModel = () => {
             const promise = applyOperation(dataprocess);
             promise.then(todoAfterOperationApplied,todoOperationFailed).then( () => {
                 post();
-            });
+            }).catch(function () {console.log("Promise rejected");});
         });
     }
 
@@ -539,10 +539,15 @@ const useModel = () => {
                     let strain_at_ultimate_strength = 0;
                     let stress_at_ultimate_strength = 0;
                     let proportional_limit_strain = 0;
+                    // dispersion
+                    let strain_at_break_min: string;
+                    let strain_at_break_max: string;
+                    let young_min: string;
+                    let young_max: string;
                     const dp_data = new Module.DataProcess(dataset_out);                
                     const op_slope = new Module.Operation(Module.ActionType.DATA_ANALYTICS,Module.MethodType.NONE);
-                    op_slope.addParameterString("stiffness","averaging");
-                    op_slope.addParameterString("last_point","averaging");
+                    op_slope.addParameterString("stiffness","all");
+                    op_slope.addParameterString("last_point","all");
                     op_slope.addParameterString("point_max_y","averaging");
                     op_slope.addParameterString("offset_yield_strength","averaging");
                    // op_slope.addParameterString("slope_range","first_point"); // not use range to avoid not enough points
@@ -574,17 +579,39 @@ const useModel = () => {
                         const proportional_limit = report_test.getPropertyFirst(Module.ActionType.DATA_ANALYTICS,"averaging","proportional_limit");
                         proportional_limit_strain = proportional_limit.toExponential(precision);
 
+                        // get dispersion values
+                        const strainAtBreaks: number[] = [];
+                        const youngModules: number[] = [];
+                        for(let curve_idx=0;curve_idx<newCurves.length;curve_idx++){
+                            const cn = newCurves[curve_idx].name;                         
+                            if(cn!=='average'){
+                                const tmp = report_test.getPropertyFirst(Module.ActionType.DATA_ANALYTICS,cn,"last_point");
+                                strainAtBreaks.push(tmp.toExponential(precision));
+                                const tmp2 = report_test.getPropertyFirst(Module.ActionType.DATA_ANALYTICS,cn,"stiffness");
+                                youngModules.push(tmp2.toExponential(precision));
+                            }
+                        }
+                        const tmp1: number = Math.min(...strainAtBreaks);
+                        strain_at_break_min = tmp1.toExponential(precision);
+                        const tmp2: number = Math.max(...strainAtBreaks);
+                        strain_at_break_max = tmp2.toExponential(precision);
+
+                        const tmp1_y: number = Math.min(...youngModules);
+                        young_min = tmp1_y.toExponential(precision);
+                        const tmp2_y: number = Math.max(...youngModules);
+                        young_max = tmp2_y.toExponential(precision);
                     }
         
                     data_analytics.length = 0;
-                    data_analytics.push({label: "Young's Modulus", value: young, name: "young", hide: false});
+                    data_analytics.push({label: "Young's Modulus", value: young, name: "young", hide: false, range: [young_min, young_max]});
+                    data_analytics.push({label: "Strain at Break", value: strain_at_break, name: "strain_at_break", hide: false, range: [ strain_at_break_min, strain_at_break_max ]});
                     data_analytics.push({label: "Yield Strength", value: yield_strength, name: "yield_strength", hide: false});
                     data_analytics.push({label: "Yield Strain", value: yield_strain, name: "yield_strain", hide: true});
                     data_analytics.push({label: "Proportional limit", value: proportional_limit_strain, name: "proportional_limit_strain", hide: true});
-                    data_analytics.push({label: "Strain at Break", value: strain_at_break, name: "strain_at_break", hide: false});
                     data_analytics.push({label: "Strength at Break", value: stress_at_break, name: "stress_at_break", hide: false});
                     data_analytics.push({label: "Strain at Ultimate Strength", value: strain_at_ultimate_strength, name: "strain_at_ultimate_strength", hide: false});
                     data_analytics.push({label: "Strength at Ultimate Strength", value: stress_at_ultimate_strength, name: "stress_at_ultimate_strength", hide: false});
+
                     op_slope.delete();
                     dp_data.delete();
                 }
@@ -652,7 +679,7 @@ const useModel = () => {
             const promise = applyOperation(dataprocess);
             promise.then(todoAfterOperationApplied,todoOperationFailed).then( () => {
                     post();
-                });
+                }).catch(function () {console.log("Promise rejected");});
         });
         
     };

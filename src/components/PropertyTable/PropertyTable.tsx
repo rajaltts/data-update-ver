@@ -37,8 +37,14 @@ const PropertyTable: React.FC<IPropertyTable> = (props) => {
             props.data.groups.forEach( (g,idg: number) => {
             const row = { curve: <div><LineOutlined style={{fontSize: '24px', verticalAlign: 'middle', color: colors[idg]}}/>{g.label}</div>, key: idg.toString(), index: idg};
             g.data.forEach( (p,idp) => {
-                if(p.hide===false)
-                Object.assign(row, { [p.name.toString()]: p.value});
+                let tmp: string;;
+                if(p.hide===false){
+                    tmp =  p.value;
+                    if(p.range){
+                       tmp += "\r[" + p.range[0] + ":" + p.range[1] + "]";
+                    } 
+                    Object.assign(row, { [p.name.toString()]: tmp});
+                }
             });
             datasource.push(row);
             });
@@ -48,7 +54,11 @@ const PropertyTable: React.FC<IPropertyTable> = (props) => {
             const r = datasource.find( r => r.index===idg);
             g.data.forEach( (p,idp) => {
                 if(p.hide===false) {
-                r[p.name] = p.value;
+                    let tmp =  p.value;
+                    if(p.range){
+                       tmp += "\r[" + p.range[0] + ":" + p.range[1] + "]";
+                    } 
+                    r[p.name] = tmp;
                 }
             });
             });
@@ -57,13 +67,19 @@ const PropertyTable: React.FC<IPropertyTable> = (props) => {
         const paramVec: {name: string, value: number[]}[]  = [];
         props.data.groups[gid].data.forEach( (p,ind) => {
             if(p.hide===false){
-            paramVec.push( {name: p.name, value: []});
+                paramVec.push( {name: p.name, value: []});
             }
         });
         datasource.forEach( g => {
             for(const r of paramVec){
-            if(g[r.name])
-                r.value.push(+g[r.name]);
+                if(g[r.name]){
+                    let val = g[r.name];
+                    const id = val.indexOf("[");
+                    if(id!==-1){
+                        val = val.slice(0,id);
+                    } 
+                    r.value.push(+val);
+                }
             }
         });
         
