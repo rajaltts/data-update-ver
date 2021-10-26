@@ -4,10 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "webpack-dev-server --analyze",
-    "build": "webpack --config webpack.config.prod.js --progress --profile --color",
-    "startStandalone": "webpack-dev-server --analyze --env.standalone",
-    "buildStandalone": "webpack --config webpack.config.prod.js --progress --profile --color --env.standalone"
+    "start": "webpack serve", 
+    "build:dev": "webpack --config webpack.config.js", 
+    "build": "webpack --config webpack.config.prod.js --progress --profile --color" 
   },
   "keywords": [],
   "author": "VRR",
@@ -45,7 +44,7 @@
     "css-loader": "^5.0.1",
     "dotenv-webpack": "^7.0.3",
     "file-loader": "^6.2.0",
-    "html-webpack-plugin": "^4.5.2",
+    "html-webpack-plugin": "^5.5.0",
     "style-loader": "^2.0.0",
     "ts-loader": "^9.2.6",
     "webidl2ts": "^1.0.4",

@@ -2,85 +2,68 @@
 
 const path = require("path");
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const Dotenv = require('dotenv-webpack');
 
-module.exports = (env) => {
-    let env_file = './.env_materialcenter';
-    try{
-        if( env.standalone){
-            env_file ='./.env_standalone';
+module.exports = {
+    mode: 'development',
+    target: 'web',
+    stats: 'errors-warnings',
+    // The application entry point
+    entry: './src/index.tsx',
+    // Where to compile the bundle
+    output: {
+        filename: 'bundle.js',
+        path: path.resolve(__dirname, 'dist'),
+    },
+    // Supported file loaders
+    module: {
+        rules: [
+        {
+            test: /\.(js|jsx)$/,
+            exclude: /node_modules/,
+            use: {
+                loader: "babel-loader"
+            }
+        },
+        {
+            test: /\.tsx?$/,
+            loader: "ts-loader",
+            exclude: /node_modules/,
+        },
+        {
+            test: /\.css$/,
+            use: ["style-loader", "css-loader"]
+        },
+        {
+            test: /\.(wasm)$/,
+            loader: 'file-loader',
+            type: 'javascript/auto',
         }
-    } catch {}
-    console.log('Load env file :'+env_file);
-
-    return {
-        mode: 'development',
-        target: 'web',
-        stats: 'errors-warnings',
-        // The application entry point
-        entry:{
-            app: path.join(__dirname, 'src', 'index.tsx')
-        },
-        // Where to compile the bundle
-        output: {
-            filename: 'bundle.js',
-            path: path.resolve(__dirname, 'dist'),
-            publicPath: 'dist'
-        },
-        // Supported file loaders
-        module: {
-            rules: [
-                {
-                    test: /\.(js|jsx)$/,
-                    exclude: /node_modules/,
-                    loader: "babel-loader",
-                    options: { presets: ["@babel/env"] },
-                },
-            {
-                test: /\.tsx?$/,
-                loader: "ts-loader",
-                exclude: /node_modules/,
-            },
-            {
-                test: /\.css$/,
-                use: ["style-loader", "css-loader"]
-            },
-            {
-                test: /\.(wasm)$/,
-                loader: 'file-loader',
-                type: 'javascript/auto',
-            }
-            ]
-        },
-    
-        // Set debugging source maps to be "inline" for
-        // simplicity and ease of use
-        devtool: "inline-source-map",  //  need in tsconfig "sourceMap": true 
-        // File extensions to support resolving
-        resolve: {
-            extensions: ['*','.ts', '.tsx', '.js', '.jsx'],
-            fallback : {
-                fs: false,
-                crypto: false,
-                path: false,
-                stream: false,
-                assert: false,
-                buffer: false
-            }
-        },
-        devServer: {
-           // contentBase: path.join(__dirname, ""),
-           static: {
-               directory: path.join(__dirname, ""),
-           },
-           port: 3000
-        },
-        plugins: [
-            new HtmlWebpackPlugin(),
-            new Dotenv({
-                path: env_file
-            })
         ]
-    }
+    },
 
+    // Set debugging source maps to be "inline" for
+    // simplicity and ease of use
+    devtool: "inline-source-map",  //  need in tsconfig "sourceMap": true 
+    // File extensions to support resolving
+    resolve: {
+        extensions: ['*','.ts', '.tsx', '.js', '.jsx'],
+        fallback : {
+            fs: false,
+            crypto: false,
+            path: false,
+            stream: false,
+            assert: false,
+            buffer: false
+        }
+    },
+    devServer: {
+        open: true,
+        host: 'localhost',
+        port: 3000,
+    },
+    plugins: [
+        new HtmlWebpackPlugin({
+            template: 'index.html'
+        })
+    ]
 };

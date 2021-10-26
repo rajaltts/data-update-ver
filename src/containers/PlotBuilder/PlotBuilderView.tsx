@@ -157,7 +157,7 @@ const PlotBuilderView: React.FC<PlotBuilderViewProps> = (props)  => {
                     </Panel>
                 </Collapse>    
                 </Col>
-                <Col flex="700px">
+                <Col flex="400px">
                     <PlotCurve
                        data={data}
                        interpolationData={interpolationData}
