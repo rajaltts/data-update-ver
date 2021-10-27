@@ -45,12 +45,10 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         const isPreviousOperations =('operations' in props.template_input?false:true); 
         if(isPreviousOperations){
             const operations_init = clone(props.template_input); 
-            alert("This workflow does not work. The application will freeze");
-            // ATTENTION this must be adapted because we must received operations fro all groups
             setAllOperations(operations_init);
-            // check if we must show the markers
-            const op_clean = props.template_input.find( op => op.action === "Cleaning_ends");
-            showCurveMarkers(op_clean.selected_method);
+            // check if we must show the markers MUST BE done for each groups IS It necessary???
+           // const op_clean = props.template_input.find( op => op.action === "Cleaning_ends");
+           // showCurveMarkers(op_clean.selected_method);
         } else {
             if(operations()[0].action==='None'){
                 setOperationsType(tensile_operations_config); // init operations state with the tensile structure (default values)
@@ -322,7 +320,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
             current: 3,
             previous: false,
             data: data,
-            template: operations//currentTemplate
+            template: allOperations//currentTemplate
         }
         sendData(json);
     }
