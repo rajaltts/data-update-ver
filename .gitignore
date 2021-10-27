@@ -25,3 +25,4 @@ launch.json
 /.vscode/*
 TODO
 /doc
+dist/bundle.js.LICENSE.txt

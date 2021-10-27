@@ -79,6 +79,8 @@ class DefineGroups extends React.Component {
         this.removeExistingGroup = this.removeExistingGroup.bind(this);
         this.createGroup = this.createGroup.bind(this);
         this.updateAttribute = this.updateAttribute.bind(this);
+        this.dragStart = this.dragStart.bind(this);
+        this.dragEnd = this.dragEnd.bind(this);
         const that = this;
         this.dragProps = {
             onDragEnd(fromIndex, toIndex) {
@@ -93,6 +95,14 @@ class DefineGroups extends React.Component {
             },
             nodeSelector: "th"
         };
+    }
+
+    dragStart = (event) =>{
+        event.target.className = 'DraggableTHDrag';
+    }
+
+    dragEnd = (event) =>{
+        event.target.className = 'DraggableTH';
     }
 
     handlePrevious() {
@@ -595,7 +605,7 @@ let table = !(this.state.groups.length>1)?"":<table className="Grid">
 <thead><tr key={'mattr01'}><th key='propCol0'></th>{
     
 this.state.groups.map((group, index)=>{
-    return(index!==0?<th style={{textAlign: 'center', cursor:'move'}}  key={'propCol'+index+1}>{index+" "+group.label}</th>:"")
+    return(index!==0?<th className="DraggableTH" key={'propCol'+index+1} onDragStart={(e)=>this.dragStart(e)} onDragEnd={(e)=>this.dragEnd(e)} >{group.label}</th>:"")
 })}</tr>
 </thead>
 <tbody>
@@ -609,7 +619,7 @@ this.state.groups.map((group, index)=>{
                      <td  key={'proptd'+index} className="MatData"> <span> {leftHeaderLabel }</span></td>
                      { 
                        values!==undefined?values.map((val,i)=>{
-                           return(<td><Input value={val} onChange={(e)=>this.updateAttribute(e.target.value,crObj.label,i)}style={{width:'60%'}} placeholder="" /></td>) 
+                           return(<td><Input value={val} onChange={(e)=>this.updateAttribute(e.target.value,crObj.label,i)} style={{width:'60%'}} placeholder="" /></td>) 
 
                        }):""                         
                        

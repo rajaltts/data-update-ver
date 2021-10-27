@@ -82,12 +82,14 @@ class SaveResults extends React.Component {
        group.data.map((d,index1)=>{
            let groupObj = {};
            let selectPropLabel = d.label;
-           if(selectedResProp[d.name].label!==undefined){
-                selectPropLabel = selectedResProp[d.name].label+" ("+selectedResProp[d.name].unit+") "
-           }
-           groupObj['Name']=selectPropLabel;
-           groupObj['Value']=d.value;
-           groupArray.push(groupObj);
+           if(!d.hide){
+                if(selectedResProp[d.name].label!==undefined){
+                        selectPropLabel = selectedResProp[d.name].label+" ("+selectedResProp[d.name].unit+") "
+                }
+                groupObj['Name']=selectPropLabel;
+                groupObj['Value']=d.value;
+                groupArray.push(groupObj);
+        }
        })
        const ws = XLSX.utils.json_to_sheet(groupArray, {skipHeader: 1});   
 
@@ -349,6 +351,7 @@ class SaveResults extends React.Component {
             res_var1: this.state.res_var1,
             targetClass: this.state.targetClass,
             selectedProject: this.state.selectedProject,
+            selected_resProp: this.props.propState.selected_resProp
         }
         this.sendData(json);
     } 
@@ -583,8 +586,12 @@ this.state.groups.map((group, index)=>{
 
     {
         Object.keys(outputGrp).map((data, index) =>{
-            let leftHeaderLabel = outputLabels[data]+" ["+this.props.propState.selected_resProp[data].unit+"] ";
             let values = outputGrp[data];
+            let d = outputGrp[data];
+            let leftHeaderLabel ='';
+            if(this.props.propState.selected_resProp[data] !== undefined)
+                leftHeaderLabel = outputLabels[data]+" ["+this.props.propState.selected_resProp[data].unit+"] ";
+           
             return(
                 leftHeaderLabel===''?'':
                 <tr key={'proptr'+index}>
