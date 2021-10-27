@@ -16,8 +16,6 @@ interface IPropertyTable {
 
 const PropertyTable: React.FC<IPropertyTable> = (props) => {
     //---------STATE-----------------------------------
-    //const [sortedTable,setSortedTable]= useState([]);
-
     const { data, sortedTable, setSortedTable} = props;
 
     const DisplayDataAll = () => {
@@ -27,7 +25,7 @@ const PropertyTable: React.FC<IPropertyTable> = (props) => {
         if(gid===-1)
             return <div></div>;
         
-        let columns: any[] = [ {title: '',dataIndex: 'sort', width:20, className: 'drag-visible', key: 'sort', render: () => <DragHandle />},
+        let columns: any[] = [ {title: '',dataIndex: 'sort', width:20, className: 'drag-visible', key: 'sort', render: (value,row,index) => <DragHandle value={value} row={row} index={index}/>},
                                 {title: 'Curve', dataIndex: 'curve',ellipsis: true , className: 'drag-visible',  key: 'curve'}];
         // data
         let allResults = false;
@@ -35,7 +33,7 @@ const PropertyTable: React.FC<IPropertyTable> = (props) => {
         let datasource: any[] = [];
         if(sortedTable.length===0){
             props.data.groups.forEach( (g,idg: number) => {
-            const row = { curve: <div><LineOutlined style={{fontSize: '24px', verticalAlign: 'middle', color: colors[idg]}}/>{g.label}</div>, key: idg.toString(), index: idg};
+            const row = { curve: g.label , key: idg.toString(), index: idg};
             g.data.forEach( (p,idp) => {
                 let tmp: string;;
                 if(p.hide===false){
@@ -111,7 +109,10 @@ const PropertyTable: React.FC<IPropertyTable> = (props) => {
             }});
         });
         
-        const DragHandle = SortableHandle(() => <MenuOutlined style={{ cursor: 'grab', color: '#999' }} />);
+        const DragHandle = SortableHandle((e) => 
+          <LineOutlined style={{fontSize: '16px', verticalAlign: 'middle', color: colors[e.row.index]}}/>
+          //<MenuOutlined style={{ cursor: 'grab', color: '#999' }} />
+        );
         const SortableItem = SortableElement(props => <tr {...props} />);
         const SortableContainer2 = SortableContainer(props => <tbody {...props} />);
         

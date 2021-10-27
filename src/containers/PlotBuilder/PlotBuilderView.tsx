@@ -128,9 +128,7 @@ const PlotBuilderView: React.FC<PlotBuilderViewProps> = (props)  => {
 
     return (
         <>
-        
-            {/* <div className="OuterDivScroll"> */}
-            <div style={{width: '100vw', height: '100%'}}>
+            <div style={{width: '100%'}}>
             <div style={{paddingTop: '20px', cursor: computationInProgress? 'wait' : 'auto'}}>
             <Row justify="start" style={{ pointerEvents: computationInProgress? 'none' : 'auto' }}>
                 <Col span={6}>
