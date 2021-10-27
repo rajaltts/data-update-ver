@@ -129,10 +129,11 @@ const PlotBuilderView: React.FC<PlotBuilderViewProps> = (props)  => {
     return (
         <>
         
-            <div className="OuterDivScroll">
+            {/* <div className="OuterDivScroll"> */}
+            <div style={{width: '100vw', height: '100%'}}>
             <div style={{paddingTop: '20px', cursor: computationInProgress? 'wait' : 'auto'}}>
             <Row justify="start" style={{ pointerEvents: computationInProgress? 'none' : 'auto' }}>
-                <Col flex="400px">
+                <Col span={6}>
                 <Collapse className='PlotBuilderCollapse' accordion bordered={false} defaultActiveKey={['1']} onChange={changeCollapseHandler}>
                     <Panel header="1 - Averaging" key="1"  showArrow={false} >
                         <Steps operations={operations}
@@ -157,7 +158,7 @@ const PlotBuilderView: React.FC<PlotBuilderViewProps> = (props)  => {
                     </Panel>
                 </Collapse>    
                 </Col>
-                <Col flex="400px">
+                <Col span={10}>
                     <PlotCurve
                        data={data}
                        interpolationData={interpolationData}
@@ -176,7 +177,7 @@ const PlotBuilderView: React.FC<PlotBuilderViewProps> = (props)  => {
                        failureInterpolation={failureInterpolationHandler}
                       />
                 </Col>
-                <Col flex="400px">
+                <Col span={8}>
                 {plotMode==='normal'&&
                     <CurveControls 
                         groupData={data.tree.groupData}

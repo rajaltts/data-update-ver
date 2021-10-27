@@ -287,9 +287,9 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
     const layout_c = { 
       modebardisplay: false,
       showlegend: false,
-     // autosize: true,
+      autosize: true,
       height: 530,
-      width: 700,
+     // width: 700,
       hovermode: "closest",
       uirevision:  currentGroup.toString(), // will keep the zoom if not changed
       margin: {

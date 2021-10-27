@@ -22,7 +22,7 @@ const dataReducer = (currentData: Data, action: any) => {
                                  xunit: action.input.xunit,
                                  yunit: action.input.yunit,
                                  measurement: action.input.measurement,
-                                 precision: action.input.precision,
+                                 precision: (action.input.precision?action.input.precision:4),
                                  groups: [],
                                  tree: { groupData: [],
                                          selectedGroup: 0}

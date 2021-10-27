@@ -27,8 +27,8 @@ const PropertyTable: React.FC<IPropertyTable> = (props) => {
         if(gid===-1)
             return <div></div>;
         
-        let columns: any[] = [ {title: 'Sort',dataIndex: 'sort', width:25, className: 'drag-visible', key: 'sort', render: () => <DragHandle />},
-                                {title: 'Curve', dataIndex: 'curve',className: 'drag-visible',  key: 'curve'}];
+        let columns: any[] = [ {title: '',dataIndex: 'sort', width:20, className: 'drag-visible', key: 'sort', render: () => <DragHandle />},
+                                {title: 'Curve', dataIndex: 'curve',ellipsis: true , className: 'drag-visible',  key: 'curve'}];
         // data
         let allResults = false;
         allResults = true;
@@ -41,7 +41,7 @@ const PropertyTable: React.FC<IPropertyTable> = (props) => {
                 if(p.hide===false){
                     tmp =  p.value;
                     if(p.range){
-                       tmp += "\r[" + p.range[0] + ":" + p.range[1] + "]";
+                       tmp += " [" + p.range[0] + ":" + p.range[1] + "]";
                     } 
                     Object.assign(row, { [p.name.toString()]: tmp});
                 }
@@ -56,7 +56,7 @@ const PropertyTable: React.FC<IPropertyTable> = (props) => {
                 if(p.hide===false) {
                     let tmp =  p.value;
                     if(p.range){
-                       tmp += "\r[" + p.range[0] + ":" + p.range[1] + "]";
+                       tmp += " [" + p.range[0] + ":" + p.range[1] + "]";
                     } 
                     r[p.name] = tmp;
                 }
@@ -94,14 +94,14 @@ const PropertyTable: React.FC<IPropertyTable> = (props) => {
         const columnStyle = (paramName: string) => {
             const e = columnColor.find( r => r.name===paramName);
             if(e)
-            return { color: e.color };
+            return { color: e.color  };
             else
             return {};
         };
                                 
         props.data.groups[gid].data.forEach( (p,ind) => {
             if(p.hide===false)
-            columns.push({title: p.label, dataIndex: p.name, width: 50, render(text,record) {
+            columns.push({title: p.label, dataIndex: p.name, ellipsis: true, render(text,record) {
                 return {
                         props: {
                         style: columnStyle(p.name)
@@ -154,7 +154,6 @@ const PropertyTable: React.FC<IPropertyTable> = (props) => {
                 pagination={false}
                 size='small' bordered={true}
                 dataSource={dataSource}
-                scroll={{ x: "max-content"}}
                 columns={columns}
                 rowKey="index"
                 components={{
@@ -173,7 +172,7 @@ const PropertyTable: React.FC<IPropertyTable> = (props) => {
     
     return (
         <>
-        <div style={{ height: '550px', borderStyle: 'solid', borderWidth: '0px', borderColor: '#d9d9d9', margin: 'auto', padding: '0px'}}>
+        <div style={{width: '100%', borderStyle: 'solid', borderWidth: '0px', borderColor: '#d9d9d9', margin: 'auto', padding: '0px'}}>
           <DisplayDataAll/>
         </div>
         </>  
