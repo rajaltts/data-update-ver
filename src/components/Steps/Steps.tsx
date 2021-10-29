@@ -133,7 +133,7 @@ const Steps: React.FC<StepsProps> = (props) => {
     //---------RENDER-----------------------------------------
     return(
     <Fragment>
-        <div style={{height: '550px', borderStyle: 'solid', borderWidth: '2px', borderColor: '#d9d9d9', margin: 'auto', padding: '10px'}}>
+        <div style={{height: '550px', borderStyle: 'solid', borderWidth: '2px', borderColor: '#d9d9d9', margin: 'auto', padding: '8px'}}>
             <div className="analysis-type-title">
                 Analysis type: {props.dataType}
             </div>

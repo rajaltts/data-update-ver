@@ -11,7 +11,7 @@ interface IConsolidation {
     selectedCurves: string[];
     listAvg: boolean[];
     adjustCurves: (algo: string, curves: string[], parameters: {curve: string, parameter: string, value: number}[] ) => void;
-    cancelAdjustCurves: () => void;
+    cancelAdjustCurves: (curves: string[]) => void;
 };
 
 const Consolidation: React.FC<IConsolidation> = (props) => {
@@ -33,7 +33,7 @@ const Consolidation: React.FC<IConsolidation> = (props) => {
             }
         }
         setParameterValues(parameterValuesInit);
-    },[]);
+    },[props.postData]);
     
     const { TabPane } = Tabs;
 
@@ -60,11 +60,13 @@ const Consolidation: React.FC<IConsolidation> = (props) => {
         if(checkedFailureCurves.length===0&&checkedStiffnessCurves.length===0)
            return;
         const algo = (selectedTab==='1'?'failure':'stiffness');
-        if(algo==='failure')
+        if(algo==='failure'){
            setCheckedFailureCurves([]);
-        else if(algo==='stiffness')
+           props.cancelAdjustCurves(checkedFailureCurves);
+        } else if(algo==='stiffness') {
            setCheckedStiffnessCurves([]);
-        props.cancelAdjustCurves();
+           props.cancelAdjustCurves(checkedStiffnessCurves);
+        }
     }
 
     const onChangeParameterHandler = (event: any, curveName: string, paramName: string) => {

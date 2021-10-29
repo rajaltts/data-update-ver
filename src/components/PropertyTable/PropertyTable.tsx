@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import { Table, Space} from 'antd'
+import { Table, Space, Tooltip} from 'antd'
 import { SortableContainer, SortableElement, SortableHandle } from 'react-sortable-hoc';
 import { MenuOutlined, LineOutlined } from '@ant-design/icons';
 import { arrayMoveImmutable } from 'array-move';
@@ -25,7 +25,7 @@ const PropertyTable: React.FC<IPropertyTable> = (props) => {
         if(gid===-1)
             return <div></div>;
         
-        let columns: any[] = [ {title: '',dataIndex: 'sort', width:20, className: 'drag-visible', key: 'sort', render: (value,row,index) => <DragHandle value={value} row={row} index={index}/>},
+        let columns: any[] = [ {title: '',dataIndex: 'sort', width:'1em', className: 'drag-visible', key: 'sort', render: (value,row,index) => <DragHandle value={value} row={row} index={index}/>},
                                 {title: 'Curve', dataIndex: 'curve',ellipsis: true , className: 'drag-visible',  key: 'curve'}];
         // data
         let allResults = false;
@@ -33,14 +33,14 @@ const PropertyTable: React.FC<IPropertyTable> = (props) => {
         let datasource: any[] = [];
         if(sortedTable.length===0){
             props.data.groups.forEach( (g,idg: number) => {
-            const row = { curve: g.label , key: idg.toString(), index: idg};
+            const row = { curve: g.label , key: idg.toString(), index: idg, style: {textAlign: 'center'}};
             g.data.forEach( (p,idp) => {
                 let tmp: string;;
                 if(p.hide===false){
                     tmp =  p.value;
-                    if(p.range){
-                       tmp += " [" + p.range[0] + ":" + p.range[1] + "]";
-                    } 
+                     if(p.range){
+                        tmp += " [" + p.range[0] + " : " + p.range[1] + "]";
+                     } 
                     Object.assign(row, { [p.name.toString()]: tmp});
                 }
             });
@@ -53,9 +53,9 @@ const PropertyTable: React.FC<IPropertyTable> = (props) => {
             g.data.forEach( (p,idp) => {
                 if(p.hide===false) {
                     let tmp =  p.value;
-                    if(p.range){
-                       tmp += " [" + p.range[0] + ":" + p.range[1] + "]";
-                    } 
+                     if(p.range){
+                        tmp += " [" + p.range[0] + " : " + p.range[1] + "]";
+                     } 
                     r[p.name] = tmp;
                 }
             });
@@ -92,19 +92,29 @@ const PropertyTable: React.FC<IPropertyTable> = (props) => {
         const columnStyle = (paramName: string) => {
             const e = columnColor.find( r => r.name===paramName);
             if(e)
-            return { color: e.color  };
+            return { color: e.color, textAlign: 'center'};
             else
             return {};
         };
                                 
         props.data.groups[gid].data.forEach( (p,ind) => {
             if(p.hide===false)
-            columns.push({title: p.label, dataIndex: p.name, ellipsis: true, render(text,record) {
+            columns.push({title: p.label, dataIndex: p.name, width: '6em', ellipsis: { showTitle: false }, render(text,record) {
+                let tooltip_value = text;
+                let cell_value = text;
+                if(text){
+                    const id = text.indexOf("[");
+                    if(id!==-1){
+                        cell_value = text.slice(0,id);
+                        tooltip_value = text.slice(id);
+                    } 
+                }
                 return {
                         props: {
                         style: columnStyle(p.name)
                         },
-                        children: <div>{text}</div>
+                       // children: <div>{text}</div>
+                       children: <Tooltip title={tooltip_value}>{cell_value}</Tooltip>
                     };
             }});
         });
@@ -155,6 +165,7 @@ const PropertyTable: React.FC<IPropertyTable> = (props) => {
                 pagination={false}
                 size='small' bordered={true}
                 dataSource={dataSource}
+                scroll={{ x: "max-content"}}
                 columns={columns}
                 rowKey="index"
                 components={{

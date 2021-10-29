@@ -30,7 +30,7 @@ interface PlotBuilderViewProps {
     changeCollapseHandler_: (key: string | string[]) => void;
     failureInterpolationHandler_: (curves: string[],post: () => void) =>  void;
     adjustCurvesHandler_: (algo:string, curves:string[], parameters: {curve: string, parameter: string, value: number}[], post: () => void) => void;
-    cancelAdjustCurvesHandler_: (post: () => void) => void;
+    cancelAdjustCurvesHandler_: (curves:string[],post: () => void) => void;
 }
 
 const PlotBuilderView: React.FC<PlotBuilderViewProps> = (props)  => {
@@ -107,9 +107,9 @@ const PlotBuilderView: React.FC<PlotBuilderViewProps> = (props)  => {
         setComputationInProgress( true);     
         return adjustCurvesHandler_(algo,curves,parameters,postOp);
     };
-    const cancelAdjustCurvesHandler = () => {
+    const cancelAdjustCurvesHandler = (curves:string[]) => {
         setComputationInProgress(true);
-        return cancelAdjustCurvesHandler_(postOp);
+        return cancelAdjustCurvesHandler_(curves,postOp);
     };
 
     // --internal functions---
@@ -131,7 +131,7 @@ const PlotBuilderView: React.FC<PlotBuilderViewProps> = (props)  => {
             <div style={{width: '100%'}}>
             <div style={{paddingTop: '20px', cursor: computationInProgress? 'wait' : 'auto'}}>
             <Row justify="start" style={{ pointerEvents: computationInProgress? 'none' : 'auto' }}>
-                <Col span={6}>
+                <Col span={5}>
                 <Collapse className='PlotBuilderCollapse' accordion bordered={false} defaultActiveKey={['1']} onChange={changeCollapseHandler}>
                     <Panel header="1 - Averaging" key="1"  showArrow={false} >
                         <Steps operations={operations}
@@ -175,7 +175,7 @@ const PlotBuilderView: React.FC<PlotBuilderViewProps> = (props)  => {
                        failureInterpolation={failureInterpolationHandler}
                       />
                 </Col>
-                <Col span={8}>
+                <Col span={9}>
                 {plotMode==='normal'&&
                     <CurveControls 
                         groupData={data.tree.groupData}

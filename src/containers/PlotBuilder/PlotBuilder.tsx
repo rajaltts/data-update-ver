@@ -278,12 +278,12 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         adjustCurves(algo, curves,parameters,postUpdate);
     }
 
-    const cancelAdjustCurvesHandler = (post: () => void ) => {
+    const cancelAdjustCurvesHandler = (curves:string[], post: () => void ) => {
         const postUpdate = () => {
             updatePlotHandler();
             post();
         }
-        cancelAdjustCurves(postUpdate);
+        cancelAdjustCurves(curves,postUpdate);
     }
 
     // restore initial curves

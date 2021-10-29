@@ -27,6 +27,10 @@ const useModel = () => {
     
     // ----Functions for Data-----
     const adjustCurves = (algo: string, curves: string[],parameters: {curve: string, parameter: string, value: number}[], post: () => void) => {
+        if(algo==='failure'&&interpolationData.x.length === 0){
+            post();
+            return;
+        }
         const allOpsBU = clone(allOperations); // efficient deep copy
         setBackupAllOperations(allOpsBU);
 
@@ -62,11 +66,14 @@ const useModel = () => {
         }
     }
 
-    const cancelAdjustCurves = (post: () => void) => {
+    const cancelAdjustCurves = (curves: string[],post: () => void) => {
         const action_id = ACTION.Averaging;
         for(let gid=0; gid<data.groups.length;gid++){
-            dispatch(actions.resetCurves(gid));
-            updatedCurve('Averaging',gid,action_id,data.precision,post,backupAllOperations);
+            const ind = curves.findIndex(e => e===data.groups[gid].label);
+            if(ind!==-1){
+                dispatch(actions.resetCurves(gid));
+                updatedCurve('Averaging',gid,action_id,data.precision,post,backupAllOperations);
+            }
         }
         //setAllOperations( () => backupAllOperations);
         setBackupAllOperations([]);
@@ -606,12 +613,12 @@ const useModel = () => {
                     data_analytics.push({label: "Young's Modulus", value: young, name: "young", hide: false, range: [young_min, young_max]});
                     data_analytics.push({label: "Strain at Break", value: strain_at_break, name: "strain_at_break", hide: false, range: [ strain_at_break_min, strain_at_break_max ]});
                     data_analytics.push({label: "Yield Strength", value: yield_strength, name: "yield_strength", hide: false});
+                    data_analytics.push({label: "Ultimate Strength", value: stress_at_ultimate_strength, name: "stress_at_ultimate_strength", hide: false});
+                    data_analytics.push({label: "Strength at Break", value: stress_at_break, name: "stress_at_break", hide: false});
                     data_analytics.push({label: "Yield Strain", value: yield_strain, name: "yield_strain", hide: true});
                     data_analytics.push({label: "Proportional limit", value: proportional_limit_strain, name: "proportional_limit_strain", hide: true});
-                    data_analytics.push({label: "Strength at Break", value: stress_at_break, name: "stress_at_break", hide: false});
                     data_analytics.push({label: "Strain at Ultimate Strength", value: strain_at_ultimate_strength, name: "strain_at_ultimate_strength", hide: false});
-                    data_analytics.push({label: "Strength at Ultimate Strength", value: stress_at_ultimate_strength, name: "stress_at_ultimate_strength", hide: false});
-
+                    
                     op_slope.delete();
                     dp_data.delete();
                 }

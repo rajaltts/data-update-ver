@@ -140,7 +140,7 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
                 y: curves[avg_cur_index].y,
                 name: props.data.groups[gid].label, //gid,
                 opacity: 1.,
-                line: { color: color, width: 4 },
+                line: { color: color, width: 3 },
               };
               if(showCurve)
                 data_.push(line);
