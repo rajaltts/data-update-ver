@@ -61,6 +61,10 @@ class DefineGroups extends React.Component {
             showGroupCriteria: false,
             xtype: props.propState.xtype,
             ytype: props.propState.ytype,
+            xunit: props.propState.xunit,
+            yunit: props.propState.yunit,
+            xunitLbl: props.propState.xunitLbl,
+            yunitLbl: props.propState.yunitLbl,
             precision: 6,
             loadingIcon:false,
             projects: this.props.propState.projects,
@@ -116,6 +120,8 @@ class DefineGroups extends React.Component {
             xunit: this.state.xunit,
             ytype: this.state.ytype,
             yunit: this.state.yunit,
+            xunitLbl: this.state.xunitLbl,
+            yunitLbl: this.state.yunitLbl,
             groupSelected:this.state.groupSelected,		
             selected_group: 0,
             numberOfGroups:1,
@@ -194,6 +200,8 @@ class DefineGroups extends React.Component {
             xunit: this.state.xunit,
             ytype: this.state.ytype,
             yunit: this.state.yunit,
+            xunitLbl: this.state.xunitLbl,
+            yunitLbl: this.state.yunitLbl,
             groupSelected:this.state.groupSelected,		
             selected_group: 0,
             selectedCriteria:this.state.selectedCriteria,
@@ -311,6 +319,8 @@ class DefineGroups extends React.Component {
             type: this.props.propState.xyDisplayScale,
             xtype:this.props.propState.xtype,
             xunit: this.props.propState.xunit,
+            xunitLbl: this.props.propState.xunitLbl,
+            yunitLbl: this.props.propState.yunitLbl,
             ytype: this.props.propState.ytype,
             yunit: this.props.propState.yunit,		
             selected_group: 0,
@@ -329,6 +339,8 @@ class DefineGroups extends React.Component {
             targetClass: this.props.propState.targetClass,
             xunit:this.props.propState.xunit,
             yunit: this.props.propState.yunit,
+            xunitLbl: this.props.propState.xunitLbl,
+            yunitLbl: this.props.propState.yunitLbl,
             unitSystem: this.props.propState.unitSystem,
             xQuantityType: this.props.propState.xQuantityType,
             yQuantityType:this.props.propState.yQuantityType,
@@ -369,7 +381,9 @@ class DefineGroups extends React.Component {
                     xtype: res.xtype,
                     xunit: res.xunit,
                     ytype: res.ytype,
-                    yunit: res.yunit,		
+                    yunit: res.yunit,	
+                    xunitLbl: res.xunitLbl,
+                    yunitLbl: res.yunitLbl,	
                     selected_group: 0,
                     tree: res.tree,
                     keys: res.keys,
@@ -658,7 +672,7 @@ this.state.groups.map((group, index)=>{
                     <Skeleton loading={!this.state.loaded}>
                         <div className="PlotCurveDiv">
                          <PlotCurve
-                        curves={allCurves} showLegend={false} isThumbnail={false} showOnlyAverage={false} xtype={this.state.xtype} ytype={this.state.ytype}
+                        curves={allCurves} showLegend={false} isThumbnail={false} showOnlyAverage={false} xtype={this.state.xtype+" ["+this.state.xunitLbl+"] "} ytype={this.state.ytype+" ["+this.state.yunitLbl+"] "}
                     />
                     </div>
                     </Skeleton>

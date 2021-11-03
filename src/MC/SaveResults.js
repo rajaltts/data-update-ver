@@ -369,6 +369,8 @@ class SaveResults extends React.Component {
             type: this.props.propState.xyDisplayScale,
             xtype:this.props.propState.xtype,
             xunit: this.props.propState.xunit,
+            yunitLbl: this.props.propState.yunitLbl,
+            xunitLbl: this.props.propState.xunitLbl,
             ytype: this.props.propState.ytype,
             yunit: this.props.propState.yunit,		
             selected_group: 0,
@@ -579,7 +581,7 @@ this.state.groups.map((group, index)=>{
             </td>{
             this.props.propState.plotBuildModel.groups.map((group, index1) =>{
                 return(<td style={{textAlign: 'center'}}  key={'propColCurve'+index1+1}> <PlotCurve onClick={e => { this.handleCurveClick(index1) }}
-                curves={group.curves} showLegend={false} isThumbnail={true} showOnlyAverage={true} groupIndex={group.id} xtype={this.state.xtype} ytype={this.state.ytype}
+                curves={group.curves} showLegend={false} isThumbnail={true} showOnlyAverage={true} groupIndex={group.id}  xtype={this.state.xtype+" ["+this.state.xunitLbl+"] "} ytype={this.state.ytype+" ["+this.state.yunitLbl+"] "}
             /></td>)
             })}
         </tr>
