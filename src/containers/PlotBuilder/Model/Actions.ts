@@ -46,6 +46,16 @@ const resetCurves = (group_id) => ({
     groupid: group_id
 });
 
+const setInterpolation =(val: {x: number[],y: number[]}) => ({
+    type: 'SET_INTERPOLATION',
+    interpolation: val
+});
+
+const setSelected= (val: string[]) =>({
+    type: 'SET_SELECTED',
+    selected: val
+});
+
 const Actions = {
  setModel,
  setMarker,
@@ -55,6 +65,8 @@ const Actions = {
  setMeasurement,
  updateCurves,
  resetCurves,
+ setInterpolation,
+ setSelected,
 };
 
 export default Actions;

@@ -1,11 +1,12 @@
 import React, {useEffect, useState } from 'react';
-import {  Button } from 'antd';
+import {  Button, Tooltip } from 'antd';
 import { Operation } from './Model/template.model';
 import { Data  } from './Model/data.model';
 import { tensile_operations_config } from '../../assets/tensile_operations_config';
 import actions from './Model/Actions';
 import useModel from './UseModel';
 import PlotBuilderView from './PlotBuilderView';
+import { PlotMode } from '../../constants/Enum'
 const clone = require('rfdc')();
 
 //---------INTERFACE-----------------------------
@@ -20,7 +21,6 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
 
     //-----------MODEL----------------------------------------
     const [data,dispatch,
-           interpolationData,
            setOperationsType,
            allOperations,setAllOperations,
            convertToTrue,updatedCurve,failureInterpolation,adjustCurves,cancelAdjustCurves,
@@ -31,7 +31,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
     const [plotUpdate, setPlotUpdate] = useState(false);
     const [showMarkers, setShowMarkers] = useState(false);
     const [disableNextButton,setDisableNextButton] = useState(true);
-    const [plotMode,setPlotMode] = useState<string>('normal');
+    const [plotMode,setPlotMode] = useState<PlotMode>(PlotMode.Averaging);
 
     //---------EFFECT-----------------------------------------
     // initialize the states (componentDidMount)
@@ -49,6 +49,9 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
             // check if we must show the markers MUST BE done for each groups IS It necessary???
            // const op_clean = props.template_input.find( op => op.action === "Cleaning_ends");
            // showCurveMarkers(op_clean.selected_method);
+           updatePlotHandler();
+           setPlotMode(PlotMode.Consolidation);
+           setDisableNextButton(false);
         } else {
             if(operations()[0].action==='None'){
                 setOperationsType(tensile_operations_config); // init operations state with the tensile structure (default values)
@@ -96,7 +99,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         
     //---------HANDLER-------------------------------------------
     const changeCollapseHandler = (key: string | string[]) => {
-        const mod = (key==='2'?'average':'normal');
+        const mod = (key==='2'?PlotMode.Consolidation: PlotMode.Averaging);
         setPlotMode(mod);
     }
 
@@ -123,9 +126,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         console.log("CLICK POINT HANDLER");
         console.log(plotMode);
         
-        if(plotMode==='average') { // consolidation
-
-            
+        if(plotMode===PlotMode.Consolidation) { // consolidation
             return false;
         } else { // normal 
             // check if we click on a merker
@@ -333,7 +334,6 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
     <>
         <PlotBuilderView
             data = {data}
-            interpolationData = {interpolationData}
             operations={operations()}
             plotUpdate={plotUpdate}
             showMarkers={showMarkers}
@@ -358,7 +358,9 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
                 <Button  onClick={e => { handlePrevious() }}>Previous</Button>
             </div>
             <div className="ButtonNext">
-                <Button type="primary" disabled={disableNextButton} onClick={e => { handleNext() }}>Next</Button>
+                <Tooltip title='Switch on Consolidation View to proceed'>
+                <Button type="primary" disabled={disableNextButton||plotMode===PlotMode.Averaging} onClick={e => { handleNext() }}>Next</Button>
+                </Tooltip>
             </div>
         </div>
     </>

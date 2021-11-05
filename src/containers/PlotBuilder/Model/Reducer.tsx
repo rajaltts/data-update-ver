@@ -25,7 +25,9 @@ const dataReducer = (currentData: Data, action: any) => {
                                  precision: (action.input.precision?action.input.precision:4),
                                  groups: [],
                                  tree: { groupData: [],
-                                         selectedGroup: 0}
+                                         selectedGroup: 0},
+                                 interpolation: (action.input.interpolation?action.input.interpolation:{x:[],y:[]}),
+                                 selected: (action.input.selected?action.input.selected:[]),
                                  };
              const initState = (action.input.tree === undefined?true:false);
              action.input.groups.forEach( (g,index_g) => {
@@ -74,7 +76,7 @@ const dataReducer = (currentData: Data, action: any) => {
                     const data_c = clone(g.data); // efficient deep copy
                     group_c.data =  data_c;
                  } else {
-                    group_c.data.push({label:'',value: 0});
+                    group_c.data.push({label:'',value: 0,name:'',hide:true});
                  }
                         
                  data.groups.push(group_c);
@@ -161,6 +163,16 @@ const dataReducer = (currentData: Data, action: any) => {
              const newData = {...currentData};
              newData.measurement = action.val;
              return newData;
+         }
+         case 'SET_INTERPOLATION': {
+            const newData = {...currentData};
+            newData.interpolation = action.interpolation;
+            return newData;
+         }
+         case 'SET_SELECTED': {
+            const newData = {...currentData};
+            newData.selected = action.selected;
+            return newData;
          }
          default:
              throw new Error('Not be reach this case'); 

@@ -18,12 +18,13 @@ export interface DataAnalytics {
     value: number;
     name: string;
     hide: boolean;
+    range?: string[];
 };
 
 export interface Group {
     id: number;
     curves: Curve[]; 
-    data: any[];
+    data: DataAnalytics[];
     label: string;
     result: boolean; // true if we have a result (averaging curve)
 };
@@ -38,6 +39,8 @@ export interface Data {
     precision: number;
     groups: Group[];
     tree?: Tree;
+    interpolation?: {x:number[],y:number[]};
+    selected?: string[]; // selected curves for interpolation
 };
 
 // use to initialize ant Tree component

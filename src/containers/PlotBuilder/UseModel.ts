@@ -16,7 +16,7 @@ interface EmscriptenModule {
 const useModel = () => {
     // datat represents the state related to curves management 
     const [data, dispatch]  =  useReducer(dataReducer,initalData);
-    const [interpolationData,setInterpolationData] = useState<{x: number[], y: number[]}>( {x: [], y:[]});
+    //const [interpolationData,setInterpolationData] = useState<{x: number[], y: number[]}>( {x: [], y:[]});
     const [strainAtBreak,setStrainAtBreak] = useState<{curve: string, value: number}[]>([]);
     // operations represent the state related to actions/methods/parameters
     // Each action has:
@@ -27,10 +27,12 @@ const useModel = () => {
     
     // ----Functions for Data-----
     const adjustCurves = (algo: string, curves: string[],parameters: {curve: string, parameter: string, value: number}[], post: () => void) => {
-        if(algo==='failure'&&interpolationData.x.length === 0){
+        if(algo==='failure'&&!data.interpolation&&data.interpolation.x.length === 0){
             post();
             return;
         }
+        if(algo==='failure')
+            dispatch(actions.setSelected(curves));
         const allOpsBU = clone(allOperations); // efficient deep copy
         setBackupAllOperations(allOpsBU);
 
@@ -147,7 +149,7 @@ const useModel = () => {
                         x_int.push(vecX_out.get(i));
                         y_int.push(vecY_out.get(i));
                     }
-                    setInterpolationData({x:x_int,y: y_int});
+                    dispatch(actions.setInterpolation({x:x_int,y: y_int}));
 
                     const report = dataprocess.getReport();
                     let res: {curve: string, value: number}[] = [];
@@ -172,7 +174,7 @@ const useModel = () => {
                     post();
                 }).catch(function () {console.log("Promise rejected");});
             });
-        }
+        } 
     }
 
     const convertToTrue = (post: any) => {
@@ -611,13 +613,13 @@ const useModel = () => {
         
                     data_analytics.length = 0;
                     data_analytics.push({label: "Young's Modulus", value: young, name: "young", hide: false, range: [young_min, young_max]});
-                    data_analytics.push({label: "Strain at Break", value: strain_at_break, name: "strain_at_break", hide: false, range: [ strain_at_break_min, strain_at_break_max ]});
+                    data_analytics.push({label: "Strain@Break", value: strain_at_break, name: "strain_at_break", hide: false, range: [ strain_at_break_min, strain_at_break_max ]});
                     data_analytics.push({label: "Yield Strength", value: yield_strength, name: "yield_strength", hide: false});
                     data_analytics.push({label: "Ultimate Strength", value: stress_at_ultimate_strength, name: "stress_at_ultimate_strength", hide: false});
-                    data_analytics.push({label: "Strength at Break", value: stress_at_break, name: "stress_at_break", hide: false});
+                    data_analytics.push({label: "Strength@Break", value: stress_at_break, name: "stress_at_break", hide: false});
                     data_analytics.push({label: "Yield Strain", value: yield_strain, name: "yield_strain", hide: true});
                     data_analytics.push({label: "Proportional limit", value: proportional_limit_strain, name: "proportional_limit_strain", hide: true});
-                    data_analytics.push({label: "Strain at Ultimate Strength", value: strain_at_ultimate_strength, name: "strain_at_ultimate_strength", hide: false});
+                    data_analytics.push({label: "Strain@Ultimate Strength", value: strain_at_ultimate_strength, name: "strain_at_ultimate_strength", hide: false});
                     
                     op_slope.delete();
                     dp_data.delete();
@@ -770,7 +772,6 @@ const useModel = () => {
     }
 
     return [data,dispatch,
-            interpolationData,
             setOperationsType,
             allOperations,setAllOperations,
             convertToTrue,updatedCurve,failureInterpolation,adjustCurves,cancelAdjustCurves,

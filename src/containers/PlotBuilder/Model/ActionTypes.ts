@@ -12,6 +12,8 @@ type Action =
 | {type: 'SET_VIEW', val: number}
 | {type: 'SET_MEASUREMENT', val: string}
 | {type: 'GET_MEASUREMENT'}
+| {type: 'SET_INTERPOLATION', interpolation: {x: number[], y: number[]}}
+| {type: 'SET_SELECTED', value: string[]}
 ;
 
 export default Action;

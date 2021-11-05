@@ -35,9 +35,9 @@ const PropertyTable: React.FC<IPropertyTable> = (props) => {
             props.data.groups.forEach( (g,idg: number) => {
             const row = { curve: g.label , key: idg.toString(), index: idg, style: {textAlign: 'center'}};
             g.data.forEach( (p,idp) => {
-                let tmp: string;;
+                let tmp: string;
                 if(p.hide===false){
-                    tmp =  p.value;
+                    tmp =  p.value.toString();
                      if(p.range){
                         tmp += " [" + p.range[0] + " : " + p.range[1] + "]";
                      } 
@@ -52,7 +52,7 @@ const PropertyTable: React.FC<IPropertyTable> = (props) => {
             const r = datasource.find( r => r.index===idg);
             g.data.forEach( (p,idp) => {
                 if(p.hide===false) {
-                    let tmp =  p.value;
+                    let tmp =  p.value.toString();
                      if(p.range){
                         tmp += " [" + p.range[0] + " : " + p.range[1] + "]";
                      } 

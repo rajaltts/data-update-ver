@@ -8,7 +8,7 @@ import {colors} from '../../assets/colors';
 interface IConsolidation {
     groupData: GroupData[];
     postData: any[];
-    selectedCurves: string[];
+    selectedCurves: string[]; // selected curves used to generate curve interpolation
     listAvg: boolean[];
     adjustCurves: (algo: string, curves: string[], parameters: {curve: string, parameter: string, value: number}[] ) => void;
     cancelAdjustCurves: (curves: string[]) => void;
@@ -17,7 +17,7 @@ interface IConsolidation {
 const Consolidation: React.FC<IConsolidation> = (props) => {
 
     const [selectedTab,setSelectedTab] = useState('1');
-    const [checkedFailureCurves,setCheckedFailureCurves] = useState<string[]>([]);
+    const [checkedFailureCurves,setCheckedFailureCurves] = useState<string[]>([]);  // selected curves to be adjusted
     const [checkedStiffnessCurves,setCheckedStiffnessCurves] = useState<string[]>([]);
     const [parameterValues,setParameterValues] = useState<{curve: string, parameter: string, value: number}[] >([]);
 

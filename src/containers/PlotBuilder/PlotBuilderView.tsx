@@ -7,16 +7,16 @@ import { Operation } from './Model/template.model';
 import { Data} from './Model/data.model';
 import Consolidation from '../../components/Consolidation/Consolidation';
 import PropertyTable from '../../components/PropertyTable/PropertyTable';
+import { PlotMode } from '../../constants/Enum';
 const { TabPane } = Tabs;
 const { Panel } = Collapse;
 
 interface PlotBuilderViewProps {
     data: Data;
-    interpolationData: {x: number[], y: number[]};
     operations: Operation[];
     plotUpdate: boolean;
     showMarkers: boolean;
-    plotMode: string;
+    plotMode: PlotMode;
     changeOperationsHandler_: (nops: Operation[]) => void;
     changeSelectedMethodHandler_: (m: string, a: string ) =>void;
     updatedCurveHandler_:(a: string, post: () => void) => void;
@@ -37,7 +37,6 @@ const PlotBuilderView: React.FC<PlotBuilderViewProps> = (props)  => {
 
     const {
         data,
-        interpolationData,
         operations,
         plotUpdate,
         showMarkers,
@@ -62,7 +61,7 @@ const PlotBuilderView: React.FC<PlotBuilderViewProps> = (props)  => {
     // --- STATE VARIABLES --------------------------------------------
     // Stae variables only used for View, they do not change the Model
     const [displayGids,setDisplayGids] = useState<string[]>([]);
-    const [selectedCurves,setSelectedCurves] = useState<string[]>([]);
+    const [selectedCurves,setSelectedCurves] = useState<string[]>([]); // curves selected for interpolation
     const [computationInProgress,setComputationInProgress] = useState(false);
     const [sortedTable,setSortedTable]= useState([]);
 
@@ -97,15 +96,19 @@ const PlotBuilderView: React.FC<PlotBuilderViewProps> = (props)  => {
         return convertToTrueHandler_(postOp);
     };
     const changeCollapseHandler = (key: string | string[]) => {changeCollapseHandler_(key)};
-    const failureInterpolationHandler = (curves: string[],post: () => void) => { 
+    const failureInterpolationHandler = (curvesSelectedToInterpolation: string[],post: () => void) => { 
+        setSelectedCurves(curvesSelectedToInterpolation);
+        if(curvesSelectedToInterpolation.length===1)
+           return;
         setComputationInProgress( true);
-        setSelectedCurves(curves);
         const postAll = () => { postOp(); post();}
-        return failureInterpolationHandler_(curves,postAll);
+        return failureInterpolationHandler_(curvesSelectedToInterpolation,postAll);
     };
-    const adjustCurvesHandler = (algo:string, curves:string[], parameters: {curve: string, parameter: string, value: number}[]) => { 
+    const adjustCurvesHandler = (algo:string, curvesToAdjust:string[], parameters: {curve: string, parameter: string, value: number}[]) => { 
+        if(algo==='failure'&&data.interpolation.x.length===0)
+          return;
         setComputationInProgress( true);     
-        return adjustCurvesHandler_(algo,curves,parameters,postOp);
+        return adjustCurvesHandler_(algo,curvesToAdjust,parameters,postOp);
     };
     const cancelAdjustCurvesHandler = (curves:string[]) => {
         setComputationInProgress(true);
@@ -132,7 +135,7 @@ const PlotBuilderView: React.FC<PlotBuilderViewProps> = (props)  => {
             <div style={{paddingTop: '20px', cursor: computationInProgress? 'wait' : 'auto'}}>
             <Row justify="start" style={{ pointerEvents: computationInProgress? 'none' : 'auto' }}>
                 <Col span={5}>
-                <Collapse className='PlotBuilderCollapse' accordion bordered={false} defaultActiveKey={['1']} onChange={changeCollapseHandler}>
+                <Collapse className='PlotBuilderCollapse' accordion bordered={false} activeKey={(plotMode===PlotMode.Averaging?['1']:['2'])} onChange={changeCollapseHandler}>
                     <Panel header="1 - Averaging" key="1"  showArrow={false} >
                         <Steps operations={operations}
                             changeSelectedMethod={changeSelectedMethodHandler}
@@ -159,7 +162,6 @@ const PlotBuilderView: React.FC<PlotBuilderViewProps> = (props)  => {
                 <Col span={10}>
                     <PlotCurve
                        data={data}
-                       interpolationData={interpolationData}
                        group={data.tree.selectedGroup}
                        curves={data.groups[data.tree.selectedGroup].curves}
                        postData={data.groups[data.tree.selectedGroup].data}
@@ -176,7 +178,7 @@ const PlotBuilderView: React.FC<PlotBuilderViewProps> = (props)  => {
                       />
                 </Col>
                 <Col span={9}>
-                {plotMode==='normal'&&
+                {plotMode===PlotMode.Averaging&&
                     <CurveControls 
                         groupData={data.tree.groupData}
                         onCheck={checkDataTreeHandler}
@@ -184,7 +186,7 @@ const PlotBuilderView: React.FC<PlotBuilderViewProps> = (props)  => {
                         convertToTrue={convertToTrueHandler}
                     />
                 }
-                {plotMode==='average'&&
+                {plotMode===PlotMode.Consolidation&&
                     <PropertyTable
                         data={data}
                         sortedTable={sortedTable}

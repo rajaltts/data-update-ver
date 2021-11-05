@@ -4,11 +4,11 @@ import Plotly from 'plotly.js/dist/plotly';
 import { Switch, Space } from 'antd';
 import { Data, Curve } from '../../containers/PlotBuilder/Model/data.model';
 import { colors } from '../../assets/colors.js';
+import { PlotMode } from '../../constants/Enum';
 import './PlotCurve.css';
 
 interface PlotCurveProps {
    data: Data;
-   interpolationData: {x: number[], y: number[]};
    group: number;
    curves: Curve[];
    postData: any[];
@@ -20,7 +20,7 @@ interface PlotCurveProps {
    resultsView: number;
    changeView: (v: number) => void;
    displayGids: string[];
-   mode: string;
+   mode: PlotMode;
    failureInterpolation: (curves: string[], post: () => void) => void;
 };
 
@@ -53,7 +53,7 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
 
     let data_: any = [];
     
-    if(props.mode==='normal'){
+    if(props.mode===PlotMode.Averaging){
       if(withAvgResult){
         const line : any = {
           type: 'scatter',
@@ -124,7 +124,7 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
     }
     }
     // display all other averaged curves
-    if(props.mode==='average'){
+    if(props.mode=== PlotMode.Consolidation){
       for(let gid=0;gid<props.data.groups.length;gid++){
         const curves = props.data.groups[gid].curves;
         const avg_cur_index = curves.findIndex( c => c.name==='average');
@@ -146,12 +146,12 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
                 data_.push(line);
         }
       }
-      if(props.interpolationData&&props.interpolationData.x.length>0){
+      if(props.data.interpolation&&props.data.interpolation.x.length>0){
         const line : any = {
           type: 'scatter',
           mode: 'lines',
-          x: props.interpolationData.x,
-          y: props.interpolationData.y,
+          x: props.data.interpolation.x,
+          y: props.data.interpolation.y,
           name: 'failureLine',
           opacity: 1,
           line: { color: '#000000', width: 2, dash: 'dot' },
@@ -172,12 +172,14 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
   }
   const AddPoint = (data_point: any) =>{
 
-    if(props.mode==='average'){
+    if(props.mode===PlotMode.Consolidation){
       setStaticMode(true);
       const line : string = data_point.points[0].data.name.toString();
+      if(line==='failureLine')
+         return;
       let update: string[];
-      if(selectedLines.length<3){
-        update = [...selectedLines,line];
+      if(selectedLines.length<3&&selectedLines.findIndex(e => e === line)===-1){
+          update = [...selectedLines,line];
       } else {
         update = [line];
       }
@@ -189,7 +191,8 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
           data_up.splice(id,1);
           setDataPlot(data_up);
         } 
-        postOp();
+        props.failureInterpolation(update,postOp);
+        setStaticMode(false);
       }
       else if(update.length===2){
         props.failureInterpolation(update,postOp);
@@ -197,7 +200,7 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
         props.failureInterpolation(update,postOp);
       }
 
-    } else if(props.mode==='normal') {
+    } else if(props.mode===PlotMode.Averaging) {
       if(!props.clickPoint(data_point))
         return;
       const curve_idx = data_point.points[0].curveNumber;
