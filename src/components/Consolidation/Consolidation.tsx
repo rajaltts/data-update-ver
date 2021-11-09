@@ -12,6 +12,7 @@ interface IConsolidation {
     listAvg: boolean[];
     adjustCurves: (algo: string, curves: string[], parameters: {curve: string, parameter: string, value: number}[] ) => void;
     cancelAdjustCurves: (curves: string[]) => void;
+    unselectAll: boolean; // deselect all checked curves for failure operation
 };
 
 const Consolidation: React.FC<IConsolidation> = (props) => {
@@ -34,6 +35,10 @@ const Consolidation: React.FC<IConsolidation> = (props) => {
         }
         setParameterValues(parameterValuesInit);
     },[props.postData]);
+
+    useEffect(() => {
+        setCheckedFailureCurves([]);
+    },[props.unselectAll]);
     
     const { TabPane } = Tabs;
 
@@ -42,7 +47,15 @@ const Consolidation: React.FC<IConsolidation> = (props) => {
     }
     
     const onFailureHandler = (e) => {
-        setCheckedFailureCurves(e);
+        const ind = checkedFailureCurves.findIndex(it => it === e.target.value);
+        if(ind===-1){
+            const up = [...checkedFailureCurves, e.target.value];
+            setCheckedFailureCurves(up);
+        } else {
+            const up = [...checkedFailureCurves];
+            up.splice(ind,1);
+            setCheckedFailureCurves(up);
+        }  
     }
     
     const onClickAdjustHandler = () => {
@@ -95,19 +108,18 @@ const Consolidation: React.FC<IConsolidation> = (props) => {
         onChange={onChangeHandler} type="card">
         <TabPane tab="Failure" key="1">
             <Divider orientation='left' style={{fontSize: '12px'}}>Select 2 or 3 averaged curves</Divider>
-            <Checkbox.Group onChange={onFailureHandler}>{
-                props.groupData.map( (g,index) => {
+                {props.groupData.map( (g,index) => {
                     if(props.listAvg[index]){
                       const dis = (props.selectedCurves.findIndex( e => e===g.title)===-1?false:true);
+                      const checked = (checkedFailureCurves.findIndex(e => e===g.title)===-1?false:true);
                       return(
                         <Row key={'row'+index} >
-                          <Checkbox  style={{fontSize: '12px'}} value={g.title} disabled={dis}> <LineOutlined style={{fontSize: '24px', verticalAlign: 'middle', color: colors[index]}}/>{g.title}</Checkbox>
+                          <Checkbox  style={{fontSize: '12px'}} value={g.title} disabled={dis} checked={checked} onChange={onFailureHandler}> <LineOutlined style={{fontSize: '24px', verticalAlign: 'middle', color: colors[index]}}/>{g.title}</Checkbox>
                         </Row>
                       )
                     }
                 })
             }
-            </Checkbox.Group>
         </TabPane>
 
         <TabPane tab="Stiffness" key="2">

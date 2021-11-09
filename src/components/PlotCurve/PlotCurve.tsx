@@ -39,7 +39,7 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
 
     const avg_cur_index = props.curves.findIndex( c => c.name==='average');
     const withAvgResult = (avg_cur_index===-1?false:true);
-    if(withAvgResult)
+    if(withAvgResult&&props.mode===PlotMode.Averaging)
       setShowSwitch(true);
     else
       setShowSwitch(false);

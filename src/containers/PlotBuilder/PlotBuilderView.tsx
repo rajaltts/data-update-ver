@@ -64,6 +64,8 @@ const PlotBuilderView: React.FC<PlotBuilderViewProps> = (props)  => {
     const [selectedCurves,setSelectedCurves] = useState<string[]>([]); // curves selected for interpolation
     const [computationInProgress,setComputationInProgress] = useState(false);
     const [sortedTable,setSortedTable]= useState([]);
+    const [unselectCurvesFailureAdjust,setUnselectCurvesFailureAdjust] = useState(false);
+
 
     // --- EFFECT -----------------------------------------------------
     useEffect( () => {
@@ -98,6 +100,7 @@ const PlotBuilderView: React.FC<PlotBuilderViewProps> = (props)  => {
     const changeCollapseHandler = (key: string | string[]) => {changeCollapseHandler_(key)};
     const failureInterpolationHandler = (curvesSelectedToInterpolation: string[],post: () => void) => { 
         setSelectedCurves(curvesSelectedToInterpolation);
+        setUnselectCurvesFailureAdjust( prev => !prev);
         if(curvesSelectedToInterpolation.length===1)
            return;
         setComputationInProgress( true);
@@ -114,6 +117,7 @@ const PlotBuilderView: React.FC<PlotBuilderViewProps> = (props)  => {
         setComputationInProgress(true);
         return cancelAdjustCurvesHandler_(curves,postOp);
     };
+   
 
     // --internal functions---
     const axisLabel = { 
@@ -155,6 +159,7 @@ const PlotBuilderView: React.FC<PlotBuilderViewProps> = (props)  => {
                             listAvg={data.groups.map(g => g.result)}
                             adjustCurves={adjustCurvesHandler}
                             cancelAdjustCurves={cancelAdjustCurvesHandler}
+                            unselectAll={unselectCurvesFailureAdjust}
                         />
                     </Panel>
                 </Collapse>    
@@ -180,6 +185,7 @@ const PlotBuilderView: React.FC<PlotBuilderViewProps> = (props)  => {
                 <Col span={9}>
                 {plotMode===PlotMode.Averaging&&
                     <CurveControls 
+                        currentGroup={data.tree.selectedGroup}
                         groupData={data.tree.groupData}
                         onCheck={checkDataTreeHandler}
                         measurement={data.measurement}

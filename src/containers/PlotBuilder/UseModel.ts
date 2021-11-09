@@ -520,6 +520,24 @@ const useModel = () => {
                     vecX_out.delete();
                     vecY_out.delete();
                 }
+                // get stiffness for each curve after shifting action 
+                const report = dataprocess.getReport();
+                 let young_min: string;
+                 let young_max: string;
+                 const youngModules: number[] = [];
+                 for(let curve_idx=0;curve_idx<newCurves.length;curve_idx++){
+                     const cn = newCurves[curve_idx].name;                         
+                     if(cn!=='average'){
+                         const tmp2 = report.getPropertyFirst(Module.ActionType.SHIFTING,cn,"stiffness");
+                         youngModules.push(tmp2.toExponential(precision));
+                     }
+                 }
+                const tmp1_y: number = Math.min(...youngModules);
+                young_min = tmp1_y.toExponential(precision);
+                const tmp2_y: number = Math.max(...youngModules);
+                young_max = tmp2_y.toExponential(precision);
+
+
                 let error_in_data_analytics = false;
                 let error_msg_in_data_analytics = '';
                 if(dataset_out.hasCurve('averaging')){
@@ -551,11 +569,9 @@ const useModel = () => {
                     // dispersion
                     let strain_at_break_min: string;
                     let strain_at_break_max: string;
-                    let young_min: string;
-                    let young_max: string;
                     const dp_data = new Module.DataProcess(dataset_out);                
                     const op_slope = new Module.Operation(Module.ActionType.DATA_ANALYTICS,Module.MethodType.NONE);
-                    op_slope.addParameterString("stiffness","all");
+                    op_slope.addParameterString("stiffness","averaging"); // do not compute on all to avoid error msg if not enough points in the range
                     op_slope.addParameterString("last_point","all");
                     op_slope.addParameterString("point_max_y","averaging");
                     op_slope.addParameterString("offset_yield_strength","averaging");
@@ -590,25 +606,17 @@ const useModel = () => {
 
                         // get dispersion values
                         const strainAtBreaks: number[] = [];
-                        const youngModules: number[] = [];
                         for(let curve_idx=0;curve_idx<newCurves.length;curve_idx++){
                             const cn = newCurves[curve_idx].name;                         
                             if(cn!=='average'){
                                 const tmp = report_test.getPropertyFirst(Module.ActionType.DATA_ANALYTICS,cn,"last_point");
                                 strainAtBreaks.push(tmp.toExponential(precision));
-                                const tmp2 = report_test.getPropertyFirst(Module.ActionType.DATA_ANALYTICS,cn,"stiffness");
-                                youngModules.push(tmp2.toExponential(precision));
                             }
                         }
                         const tmp1: number = Math.min(...strainAtBreaks);
                         strain_at_break_min = tmp1.toExponential(precision);
                         const tmp2: number = Math.max(...strainAtBreaks);
                         strain_at_break_max = tmp2.toExponential(precision);
-
-                        const tmp1_y: number = Math.min(...youngModules);
-                        young_min = tmp1_y.toExponential(precision);
-                        const tmp2_y: number = Math.max(...youngModules);
-                        young_max = tmp2_y.toExponential(precision);
                     }
         
                     data_analytics.length = 0;
