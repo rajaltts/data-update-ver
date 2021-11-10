@@ -11,7 +11,7 @@ interface IConsolidation {
     selectedCurves: string[]; // selected curves used to generate curve interpolation
     listAvg: boolean[];
     adjustCurves: (algo: string, curves: string[], parameters: {curve: string, parameter: string, value: number}[] ) => void;
-    cancelAdjustCurves: (curves: string[]) => void;
+    cancelAdjustCurves: (algo: string, curves: string[]) => void;
     unselectAll: boolean; // deselect all checked curves for failure operation
 };
 
@@ -75,10 +75,10 @@ const Consolidation: React.FC<IConsolidation> = (props) => {
         const algo = (selectedTab==='1'?'failure':'stiffness');
         if(algo==='failure'){
            setCheckedFailureCurves([]);
-           props.cancelAdjustCurves(checkedFailureCurves);
+           props.cancelAdjustCurves(algo,checkedFailureCurves);
         } else if(algo==='stiffness') {
            setCheckedStiffnessCurves([]);
-           props.cancelAdjustCurves(checkedStiffnessCurves);
+           props.cancelAdjustCurves(algo,checkedStiffnessCurves);
         }
     }
 

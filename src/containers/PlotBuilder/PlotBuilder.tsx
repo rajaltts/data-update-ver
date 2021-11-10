@@ -271,10 +271,10 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
     }
 
     // Consolidation Adjust handler
-    const adjustCurvesHandler = (algo:string, curves:string[], parameters: {curve: string, parameter: string, value: number}[], post: () => void ) => {
-        const postUpdate = () => {
+    const adjustCurvesHandler = (algo:string, curves:string[], parameters: {curve: string, parameter: string, value: number}[], post: (msg:string) => void ) => {
+        const postUpdate = (msg:string) => {
             updatePlotHandler();
-            post();
+            post(msg);
         }
         adjustCurves(algo, curves,parameters,postUpdate);
     }

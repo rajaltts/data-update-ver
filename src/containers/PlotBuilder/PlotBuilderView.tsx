@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import { Col, Row, Tabs, Collapse} from 'antd';
+import { Col, Row, Tabs, Collapse, Alert} from 'antd';
 import PlotCurve from '../../components/PlotCurve/PlotCurve';
 import CurveControls from '../../components/CurveControls/CurveControls'
 import Steps from '../../components/Steps/Steps';
@@ -7,7 +7,8 @@ import { Operation } from './Model/template.model';
 import { Data} from './Model/data.model';
 import Consolidation from '../../components/Consolidation/Consolidation';
 import PropertyTable from '../../components/PropertyTable/PropertyTable';
-import { PlotMode } from '../../constants/Enum';
+import Error from '../../components/Error/Error';
+import { PlotMode,ErrorType } from '../../constants/Enum';
 const { TabPane } = Tabs;
 const { Panel } = Collapse;
 
@@ -29,7 +30,7 @@ interface PlotBuilderViewProps {
     convertToTrueHandler_: (post: () => void) => void;
     changeCollapseHandler_: (key: string | string[]) => void;
     failureInterpolationHandler_: (curves: string[],post: () => void) =>  void;
-    adjustCurvesHandler_: (algo:string, curves:string[], parameters: {curve: string, parameter: string, value: number}[], post: () => void) => void;
+    adjustCurvesHandler_: (algo:string, curves:string[], parameters: {curve: string, parameter: string, value: number}[], post: (msg:string) => void) => void;
     cancelAdjustCurvesHandler_: (curves:string[],post: () => void) => void;
 }
 
@@ -65,6 +66,9 @@ const PlotBuilderView: React.FC<PlotBuilderViewProps> = (props)  => {
     const [computationInProgress,setComputationInProgress] = useState(false);
     const [sortedTable,setSortedTable]= useState([]);
     const [unselectCurvesFailureAdjust,setUnselectCurvesFailureAdjust] = useState(false);
+    const [resetFailureCurve,setResetFailureCurve]= useState(false);
+    const [statusConsolidation,setStatusConsolidation] = useState('success');
+    const [errorConsolidation,setErrorConsolidation] = useState('');
 
 
     // --- EFFECT -----------------------------------------------------
@@ -101,8 +105,10 @@ const PlotBuilderView: React.FC<PlotBuilderViewProps> = (props)  => {
     const failureInterpolationHandler = (curvesSelectedToInterpolation: string[],post: () => void) => { 
         setSelectedCurves(curvesSelectedToInterpolation);
         setUnselectCurvesFailureAdjust( prev => !prev);
-        if(curvesSelectedToInterpolation.length===1)
-           return;
+        if(curvesSelectedToInterpolation.length<=1) {
+            post();
+            return;
+        }        
         setComputationInProgress( true);
         const postAll = () => { postOp(); post();}
         return failureInterpolationHandler_(curvesSelectedToInterpolation,postAll);
@@ -110,10 +116,21 @@ const PlotBuilderView: React.FC<PlotBuilderViewProps> = (props)  => {
     const adjustCurvesHandler = (algo:string, curvesToAdjust:string[], parameters: {curve: string, parameter: string, value: number}[]) => { 
         if(algo==='failure'&&data.interpolation.x.length===0)
           return;
-        setComputationInProgress( true);     
-        return adjustCurvesHandler_(algo,curvesToAdjust,parameters,postOp);
+        setComputationInProgress( true);
+        const postOpAll = (msg: string) => {
+            setSelectedCurves([]);
+            setResetFailureCurve(prev => !prev);
+            postOp();
+            if(msg.length!==0){
+                setStatusConsolidation('failed');
+                setErrorConsolidation(msg);
+            } else {
+                setStatusConsolidation('success');
+            }
+        }
+        return adjustCurvesHandler_(algo,curvesToAdjust,parameters,postOpAll);
     };
-    const cancelAdjustCurvesHandler = (curves:string[]) => {
+    const cancelAdjustCurvesHandler = (algo:string,curves:string[]) => {
         setComputationInProgress(true);
         return cancelAdjustCurvesHandler_(curves,postOp);
     };
@@ -161,6 +178,7 @@ const PlotBuilderView: React.FC<PlotBuilderViewProps> = (props)  => {
                             cancelAdjustCurves={cancelAdjustCurvesHandler}
                             unselectAll={unselectCurvesFailureAdjust}
                         />
+                        <Error show={statusConsolidation==='failed'} type={ErrorType.Error} message={errorConsolidation}/>
                     </Panel>
                 </Collapse>    
                 </Col>
@@ -180,6 +198,7 @@ const PlotBuilderView: React.FC<PlotBuilderViewProps> = (props)  => {
                        displayGids={displayGids}
                        mode={plotMode}
                        failureInterpolation={failureInterpolationHandler}
+                       resetFailureCurve={resetFailureCurve}
                       />
                 </Col>
                 <Col span={9}>

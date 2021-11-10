@@ -26,9 +26,9 @@ const useModel = () => {
     const [backupAllOperations, setBackupAllOperations] = useState<Operations[]>([]);
     
     // ----Functions for Data-----
-    const adjustCurves = (algo: string, curves: string[],parameters: {curve: string, parameter: string, value: number}[], post: () => void) => {
+    const adjustCurves = (algo: string, curves: string[],parameters: {curve: string, parameter: string, value: number}[], post: (msg: string) => void) => {
         if(algo==='failure'&&!data.interpolation&&data.interpolation.x.length === 0){
-            post();
+            post("");
             return;
         }
         if(algo==='failure')
@@ -61,6 +61,11 @@ const useModel = () => {
                         const param_linear_correction = method.params.find( p => p.name === 'linear_correction');
                         param_linear_correction.value = 1;
                     }
+                }
+                if(algo==='failure'&&strainAtBreak[gid].value<Number.MIN_VALUE){
+                    const msg = "Impossible to adjust the curve "+data.groups[gid].label;
+                    post(msg);
+                    continue;
                 }
                 setAllOperations(allOpsUp);
                 updatedCurve('Averaging',gid,action_id,data.precision,post);
@@ -152,6 +157,8 @@ const useModel = () => {
                     dispatch(actions.setInterpolation({x:x_int,y: y_int}));
 
                     const report = dataprocess.getReport();
+                    const log = report.executionLog();
+                    console.log("REPORT :"+log);
                     let res: {curve: string, value: number}[] = [];
                     for(let gid=0; gid<data.groups.length;gid++){
                         const curve_name = data.groups[gid].label;
@@ -695,7 +702,7 @@ const useModel = () => {
 
             const promise = applyOperation(dataprocess);
             promise.then(todoAfterOperationApplied,todoOperationFailed).then( () => {
-                    post();
+                    post("");
                 }).catch(function () {console.log("Promise rejected");});
         });
         

@@ -22,6 +22,7 @@ interface PlotCurveProps {
    displayGids: string[];
    mode: PlotMode;
    failureInterpolation: (curves: string[], post: () => void) => void;
+   resetFailureCurve: boolean;
 };
 
 const PlotCurve: React.FC<PlotCurveProps> = (props) => {
@@ -167,6 +168,11 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
     } 
   },[props.curves,props.keys,displayInitCurves,props.plotUpdate,props.displayGids,props.mode]);
 
+
+  useEffect( () => {
+    setSelectedLines([]);
+  },[props.resetFailureCurve]);
+
   const postOp = () => {
     setStaticMode(false);
   }
@@ -178,27 +184,20 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
       if(line==='failureLine')
          return;
       let update: string[];
-      if(selectedLines.length<3&&selectedLines.findIndex(e => e === line)===-1){
-          update = [...selectedLines,line];
+      if(selectedLines.length===3||selectedLines.findIndex(e => e === line)!==-1){
+        update = [];
       } else {
-        update = [line];
+        update = [...selectedLines,line];
       }
       setSelectedLines(update);
-      if(update.length===1){
-        const data_up = [...dataPlot];
-        const id = data_up.findIndex( e => e.name === 'failureLine');
-        if(id!==-1){
-          data_up.splice(id,1);
-          setDataPlot(data_up);
-        } 
-        props.failureInterpolation(update,postOp);
-        setStaticMode(false);
-      }
-      else if(update.length===2){
-        props.failureInterpolation(update,postOp);
-      } else if(update.length===3){
-        props.failureInterpolation(update,postOp);
-      }
+      // remove failure curve
+      const data_up = [...dataPlot];
+      const id = data_up.findIndex( e => e.name === 'failureLine');
+      if(id!==-1){
+        data_up.splice(id,1);
+        setDataPlot(data_up);
+      } 
+      props.failureInterpolation(update,postOp);
 
     } else if(props.mode===PlotMode.Averaging) {
       if(!props.clickPoint(data_point))
