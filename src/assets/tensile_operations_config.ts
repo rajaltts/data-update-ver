@@ -130,6 +130,9 @@ export const tensile_operations_config = [
                               value: 0},  
                         {label:'Stiffness', name:'linear_correction_stiffness', tip: 'Define a targeted stiffness',  advanced: true, value: undefined, float: true, conditional: 'linear_correction'},
                         {label:'Strain', name:'linear_correction_strain', tip: 'Define strain value',  advanced: true, value: undefined, float: true, conditional: 'linear_correction'},
+                        {label:'Distribution', name:'distribution', tip: 'Define points distribution',  advanced: true, 
+                           selection:[{label:'Linear refinement', name:'linear_refinement', tip: 'Special refinelement to compute Young modulus'}],
+                           value: 0},
                          ]
             },
             {
@@ -156,7 +159,20 @@ export const tensile_operations_config = [
                                            {label:'User Defined Strain',name:'x_value',link:['extrapolating_end_point_value'], tip: 'Define the largest strain value.\nWARNING: Can be larger than max strain. No check performed.'}
                                            ],
                                 value: 0},
-                        {label:'Value', name: 'extrapolating_end_point_value',  value: undefined, float: true, conditional: 'extrapolating_end_point'},    
+                        {label:'Value', name: 'extrapolating_end_point_value',  value: undefined, float: true, conditional: 'extrapolating_end_point'},
+                        {label:'Averaging Type', name: 'averaging_type', tip:'Define how curves are averaged', advanced: true,
+                                selection: [{label:'Standard',name:'standard',tip:'Unweighted average'},
+                                            {label:'Weighted',name:'weighted',tip:'Weighted average. Select a curve on the plot area.'}],      
+                                value:0},
+                        {label:'Linear Correction', name:'linear_correction', tip: 'Define a targeted stiffness',  advanced: true,
+                              selection: [{label:'No',name:'linear_correction_no',tip: ''},
+                                          {label:'Yes',name:'linear_correction_yes',link:['linear_correction_stiffness','linear_correction_strain'],tip: ''}],
+                              value: 0},  
+                        {label:'Stiffness', name:'linear_correction_stiffness', tip: 'Define a targeted stiffness',  advanced: true, value: undefined, float: true, conditional: 'linear_correction'},
+                        {label:'Strain', name:'linear_correction_strain', tip: 'Define strain value',  advanced: true, value: undefined, float: true, conditional: 'linear_correction'},
+                        {label:'Distribution', name:'distribution', tip: 'Define points distribution',  advanced: true, 
+                           selection:[{label:'Linear refinement', name:'linear_refinement', tip: 'Special refinelement to compute Young modulus'}],
+                           value: 0},    
                         ]
             }
         ],

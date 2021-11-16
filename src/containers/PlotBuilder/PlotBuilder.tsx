@@ -330,8 +330,21 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         props.parentCallback(result);
     }
 
+    const keyPressHandler = (event: any) => {
+        if(event.ctrlKey&&event.shiftKey&&event.keyCode===72){ // "Ctrl+Shift+H"
+            if(data.tree.selectedGroup>0){
+                console.log("Copy parameters from previous group");
+                const allOpsUp = [...allOperations];
+                const prev_ops = clone(allOpsUp[data.tree.selectedGroup-1].operations);
+                prev_ops.forEach( (e,i,a) => a[i].status='waiting');
+                allOpsUp[data.tree.selectedGroup]={gid:data.tree.selectedGroup, operations: prev_ops};
+                setAllOperations(allOpsUp);
+            }
+        }   
+    }
     return (
     <>
+        <div  onKeyUp={keyPressHandler} tabIndex={0}>
         <PlotBuilderView
             data = {data}
             operations={operations()}
@@ -353,6 +366,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
             adjustCurvesHandler_={adjustCurvesHandler}
             cancelAdjustCurvesHandler_={cancelAdjustCurvesHandler}
         />
+        </div>
         <div className="ButtonPanel">
             <div className="ButtonPrevious">
                 <Button  onClick={e => { handlePrevious() }}>Previous</Button>

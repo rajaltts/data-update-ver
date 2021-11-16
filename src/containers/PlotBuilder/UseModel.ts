@@ -74,6 +74,10 @@ const useModel = () => {
     }
 
     const cancelAdjustCurves = (curves: string[],post: () => void) => {
+        if(backupAllOperations.length===0){ 
+            post();
+            return;
+        }
         const action_id = ACTION.Averaging;
         for(let gid=0; gid<data.groups.length;gid++){
             const ind = curves.findIndex(e => e===data.groups[gid].label);
@@ -287,7 +291,13 @@ const useModel = () => {
     }
 
     const updatedCurve = (action: string,group_id: number,op_target: number ,precision: number,post: any,allOpsIn: Operations[] = undefined) => { 
-           
+        // check input
+        // if input operations are defined but empty do not continue
+        if(allOpsIn&&allOpsIn.length===0){
+           post();
+           return;
+        }   
+
          // use dataClean C++ lib 
         const Module: EmscriptenModule  = {};
         ReactWasm(Module).then( () => {    
@@ -307,7 +317,7 @@ const useModel = () => {
                                     label: curves[ic].label,
                                     selected: curves[ic].selected,
                                     opacity: curves[ic].opacity,
-                                    x0: curves[ic].x0,
+                                    x0: curves[ic].x0,          
                                     y0: curves[ic].y0
                                 };
                     if(curves[ic].markerId){
@@ -424,7 +434,7 @@ const useModel = () => {
                             }
                         });
                         if(action==='Averaging')
-                            ops.push({action: action, method: op.selected_method, parameters: par, result: 'Shifting'});
+                            ops.push({action: action, method: op.selected_method, parameters: par, result: [{Shifting: 'all'},{Averaging: 'averaging'}]});
                         else 
                             ops.push({action: action, method: op.selected_method, parameters: par});
 
@@ -448,7 +458,7 @@ const useModel = () => {
                                         }
                                     }
                                 });
-                                ops.push({action: 'Extrapoling' , method: extrapolation_method, parameters: params, result: 'Shifting'})
+                                ops.push({action: 'Extrapoling' , method: extrapolation_method, parameters: params, result: [{Shifting: 'all'},{Extrapoling: 'averaging'}]})
                             }
                             // Add Transform operation
                             const lin_corr_parm = avg_method.params.find( e => e.name === 'linear_correction');
@@ -462,7 +472,7 @@ const useModel = () => {
                                               strain: [strain.value*(1.+1e-15)],
                                               strategy: "fixed_failure_point"});
                                
-                                ops.push({action: 'Transform' , method: 'None', parameters: params})
+                                ops.push({action: 'Transform' , method: 'None', parameters: params, result: [{Shifting: 'all'},{Transform: 'averaging'}]})
                             }
                         }
                         
@@ -634,7 +644,7 @@ const useModel = () => {
                     data_analytics.push({label: "Strength@Break", value: stress_at_break, name: "stress_at_break", hide: false});
                     data_analytics.push({label: "Yield Strain", value: yield_strain, name: "yield_strain", hide: true});
                     data_analytics.push({label: "Proportional limit", value: proportional_limit_strain, name: "proportional_limit_strain", hide: true});
-                    data_analytics.push({label: "Strain@Ultimate Strength", value: strain_at_ultimate_strength, name: "strain_at_ultimate_strength", hide: false});
+                    data_analytics.push({label: "Strain@Ult. Strength", value: strain_at_ultimate_strength, name: "strain_at_ultimate_strength", hide: false});
                     
                     op_slope.delete();
                     dp_data.delete();
