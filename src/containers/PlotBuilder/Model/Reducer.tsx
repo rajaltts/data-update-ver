@@ -174,6 +174,11 @@ const dataReducer = (currentData: Data, action: any) => {
             newData.selected = action.selected;
             return newData;
          }
+         case 'REMOVE_INTERPOLATION': {
+            const newData = {...currentData};
+            newData.interpolation = { x:[], y:[]};
+            return newData;
+         }
          default:
              throw new Error('Not be reach this case'); 
     }

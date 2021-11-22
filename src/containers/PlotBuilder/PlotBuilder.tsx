@@ -23,7 +23,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
     const [data,dispatch,
            setOperationsType,
            allOperations,setAllOperations,
-           convertToTrue,updatedCurve,failureInterpolation,adjustCurves,cancelAdjustCurves,
+           convertToTrue,updatedCurve,failureInterpolation,removeFailureInterpolation,adjustCurves,cancelAdjustCurves,
            initOperationsFromTemplate] = useModel();
    
     // template is an input json file for dataclean library 
@@ -241,7 +241,10 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
             updatePlotHandler();
             post();
         }
-        failureInterpolation(curves,postConvert);
+        if(curves.length===0)
+            removeFailureInterpolation(postConvert);
+        else
+            failureInterpolation(curves,postConvert);
     } 
 
     //Operation Handler
@@ -279,12 +282,12 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         adjustCurves(algo, curves,parameters,postUpdate);
     }
 
-    const cancelAdjustCurvesHandler = (curves:string[], post: () => void ) => {
+    const cancelAdjustCurvesHandler = (post: () => void ) => {
         const postUpdate = () => {
             updatePlotHandler();
             post();
         }
-        cancelAdjustCurves(curves,postUpdate);
+        cancelAdjustCurves(postUpdate);
     }
 
     // restore initial curves

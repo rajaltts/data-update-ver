@@ -14,6 +14,7 @@ type Action =
 | {type: 'GET_MEASUREMENT'}
 | {type: 'SET_INTERPOLATION', interpolation: {x: number[], y: number[]}}
 | {type: 'SET_SELECTED', value: string[]}
+| {type: 'REMOVE_INTERPOLATION'}
 ;
 
 export default Action;

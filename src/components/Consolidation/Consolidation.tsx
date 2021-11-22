@@ -11,8 +11,10 @@ interface IConsolidation {
     selectedCurves: string[]; // selected curves used to generate curve interpolation
     listAvg: boolean[];
     adjustCurves: (algo: string, curves: string[], parameters: {curve: string, parameter: string, value: number}[] ) => void;
-    cancelAdjustCurves: (algo: string, curves: string[]) => void;
+    cancelAdjustCurves: (algo: string) => void;
     unselectAll: boolean; // deselect all checked curves for failure operation
+    cleanError: () => void;
+    selectConsolidationAlgo: (algo: string) => void;
 };
 
 const Consolidation: React.FC<IConsolidation> = (props) => {
@@ -21,6 +23,7 @@ const Consolidation: React.FC<IConsolidation> = (props) => {
     const [checkedFailureCurves,setCheckedFailureCurves] = useState<string[]>([]);  // selected curves to be adjusted
     const [checkedStiffnessCurves,setCheckedStiffnessCurves] = useState<string[]>([]);
     const [parameterValues,setParameterValues] = useState<{curve: string, parameter: string, value: number}[] >([]);
+    const [adjustStatus,setAdjustStatus] = useState<string>("");
 
     useEffect(()=>{
         let parameterValuesInit: {curve: string, parameter: string, value: number}[] = [];
@@ -44,6 +47,8 @@ const Consolidation: React.FC<IConsolidation> = (props) => {
 
     const onChangeHandler = (key: string) => {
         setSelectedTab(key);
+        const algo = (key==='1'?'failure':'stiffness');
+        props.selectConsolidationAlgo(algo);
     }
     
     const onFailureHandler = (e) => {
@@ -62,25 +67,27 @@ const Consolidation: React.FC<IConsolidation> = (props) => {
         if(checkedFailureCurves.length===0&&checkedStiffnessCurves.length===0)
            return;
         const algo = (selectedTab==='1'?'failure':'stiffness');
+        setAdjustStatus(algo);
         if(algo==='failure')
           props.adjustCurves(algo,checkedFailureCurves,null);
         else if(algo==='stiffness')
           props.adjustCurves(algo,checkedStiffnessCurves,parameterValues);
-
     }
 
     const onClickCancelAdjustHandler = () => {
-        if(checkedFailureCurves.length===0&&checkedStiffnessCurves.length===0)
-           return;
+        setAdjustStatus('');
+        props.cleanError();
         const algo = (selectedTab==='1'?'failure':'stiffness');
         if(algo==='failure'){
            setCheckedFailureCurves([]);
-           props.cancelAdjustCurves(algo,checkedFailureCurves);
+           props.cancelAdjustCurves(algo);
         } else if(algo==='stiffness') {
            setCheckedStiffnessCurves([]);
-           props.cancelAdjustCurves(algo,checkedStiffnessCurves);
+           props.cancelAdjustCurves(algo);
         }
     }
+
+    const cancelEnabled = ((selectedTab==='1'&&adjustStatus==='failure')||(selectedTab==='2'&&adjustStatus==='stiffness'));
 
     const onChangeParameterHandler = (event: any, curveName: string, paramName: string) => {
         let checkedCurvesUp = checkedStiffnessCurves;
@@ -102,9 +109,9 @@ const Consolidation: React.FC<IConsolidation> = (props) => {
     });
 
     return (<>
-    <div style={{height: '400px', fontWeight: 'normal', fontSize: '12px', borderStyle: 'solid', borderWidth: '2px', borderColor: '#d9d9d9', margin: 'auto', padding: '10px'}}>
+    <div style={{height: '410px', fontWeight: 'normal', fontSize: '12px', borderStyle: 'solid', borderWidth: '2px', borderColor: '#d9d9d9', margin: 'auto', padding: '10px'}}>
     <Tabs 
-        style={{ height: '350px', borderStyle: 'solid', borderWidth: '0px', borderColor: '#d9d9d9', margin: 'auto', padding: '10px'}}
+        style={{ height: '350px', borderStyle: 'solid', borderWidth: '1px', borderColor: '#d9d9d9', margin: 'auto', padding: '10px'}}
         onChange={onChangeHandler} type="card">
         <TabPane tab="Failure" key="1">
             <Divider orientation='left' style={{fontSize: '12px'}}>Select 2 or 3 averaged curves</Divider>
@@ -166,9 +173,9 @@ const Consolidation: React.FC<IConsolidation> = (props) => {
            })}  
         </TabPane>
     </Tabs>
-    <Space style={{ float: 'right', paddingRight: '7px', paddingBottom: '10px'}}>
+    <Space style={{ float: 'right', paddingRight: '7px', paddingBottom: '10px', paddingTop: '10px'}}>
                 <Button style={{fontSize: '12px'}} size="small" type="primary" onClick={onClickAdjustHandler}>Adjust</Button>
-                <Button style={{fontSize: '12px'}} size="small" type="primary" onClick={onClickCancelAdjustHandler}>Cancel</Button>
+                <Button style={{fontSize: '12px'}} size="small" type="primary" disabled={!cancelEnabled} onClick={onClickCancelAdjustHandler}>Cancel</Button>
            </Space>
     </div>
     </>);

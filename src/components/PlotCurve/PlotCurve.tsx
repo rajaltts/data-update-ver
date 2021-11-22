@@ -1,7 +1,7 @@
 import React, {useState, useEffect}  from 'react';
 import PlotlyChart from 'react-plotlyjs-ts';
 import Plotly from 'plotly.js/dist/plotly';
-import { Switch, Space } from 'antd';
+import { Switch, Space, Button } from 'antd';
 import { Data, Curve } from '../../containers/PlotBuilder/Model/data.model';
 import { colors } from '../../assets/colors.js';
 import { PlotMode } from '../../constants/Enum';
@@ -12,7 +12,6 @@ interface PlotCurveProps {
    group: number;
    curves: Curve[];
    postData: any[];
-   keys: string[];
    axisLabel: { xlabel: string, ylabel: string};
    clickPoint: (data: any) => boolean;
    plotUpdate: boolean;
@@ -20,7 +19,7 @@ interface PlotCurveProps {
    resultsView: number;
    changeView: (v: number) => void;
    displayGids: string[];
-   mode: PlotMode;
+   mode: {plotMode: PlotMode,consolidationAlgo: string};
    failureInterpolation: (curves: string[], post: () => void) => void;
    resetFailureCurve: boolean;
 };
@@ -32,15 +31,13 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
   const [displayInitCurves,setDisplayInitCurves ] = useState(false);
   const [showSwitch,setShowSwitch] = useState(false);
   const [selectedLines,setSelectedLines] = useState<string[]>([]);
-  //const [interpolationLine,setInterpolationLine] = useState();
-  const [sortedTable,setSortedTable]= useState([]);
   const [staticMode,setStaticMode] = useState(false);
 
   useEffect(() => {
 
     const avg_cur_index = props.curves.findIndex( c => c.name==='average');
     const withAvgResult = (avg_cur_index===-1?false:true);
-    if(withAvgResult&&props.mode===PlotMode.Averaging)
+    if(withAvgResult&&props.mode.plotMode===PlotMode.Averaging)
       setShowSwitch(true);
     else
       setShowSwitch(false);
@@ -54,7 +51,7 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
 
     let data_: any = [];
     
-    if(props.mode===PlotMode.Averaging){
+    if(props.mode.plotMode===PlotMode.Averaging){
       if(withAvgResult){
         const line : any = {
           type: 'scatter',
@@ -125,12 +122,12 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
     }
     }
     // display all other averaged curves
-    if(props.mode=== PlotMode.Consolidation){
+    if(props.mode.plotMode=== PlotMode.Consolidation){
       for(let gid=0;gid<props.data.groups.length;gid++){
         const curves = props.data.groups[gid].curves;
         const avg_cur_index = curves.findIndex( c => c.name==='average');
         const withAvgResult = (avg_cur_index===-1?false:true);
-        if(withAvgResult/*&&gid!==props.group*/){
+        if(withAvgResult){
             const color = colors[gid]; 
             const showCurve = (props.displayGids.findIndex(k => k === '0-'+gid.toString())===-1?false:true);
             
@@ -147,7 +144,7 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
                 data_.push(line);
         }
       }
-      if(props.data.interpolation&&props.data.interpolation.x.length>0){
+      if(props.data.interpolation&&props.data.interpolation.x.length>0&&props.mode.consolidationAlgo==='failure'){
         const line : any = {
           type: 'scatter',
           mode: 'lines',
@@ -159,6 +156,7 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
         };
         data_.push(line);
       }
+      
     }
 
     setDataPlot(data_);
@@ -166,7 +164,7 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
     if(props.group!==currentGroup){
       setCurrentGroup(props.group);
     } 
-  },[props.curves,props.keys,displayInitCurves,props.plotUpdate,props.displayGids,props.mode]);
+  },[props.curves,displayInitCurves,props.plotUpdate,props.displayGids,props.mode]);
 
 
   useEffect( () => {
@@ -176,9 +174,11 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
   const postOp = () => {
     setStaticMode(false);
   }
+
+  
   const AddPoint = (data_point: any) =>{
 
-    if(props.mode===PlotMode.Consolidation){
+    if(props.mode.plotMode===PlotMode.Consolidation&&props.mode.consolidationAlgo==='failure'){
       setStaticMode(true);
       const line : string = data_point.points[0].data.name.toString();
       if(line==='failureLine')
@@ -199,7 +199,7 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
       } 
       props.failureInterpolation(update,postOp);
 
-    } else if(props.mode===PlotMode.Averaging) {
+    } else if(props.mode.plotMode===PlotMode.Averaging) {
       if(!props.clickPoint(data_point))
         return;
       const curve_idx = data_point.points[0].curveNumber;
@@ -223,6 +223,7 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
     return; 
     
   }
+  
 
   const configHandler = () => {
     const config = {
@@ -285,6 +286,7 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
     const up = (checked===true?1:0);
     props.changeView(up);
   }
+
   const layoutHandler = () => {
     const layout_c = { 
       modebardisplay: false,
@@ -311,10 +313,18 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
         title: {
           text: props.axisLabel.ylabel
         }
-      }
+      },
     };
     return layout_c;
   }
+
+  const unselectAllHandler = () => {
+    setStaticMode(true);
+    setSelectedLines([]);
+    props.failureInterpolation([],postOp);
+  }
+
+  const showUnselectAll = (props.mode.plotMode===PlotMode.Consolidation&&props.mode.consolidationAlgo==='failure'&&selectedLines.length>0);
 
   return(
     <>
@@ -325,6 +335,8 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
              <Switch size="small" checked={displayInitCurves}  onChange={switchChange} />
              Initial Curves
       </Space>}
+      {showUnselectAll&&
+        <Button style={{ fontSize: '12px', paddingBottom: '10px'}} type='primary' size='small' onClick={unselectAllHandler}>Reset Curves Selection</Button>}
       </div>
       
       <PlotlyChart

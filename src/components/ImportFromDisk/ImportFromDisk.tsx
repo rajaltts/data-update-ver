@@ -49,22 +49,30 @@ const ImportFromDisk: React.FC = () => {
                 xs[j-index_strat] = result[j].data[2*i];
                 ys[j-index_strat] = result[j].data[2*i+1];
             }
+
+            const key = header_line0[2*i];
+            const name_x =  header_line1[2*i];
+            const name_y =  header_line1[2*i+1];
+            let unit_x =  header_line2[2*i];
+            const unit_y =  header_line2[2*i+1];
+            let strain_scale = 1.;
+            if(unit_x==='MICRO'){
+                strain_scale = 1.0e-6;
+                unit_x = 'NO';
+            }
+               
+            strain_unit = unit_x;
+            stress_unit = unit_y;
             
             let xs_:number[]=[];
             let ys_:number[]=[];
             for(let i=0; i<xs.length; i++){
                 if(xs[i] !== undefined && xs[i].length >0){
-                xs_.push(parseFloat(xs[i]));
+                xs_.push(parseFloat(xs[i])*strain_scale);
                 ys_.push(parseFloat(ys[i]));
                 }
             }
-            const key = header_line0[2*i];
-            const name_x =  header_line1[2*i];
-            const name_y =  header_line1[2*i+1];
-            const unit_x =  header_line2[2*i];
-            const unit_y =  header_line2[2*i+1];
-            strain_unit = unit_x;
-            stress_unit = unit_y;
+            
             const curve_id = i+1;
             const curve:Curve = { id: i+1, oid: (i+1).toString(), name: i.toString(),matDataLabel: i.toString() , selected: true, opacity: 1, x: xs_, y: ys_, label: 'curve_'+key+"_"+curve_id};
             curves_.push(curve);

@@ -44,6 +44,11 @@ const useModel = () => {
                 const selected_method = allOpsUp[gid].operations[action_id].selected_method;
                 const method = allOpsUp[gid].operations[action_id].methods.find( m => m.type === selected_method);
                 if(algo==='failure'){
+                    if(strainAtBreak[gid].value<Number.MIN_VALUE){
+                        const msg = "Impossible to adjust the curve "+data.groups[gid].label;
+                        post(msg);
+                        continue;
+                    }
                     const param_extrapolation = method.params.find( p => p.name === 'extrapolation');
                     param_extrapolation.value = 2; // tangent method
                     const param_extrapolation_end_point = method.params.find( p => p.name === 'extrapolating_end_point');
@@ -62,34 +67,31 @@ const useModel = () => {
                         param_linear_correction.value = 1;
                     }
                 }
-                if(algo==='failure'&&strainAtBreak[gid].value<Number.MIN_VALUE){
-                    const msg = "Impossible to adjust the curve "+data.groups[gid].label;
-                    post(msg);
-                    continue;
-                }
+               
                 setAllOperations(allOpsUp);
                 updatedCurve('Averaging',gid,action_id,data.precision,post);
             }
         }
     }
 
-    const cancelAdjustCurves = (curves: string[],post: () => void) => {
+    const cancelAdjustCurves = (post: () => void) => {
         if(backupAllOperations.length===0){ 
             post();
             return;
         }
         const action_id = ACTION.Averaging;
         for(let gid=0; gid<data.groups.length;gid++){
-            const ind = curves.findIndex(e => e===data.groups[gid].label);
-            if(ind!==-1){
-                dispatch(actions.resetCurves(gid));
-                updatedCurve('Averaging',gid,action_id,data.precision,post,backupAllOperations);
-            }
+            dispatch(actions.resetCurves(gid));
+            updatedCurve('Averaging',gid,action_id,data.precision,post,backupAllOperations);
         }
-        //setAllOperations( () => backupAllOperations);
         setBackupAllOperations([]);
     }
 
+    const removeFailureInterpolation = (post: any) => {
+        dispatch(actions.removeInterpolation());
+        post();
+    }
+    
     const failureInterpolation = (selectedCurves: string[],post: any) => {
         let x_int: number[] = [];
         let y_int: number[] = [];
@@ -799,7 +801,7 @@ const useModel = () => {
     return [data,dispatch,
             setOperationsType,
             allOperations,setAllOperations,
-            convertToTrue,updatedCurve,failureInterpolation,adjustCurves,cancelAdjustCurves,
+            convertToTrue,updatedCurve,failureInterpolation,removeFailureInterpolation,adjustCurves,cancelAdjustCurves,
             initOperationsFromTemplate] as const; // as const to ensure argument order not guaranteed
 };
 

@@ -56,6 +56,8 @@ const setSelected= (val: string[]) =>({
     selected: val
 });
 
+const removeInterpolation = () =>({type: 'REMOVE_INTERPOLATION'});
+
 const Actions = {
  setModel,
  setMarker,
@@ -66,6 +68,7 @@ const Actions = {
  updateCurves,
  resetCurves,
  setInterpolation,
+ removeInterpolation,
  setSelected,
 };
 

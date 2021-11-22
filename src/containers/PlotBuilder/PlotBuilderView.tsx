@@ -31,7 +31,7 @@ interface PlotBuilderViewProps {
     changeCollapseHandler_: (key: string | string[]) => void;
     failureInterpolationHandler_: (curves: string[],post: () => void) =>  void;
     adjustCurvesHandler_: (algo:string, curves:string[], parameters: {curve: string, parameter: string, value: number}[], post: (msg:string) => void) => void;
-    cancelAdjustCurvesHandler_: (curves:string[],post: () => void) => void;
+    cancelAdjustCurvesHandler_: (post: () => void) => void;
 }
 
 const PlotBuilderView: React.FC<PlotBuilderViewProps> = (props)  => {
@@ -69,7 +69,7 @@ const PlotBuilderView: React.FC<PlotBuilderViewProps> = (props)  => {
     const [resetFailureCurve,setResetFailureCurve]= useState(false);
     const [statusConsolidation,setStatusConsolidation] = useState('success');
     const [errorConsolidation,setErrorConsolidation] = useState('');
-
+    const [consolidationAlgo,setConsolidationAlgo] = useState<string>('failure');
 
     // --- EFFECT -----------------------------------------------------
     useEffect( () => {
@@ -105,12 +105,14 @@ const PlotBuilderView: React.FC<PlotBuilderViewProps> = (props)  => {
     const failureInterpolationHandler = (curvesSelectedToInterpolation: string[],post: () => void) => { 
         setSelectedCurves(curvesSelectedToInterpolation);
         setUnselectCurvesFailureAdjust( prev => !prev);
-        if(curvesSelectedToInterpolation.length<=1) {
+        if(curvesSelectedToInterpolation.length===1) {
             post();
             return;
         }        
         setComputationInProgress( true);
-        const postAll = () => { postOp(); post();}
+        const postAll = () => { 
+            postOp();
+            post();}
         return failureInterpolationHandler_(curvesSelectedToInterpolation,postAll);
     };
     const adjustCurvesHandler = (algo:string, curvesToAdjust:string[], parameters: {curve: string, parameter: string, value: number}[]) => { 
@@ -118,8 +120,6 @@ const PlotBuilderView: React.FC<PlotBuilderViewProps> = (props)  => {
           return;
         setComputationInProgress( true);
         const postOpAll = (msg: string) => {
-            setSelectedCurves([]);
-            setResetFailureCurve(prev => !prev);
             postOp();
             if(msg.length!==0){
                 setStatusConsolidation('failed');
@@ -130,9 +130,9 @@ const PlotBuilderView: React.FC<PlotBuilderViewProps> = (props)  => {
         }
         return adjustCurvesHandler_(algo,curvesToAdjust,parameters,postOpAll);
     };
-    const cancelAdjustCurvesHandler = (algo:string,curves:string[]) => {
+    const cancelAdjustCurvesHandler = (algo:string) => {
         setComputationInProgress(true);
-        return cancelAdjustCurvesHandler_(curves,postOp);
+        return cancelAdjustCurvesHandler_(postOp);
     };
    
 
@@ -148,6 +148,15 @@ const PlotBuilderView: React.FC<PlotBuilderViewProps> = (props)  => {
     
     const updateSortedTable = (data: any) => {
         setSortedTable(data);
+    }
+
+    const cleanErrorHandler = () => {
+        setStatusConsolidation('success');
+        setErrorConsolidation('');
+    }
+
+    const selectConsolidationAlgoHandler = (algo: string) => {
+        setConsolidationAlgo(algo);
     }
 
     return (
@@ -177,6 +186,8 @@ const PlotBuilderView: React.FC<PlotBuilderViewProps> = (props)  => {
                             adjustCurves={adjustCurvesHandler}
                             cancelAdjustCurves={cancelAdjustCurvesHandler}
                             unselectAll={unselectCurvesFailureAdjust}
+                            cleanError={cleanErrorHandler}
+                            selectConsolidationAlgo={selectConsolidationAlgoHandler}
                         />
                         <Error show={statusConsolidation==='failed'} type={ErrorType.Error} message={errorConsolidation}/>
                     </Panel>
@@ -188,7 +199,6 @@ const PlotBuilderView: React.FC<PlotBuilderViewProps> = (props)  => {
                        group={data.tree.selectedGroup}
                        curves={data.groups[data.tree.selectedGroup].curves}
                        postData={data.groups[data.tree.selectedGroup].data}
-                       keys={data.tree.groupData[data.tree.selectedGroup].keys}
                        axisLabel={axisLabel}
                        clickPoint={clickPointHandler}
                        plotUpdate={plotUpdate}
@@ -196,7 +206,7 @@ const PlotBuilderView: React.FC<PlotBuilderViewProps> = (props)  => {
                        resultsView={data.tree.groupData[data.tree.selectedGroup].resultsView}
                        changeView={changeViewHandler}
                        displayGids={displayGids}
-                       mode={plotMode}
+                       mode={ {plotMode,consolidationAlgo} }
                        failureInterpolation={failureInterpolationHandler}
                        resetFailureCurve={resetFailureCurve}
                       />
