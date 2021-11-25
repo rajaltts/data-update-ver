@@ -1,17 +1,18 @@
 import React, { useState, useEffect} from 'react';
 import  {Tabs, Table, Checkbox, Divider, Row, Col, Button, Space, InputNumber } from 'antd';
-import { GroupData } from '../../containers/PlotBuilder/Model/data.model';
+import { DataAnalytics, GroupData } from '../../containers/PlotBuilder/Model/data.model';
 import './Consolidation.css';
 import {LineOutlined, PropertySafetyOutlined} from '@ant-design/icons';
 import {colors} from '../../assets/colors';
 
 interface IConsolidation {
+    xunit: string;
     groupData: GroupData[];
-    postData: any[];
+    postData: DataAnalytics[][];
     selectedCurves: string[]; // selected curves used to generate curve interpolation
     listAvg: boolean[];
     adjustCurves: (algo: string, curves: string[], parameters: {curve: string, parameter: string, value: number}[] ) => void;
-    cancelAdjustCurves: (algo: string) => void;
+    resetConsolidationActions: (algo: string) => void;
     unselectAll: boolean; // deselect all checked curves for failure operation
     cleanError: () => void;
     selectConsolidationAlgo: (algo: string) => void;
@@ -30,8 +31,7 @@ const Consolidation: React.FC<IConsolidation> = (props) => {
         for(let index=0; index<props.groupData.length; index++){
             if(props.postData[index].length>1){
                 const young_value = (props.postData[index].find(p => p.name==='young')?props.postData[index].find(p => p.name==='young').value:undefined);
-                const strain_value = (props.postData[index].find(p => p.name==='proportional_limit_strain')?props.postData[index].find(p => p.name==='proportional_limit_strain').value:undefined);
-               
+                const strain_value = (props.xunit==="POURCENT"?1.0:0.01);
                 parameterValuesInit.push({curve: props.groupData[index].title, parameter: 'young', value: young_value });
                 parameterValuesInit.push({curve: props.groupData[index].title, parameter: 'strain', value: strain_value });
             }
@@ -74,16 +74,16 @@ const Consolidation: React.FC<IConsolidation> = (props) => {
           props.adjustCurves(algo,checkedStiffnessCurves,parameterValues);
     }
 
-    const onClickCancelAdjustHandler = () => {
+    const onClickResetHandler = () => {
         setAdjustStatus('');
         props.cleanError();
         const algo = (selectedTab==='1'?'failure':'stiffness');
         if(algo==='failure'){
            setCheckedFailureCurves([]);
-           props.cancelAdjustCurves(algo);
+           props.resetConsolidationActions(algo);
         } else if(algo==='stiffness') {
            setCheckedStiffnessCurves([]);
-           props.cancelAdjustCurves(algo);
+           props.resetConsolidationActions(algo);
         }
     }
 
@@ -130,15 +130,16 @@ const Consolidation: React.FC<IConsolidation> = (props) => {
         </TabPane>
 
         <TabPane tab="Stiffness" key="2">
+          <Divider orientation='left' style={{fontSize: '12px'}}>Elastic Range Correction</Divider>
             <Row style={{fontSize: '12px', fontWeight: 'bold', paddingBottom: '10px'}}>
                 <Col span={8}>
                      Group
                 </Col>
                 <Col span={8}>
-                     Young
+                    Targeted Young
                 </Col>
                 <Col span={8}>
-                     {/* Strain */}
+                    Strain Range
                 </Col>
             </Row>
             {props.groupData.map( (g,index) => {
@@ -153,20 +154,21 @@ const Consolidation: React.FC<IConsolidation> = (props) => {
                               style={{fontSize: '12px'}}
                               key='young'
                               size="small"
-                              defaultValue={ (props.postData[index].find(p => p.name==='young')?props.postData[index].find(p => p.name==='young').value:0)}
+                              defaultValue={ (parameterValues.find(e => e.parameter==='young')?parameterValues.find(e => e.parameter==='young').value:0) }
                               step={10}
                               onChange={  (event:any) =>onChangeParameterHandler(event,g.title,'young')}
                           />
                           </Col>
-                          {/* <Col span={8}>
+                          <Col span={8}>
                           <InputNumber
                               key='strain'
                               size="small"
-                              defaultValue={ (props.postData[index].find(p => p.name==='proportional_limit_strain')?props.postData[index].find(p => p.name==='proportional_limit_strain').value:0)}
+                              defaultValue={ (parameterValues.find(e => e.parameter==='strain')?parameterValues.find(e => e.parameter==='strain').value:0) }
                               step={0.01}
                               onChange={  (event:any) => onChangeParameterHandler(event,g.title,'strain')}
                           />
-                          </Col> */}
+                          </Col>
+
                       </Row>
                  );
              }
@@ -175,7 +177,7 @@ const Consolidation: React.FC<IConsolidation> = (props) => {
     </Tabs>
     <Space style={{ float: 'right', paddingRight: '7px', paddingBottom: '10px', paddingTop: '10px'}}>
                 <Button style={{fontSize: '12px'}} size="small" type="primary" onClick={onClickAdjustHandler}>Adjust</Button>
-                <Button style={{fontSize: '12px'}} size="small" type="primary" disabled={!cancelEnabled} onClick={onClickCancelAdjustHandler}>Cancel</Button>
+                <Button style={{fontSize: '12px'}} size="small" type="primary" disabled={!cancelEnabled} onClick={onClickResetHandler}>Reset</Button>
            </Space>
     </div>
     </>);

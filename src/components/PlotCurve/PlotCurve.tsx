@@ -172,14 +172,14 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
   },[props.resetFailureCurve]);
 
   const postOp = () => {
-    setStaticMode(false);
+    setStaticMode(prev =>!prev);
   }
 
   
   const AddPoint = (data_point: any) =>{
 
     if(props.mode.plotMode===PlotMode.Consolidation&&props.mode.consolidationAlgo==='failure'){
-      setStaticMode(true);
+      setStaticMode(prev => !prev);
       const line : string = data_point.points[0].data.name.toString();
       if(line==='failureLine')
          return;
@@ -319,7 +319,7 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
   }
 
   const unselectAllHandler = () => {
-    setStaticMode(true);
+    setStaticMode(prev => !prev);
     setSelectedLines([]);
     props.failureInterpolation([],postOp);
   }
@@ -336,7 +336,9 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
              Initial Curves
       </Space>}
       {showUnselectAll&&
-        <Button style={{ fontSize: '12px', paddingBottom: '10px'}} type='primary' size='small' onClick={unselectAllHandler}>Reset Curves Selection</Button>}
+        <Space style={{float: 'left', paddingLeft: '100px' }}>
+          <Button style={{ fontSize: '12px', paddingBottom: '10px'}} type='primary' size='small' onClick={unselectAllHandler}>Reset Curves Selection</Button>
+        </Space>}
       </div>
       
       <PlotlyChart

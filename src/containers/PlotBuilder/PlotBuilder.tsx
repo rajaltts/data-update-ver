@@ -21,9 +21,10 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
 
     //-----------MODEL----------------------------------------
     const [data,dispatch,
+           createBackupAllOperations,restoreBackupllOperations,
            setOperationsType,
            allOperations,setAllOperations,
-           convertToTrue,updatedCurve,failureInterpolation,removeFailureInterpolation,adjustCurves,cancelAdjustCurves,
+           convertToTrue,updatedCurve,failureInterpolation,removeFailureInterpolation,adjustCurves,
            initOperationsFromTemplate] = useModel();
    
     // template is an input json file for dataclean library 
@@ -32,6 +33,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
     const [showMarkers, setShowMarkers] = useState(false);
     const [disableNextButton,setDisableNextButton] = useState(true);
     const [plotMode,setPlotMode] = useState<PlotMode>(PlotMode.Averaging);
+    const [averagingApplied,setAveragingApplied]= useState(false); // true if ops have been changed and applied
 
     //---------EFFECT-----------------------------------------
     // initialize the states (componentDidMount)
@@ -101,6 +103,10 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
     const changeCollapseHandler = (key: string | string[]) => {
         const mod = (key==='2'?PlotMode.Consolidation: PlotMode.Averaging);
         setPlotMode(mod);
+        if(mod===PlotMode.Averaging)
+          setAveragingApplied(false);
+        if(mod===PlotMode.Consolidation&&averagingApplied===true)
+          createBackupAllOperations();
     }
 
     const changeOperationsHandler = (new_ops: Operation[]) => { 
@@ -271,6 +277,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         }
 
         updatedCurve(action,group_id,op_target,data.precision,postUpdate);
+        setAveragingApplied(true);
     }
 
     // Consolidation Adjust handler
@@ -282,12 +289,12 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         adjustCurves(algo, curves,parameters,postUpdate);
     }
 
-    const cancelAdjustCurvesHandler = (post: () => void ) => {
+    const resetConsolidationActionsHandler = (post: () => void ) => {
         const postUpdate = () => {
             updatePlotHandler();
             post();
         }
-        cancelAdjustCurves(postUpdate);
+        restoreBackupllOperations(postUpdate);
     }
 
     // restore initial curves
@@ -367,7 +374,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
             changeCollapseHandler_={changeCollapseHandler}
             failureInterpolationHandler_={failureInterpolationHandler}
             adjustCurvesHandler_={adjustCurvesHandler}
-            cancelAdjustCurvesHandler_={cancelAdjustCurvesHandler}
+            resetConsolidationActionsHandler_={resetConsolidationActionsHandler}
         />
         </div>
         <div className="ButtonPanel">

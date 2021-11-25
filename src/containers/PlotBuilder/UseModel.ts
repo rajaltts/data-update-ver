@@ -26,6 +26,24 @@ const useModel = () => {
     const [backupAllOperations, setBackupAllOperations] = useState<Operations[]>([]);
     
     // ----Functions for Data-----
+    const createBackupAllOperations = () => {
+        const allOpsBU = clone(allOperations); // efficient deep copy
+        setBackupAllOperations(allOpsBU);
+    }
+
+    const restoreBackupllOperations = (post: () => void) => {
+        if(backupAllOperations.length===0){ 
+            post();
+            return;
+        }
+        const action_id = ACTION.Averaging;
+        for(let gid=0; gid<data.groups.length;gid++){
+            dispatch(actions.resetCurves(gid));
+            updatedCurve('Averaging',gid,action_id,data.precision,post, true/*,backupAllOperations*/);
+        }
+        //setBackupAllOperations([]);
+    }
+
     const adjustCurves = (algo: string, curves: string[],parameters: {curve: string, parameter: string, value: number}[], post: (msg: string) => void) => {
         if(algo==='failure'&&!data.interpolation&&data.interpolation.x.length === 0){
             post("");
@@ -33,8 +51,6 @@ const useModel = () => {
         }
         if(algo==='failure')
             dispatch(actions.setSelected(curves));
-        const allOpsBU = clone(allOperations); // efficient deep copy
-        setBackupAllOperations(allOpsBU);
 
         for(let gid=0; gid<data.groups.length;gid++){
             const ind = curves.findIndex(e => e===data.groups[gid].label);
@@ -72,19 +88,6 @@ const useModel = () => {
                 updatedCurve('Averaging',gid,action_id,data.precision,post);
             }
         }
-    }
-
-    const cancelAdjustCurves = (post: () => void) => {
-        if(backupAllOperations.length===0){ 
-            post();
-            return;
-        }
-        const action_id = ACTION.Averaging;
-        for(let gid=0; gid<data.groups.length;gid++){
-            dispatch(actions.resetCurves(gid));
-            updatedCurve('Averaging',gid,action_id,data.precision,post,backupAllOperations);
-        }
-        setBackupAllOperations([]);
     }
 
     const removeFailureInterpolation = (post: any) => {
@@ -292,14 +295,8 @@ const useModel = () => {
         });
     }
 
-    const updatedCurve = (action: string,group_id: number,op_target: number ,precision: number,post: any,allOpsIn: Operations[] = undefined) => { 
-        // check input
-        // if input operations are defined but empty do not continue
-        if(allOpsIn&&allOpsIn.length===0){
-           post();
-           return;
-        }   
-
+    const updatedCurve = (action: string,group_id: number,op_target: number ,precision: number,post: any,usebBackup = false) => { 
+         
          // use dataClean C++ lib 
         const Module: EmscriptenModule  = {};
         ReactWasm(Module).then( () => {    
@@ -388,13 +385,11 @@ const useModel = () => {
                     // create a template file from operations and run 
                     let ops: object[] = [];
                     for(let op_index=0; op_index <= op_target; op_index++){
-                        //const op = allOperations[group_id].operations[op_index]; //operations[op_index];
                         let op: any;
-                        if(allOpsIn===undefined){
-                            op = allOperations[group_id].operations[op_index];
+                        if(usebBackup){
+                            op = backupAllOperations[group_id].operations[op_index];
                         } else {
-                            op = allOpsIn[group_id].operations[op_index];
-                            allOperations[group_id].operations[op_index] = op;
+                            op = allOperations[group_id].operations[op_index];
                         }
                         const action = op.action;
                         const method = op.methods.find( e => e.type === op.selected_method);
@@ -799,9 +794,10 @@ const useModel = () => {
     }
 
     return [data,dispatch,
+            createBackupAllOperations,restoreBackupllOperations,
             setOperationsType,
             allOperations,setAllOperations,
-            convertToTrue,updatedCurve,failureInterpolation,removeFailureInterpolation,adjustCurves,cancelAdjustCurves,
+            convertToTrue,updatedCurve,failureInterpolation,removeFailureInterpolation,adjustCurves,
             initOperationsFromTemplate] as const; // as const to ensure argument order not guaranteed
 };
 

@@ -31,7 +31,7 @@ interface PlotBuilderViewProps {
     changeCollapseHandler_: (key: string | string[]) => void;
     failureInterpolationHandler_: (curves: string[],post: () => void) =>  void;
     adjustCurvesHandler_: (algo:string, curves:string[], parameters: {curve: string, parameter: string, value: number}[], post: (msg:string) => void) => void;
-    cancelAdjustCurvesHandler_: (post: () => void) => void;
+    resetConsolidationActionsHandler_: (post: () => void) => void;
 }
 
 const PlotBuilderView: React.FC<PlotBuilderViewProps> = (props)  => {
@@ -55,7 +55,7 @@ const PlotBuilderView: React.FC<PlotBuilderViewProps> = (props)  => {
         changeCollapseHandler_,
         failureInterpolationHandler_,
         adjustCurvesHandler_,
-        cancelAdjustCurvesHandler_
+        resetConsolidationActionsHandler_
 
     } = props;
 
@@ -130,9 +130,9 @@ const PlotBuilderView: React.FC<PlotBuilderViewProps> = (props)  => {
         }
         return adjustCurvesHandler_(algo,curvesToAdjust,parameters,postOpAll);
     };
-    const cancelAdjustCurvesHandler = (algo:string) => {
+    const resetConsolidationActionsHandler = (algo:string) => {
         setComputationInProgress(true);
-        return cancelAdjustCurvesHandler_(postOp);
+        return resetConsolidationActionsHandler_(postOp);
     };
    
 
@@ -179,12 +179,13 @@ const PlotBuilderView: React.FC<PlotBuilderViewProps> = (props)  => {
                     </Panel>
                     <Panel header="2 - Consolidation" key="2" showArrow={false}>
                         <Consolidation
+                            xunit = {data.xunit}
                             groupData={data.tree.groupData}
                             postData = {data.groups.map(g => g.data)}
                             selectedCurves={selectedCurves}
                             listAvg={data.groups.map(g => g.result)}
                             adjustCurves={adjustCurvesHandler}
-                            cancelAdjustCurves={cancelAdjustCurvesHandler}
+                            resetConsolidationActions={resetConsolidationActionsHandler}
                             unselectAll={unselectCurvesFailureAdjust}
                             cleanError={cleanErrorHandler}
                             selectConsolidationAlgo={selectConsolidationAlgoHandler}
