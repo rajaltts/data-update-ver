@@ -179,10 +179,10 @@ const PlotCurve: React.FC<PlotCurveProps> = (props) => {
   const AddPoint = (data_point: any) =>{
 
     if(props.mode.plotMode===PlotMode.Consolidation&&props.mode.consolidationAlgo==='failure'){
-      setStaticMode(prev => !prev);
       const line : string = data_point.points[0].data.name.toString();
       if(line==='failureLine')
          return;
+      setStaticMode(prev => !prev);
       let update: string[];
       if(selectedLines.length===3||selectedLines.findIndex(e => e === line)!==-1){
         update = [];

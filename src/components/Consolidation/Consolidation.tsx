@@ -108,6 +108,15 @@ const Consolidation: React.FC<IConsolidation> = (props) => {
         return({key: index.toString(), group: g.title, young: '0', strain: '0'} );  
     });
 
+    const parameterValue = (curve_name: string, param_name: string) :number => {
+
+        const elt = parameterValues.find( e => e.parameter===param_name&&e.curve===curve_name);
+        if(elt)
+          return elt.value;
+        else 
+          return 0;  
+    }
+
     return (<>
     <div style={{height: '410px', fontWeight: 'normal', fontSize: '12px', borderStyle: 'solid', borderWidth: '2px', borderColor: '#d9d9d9', margin: 'auto', padding: '10px'}}>
     <Tabs 
@@ -154,7 +163,10 @@ const Consolidation: React.FC<IConsolidation> = (props) => {
                               style={{fontSize: '12px'}}
                               key='young'
                               size="small"
-                              defaultValue={ (parameterValues.find(e => e.parameter==='young')?parameterValues.find(e => e.parameter==='young').value:0) }
+                              defaultValue={ parameterValue(g.title,'young') }
+                              formatter = { 
+                                  v =>
+                                   (v?(+v).toExponential(3):'')}
                               step={10}
                               onChange={  (event:any) =>onChangeParameterHandler(event,g.title,'young')}
                           />
@@ -163,7 +175,7 @@ const Consolidation: React.FC<IConsolidation> = (props) => {
                           <InputNumber
                               key='strain'
                               size="small"
-                              defaultValue={ (parameterValues.find(e => e.parameter==='strain')?parameterValues.find(e => e.parameter==='strain').value:0) }
+                              defaultValue={ parameterValue(g.title,'strain') }
                               step={0.01}
                               onChange={  (event:any) => onChangeParameterHandler(event,g.title,'strain')}
                           />

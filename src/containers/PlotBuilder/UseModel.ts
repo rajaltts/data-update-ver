@@ -36,12 +36,17 @@ const useModel = () => {
             post();
             return;
         }
+
+        const postAll = () => {
+            setAllOperations(backupAllOperations);
+            post();
+        }
         const action_id = ACTION.Averaging;
         for(let gid=0; gid<data.groups.length;gid++){
             dispatch(actions.resetCurves(gid));
-            updatedCurve('Averaging',gid,action_id,data.precision,post, true/*,backupAllOperations*/);
+            updatedCurve('Averaging',gid,action_id,data.precision,postAll, true/*,backupAllOperations*/);
         }
-        //setBackupAllOperations([]);
+
     }
 
     const adjustCurves = (algo: string, curves: string[],parameters: {curve: string, parameter: string, value: number}[], post: (msg: string) => void) => {
@@ -66,7 +71,8 @@ const useModel = () => {
                         continue;
                     }
                     const param_extrapolation = method.params.find( p => p.name === 'extrapolation');
-                    param_extrapolation.value = 2; // tangent method
+                    if(param_extrapolation.value === 0) // if none set to tangent
+                        param_extrapolation.value = 2; // tangent method
                     const param_extrapolation_end_point = method.params.find( p => p.name === 'extrapolating_end_point');
                     param_extrapolation_end_point.value = 2; // user defined
                     const param_extrapolation_end_point_value = method.params.find( p => p.name === 'extrapolating_end_point_value');
