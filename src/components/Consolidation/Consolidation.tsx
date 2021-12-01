@@ -164,15 +164,24 @@ const Consolidation: React.FC<IConsolidation> = (props) => {
                               key='young'
                               size="small"
                               defaultValue={ parameterValue(g.title,'young') }
-                              formatter = { 
-                                  v =>
-                                   (v?(+v).toExponential(3):'')}
-                              step={10}
+                              formatter={ v => { 
+                                let tmp = '';
+                                if(v){
+                                  if(v<10000){
+                                    tmp = v.toString();
+                                  } else {
+                                    tmp = (+v).toExponential(3);
+                                  }
+                                }
+                                return tmp;
+                              }}
+                              step={((parameterValue(g.title,'young')!==0)?Math.pow(10,(Math.floor(Math.log10(Math.abs(parameterValue(g.title,'young'))))-1)):1)}
                               onChange={  (event:any) =>onChangeParameterHandler(event,g.title,'young')}
                           />
                           </Col>
                           <Col span={8}>
                           <InputNumber
+                              style={{fontSize: '12px'}}
                               key='strain'
                               size="small"
                               defaultValue={ parameterValue(g.title,'strain') }
