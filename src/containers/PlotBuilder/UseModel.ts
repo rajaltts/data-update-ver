@@ -38,7 +38,8 @@ const useModel = () => {
         }
 
         const postAll = () => {
-            setAllOperations(backupAllOperations);
+            const opsUp = clone(backupAllOperations);
+            setAllOperations(opsUp);
             post();
         }
         const action_id = ACTION.Averaging;
