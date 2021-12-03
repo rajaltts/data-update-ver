@@ -27,13 +27,13 @@ const Consolidation: React.FC<IConsolidation> = (props) => {
     const [adjustStatus,setAdjustStatus] = useState<string>("");
 
     useEffect(()=>{
-        let parameterValuesInit: {curve: string, parameter: string, value: number}[] = [];
+        const parameterValuesInit = [...parameterValues];
         for(let index=0; index<props.groupData.length; index++){
             if(props.postData[index].length>1){
-                const young_value = (props.postData[index].find(p => p.name==='young')?props.postData[index].find(p => p.name==='young').value:undefined);
+                const young_value = (props.postData[index].find(p => p.name==='young')?props.postData[index].find(p => p.name==='young').value:0);
                 const strain_value = (props.xunit==="POURCENT"?1.0:0.01);
                 parameterValuesInit.push({curve: props.groupData[index].title, parameter: 'young', value: young_value });
-                parameterValuesInit.push({curve: props.groupData[index].title, parameter: 'strain', value: strain_value });
+                parameterValuesInit.push({curve: props.groupData[index].title, parameter: 'strain', value: strain_value });      
             }
         }
         setParameterValues(parameterValuesInit);
