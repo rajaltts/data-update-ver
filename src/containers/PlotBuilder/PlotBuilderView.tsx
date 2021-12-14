@@ -116,7 +116,7 @@ const PlotBuilderView: React.FC<PlotBuilderViewProps> = (props)  => {
         return failureInterpolationHandler_(curvesSelectedToInterpolation,postAll);
     };
     const adjustCurvesHandler = (algo:string, curvesToAdjust:string[], parameters: {curve: string, parameter: string, value: number}[]) => { 
-        if(algo==='failure'&&data.interpolation.x.length===0)
+        if(curvesToAdjust.length===0||(algo==='failure'&&data.interpolation.x.length===0))
           return;
         setComputationInProgress( true);
         const postOpAll = (msg: string) => {
@@ -127,6 +127,8 @@ const PlotBuilderView: React.FC<PlotBuilderViewProps> = (props)  => {
             } else {
                 setStatusConsolidation('success');
             }
+            if(algo==='stiffness')
+               curvesToAdjust.length = 0;
         }
         return adjustCurvesHandler_(algo,curvesToAdjust,parameters,postOpAll);
     };

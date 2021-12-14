@@ -1,5 +1,5 @@
 import React, { useState, useEffect} from 'react';
-import  {Tabs, Table, Checkbox, Divider, Row, Col, Button, Space, InputNumber } from 'antd';
+import  {Tabs, Checkbox, Divider, Row, Col, Button, Space, InputNumber, Tooltip } from 'antd';
 import { DataAnalytics, GroupData } from '../../containers/PlotBuilder/Model/data.model';
 import './Consolidation.css';
 import {LineOutlined, PropertySafetyOutlined} from '@ant-design/icons';
@@ -64,9 +64,9 @@ const Consolidation: React.FC<IConsolidation> = (props) => {
     }
     
     const onClickAdjustHandler = () => {
-        if(checkedFailureCurves.length===0&&checkedStiffnessCurves.length===0)
-           return;
         const algo = (selectedTab==='1'?'failure':'stiffness');
+        if((algo==='failure'&&checkedFailureCurves.length===0)||(algo==='stiffness'&&checkedStiffnessCurves.length===0))
+           return;
         setAdjustStatus(algo);
         if(algo==='failure')
           props.adjustCurves(algo,checkedFailureCurves,null);
@@ -87,7 +87,7 @@ const Consolidation: React.FC<IConsolidation> = (props) => {
         }
     }
 
-    const cancelEnabled = ((selectedTab==='1'&&adjustStatus==='failure')||(selectedTab==='2'&&adjustStatus==='stiffness'));
+    const cancelEnabled = (adjustStatus.length>0);
 
     const onChangeParameterHandler = (event: any, curveName: string, paramName: string) => {
         let checkedCurvesUp = checkedStiffnessCurves;
