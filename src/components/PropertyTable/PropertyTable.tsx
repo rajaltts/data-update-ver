@@ -9,14 +9,13 @@ import './PropertyTable.css';
 
 interface IPropertyTable {
     data: Data;
-    sortedTable: any;
     setSortedTable: (data: any) => void;
 };
 
 
 const PropertyTable: React.FC<IPropertyTable> = (props) => {
     //---------STATE-----------------------------------
-    const { data, sortedTable, setSortedTable} = props;
+    const { data, setSortedTable} = props;
 
     const DisplayDataAll = () => {
 
@@ -31,7 +30,7 @@ const PropertyTable: React.FC<IPropertyTable> = (props) => {
         let allResults = false;
         allResults = true;
         let datasource: any[] = [];
-        if(sortedTable.length===0){
+        if(data.sortedTable.length===0){
             props.data.groups.forEach( (g,idg: number) => {
             const row = { curve: g.label , key: idg.toString(), index: idg, style: {textAlign: 'center'}};
             g.data.forEach( (p,idp) => {
@@ -47,7 +46,7 @@ const PropertyTable: React.FC<IPropertyTable> = (props) => {
             datasource.push(row);
             });
         } else {
-            datasource = [...sortedTable];
+            datasource = [...data.sortedTable];
             props.data.groups.forEach( (g,idg: number) => {
             const r = datasource.find( r => r.index===idg);
             g.data.forEach( (p,idp) => {

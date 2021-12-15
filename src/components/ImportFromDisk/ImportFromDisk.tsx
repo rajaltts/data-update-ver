@@ -7,6 +7,8 @@ import dataReducer from '../../containers/PlotBuilder/Model/Reducer';
 import actions from '../../containers/PlotBuilder/Model/Actions';
 import { Data, Curve, Group } from '../../containers/PlotBuilder/Model/data.model';
 import tensile_template from '../../data/template_tensile.json'
+import * as FileSaver from 'file-saver';
+import * as XLSX from 'xlsx';
 
 const ImportFromDisk: React.FC = () => {
 
@@ -117,6 +119,66 @@ const ImportFromDisk: React.FC = () => {
         dispatch(actions.setModel(data_3));
         setShow( prev => !prev);
     }
+
+    const saveResults = (res: any) => {
+        const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
+        const fileExtension = '.xlsx';
+        // create workbook
+        const wb = XLSX.utils.book_new();
+
+        let ws_mod = [];
+        res.data.groups.map( (g,i) => {
+            if(i===0){
+                let header = [""];
+                for(let i=0; i<g.data.length;i++){
+                    header.push(g.data[i].label);
+                }
+                ws_mod.push(header);
+            }
+            let line = [g.label];
+            for(let i=0; i<g.data.length;i++){
+                line.push(+g.data[i].value)
+            }
+            ws_mod.push(line);
+        });
+        const ws = XLSX.utils.aoa_to_sheet(ws_mod); 
+        XLSX.utils.book_append_sheet(wb, ws,"Property");
+
+        let x_label = res.data.xtype + " [" + res.data.xunit + "]";
+        let y_label = res.data.ytype + " [" + res.data.yunit + "]";
+
+
+        res.data.groups.map( g => {
+            let ws_data =[ [x_label,y_label] ];
+            const avg_cur_index = g.curves.findIndex( c => c.name==='average');
+            const withAvgResult = (avg_cur_index===-1?false:true);
+            if(withAvgResult){
+                const x =g.curves[avg_cur_index].x;
+                const y =g.curves[avg_cur_index].y;
+                for(let i=0; i<x.length; i++){
+                    ws_data.push([x[i],y[i]]);
+                }
+            }
+            const label = g.label;
+             // create worksheet
+            const ws = XLSX.utils.aoa_to_sheet(ws_data); 
+            XLSX.utils.book_append_sheet(wb, ws,label);
+        })
+
+        
+
+        // const ws_data = [
+        //     ["x","y"],
+        //     [1, 2],
+        //     [10,20]
+        // ];
+       
+        // create file
+        const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+        const data = new Blob([excelBuffer], {type: fileType});
+        FileSaver.saveAs(data, "DataReduction_Result" + fileExtension);
+
+    }
     
     //---------RENDER-----------------------------------------
     return (
@@ -133,7 +195,7 @@ const ImportFromDisk: React.FC = () => {
         <PlotBuilder  
                     data_input = {data}
                     template_input = {template}
-                    parentCallback = {""}/>
+                    parentCallback = {saveResults}/>
     </Content>
     </Layout>
     )

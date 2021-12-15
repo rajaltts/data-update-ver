@@ -41,6 +41,7 @@ export interface Data {
     tree?: Tree;
     interpolation?: {x:number[],y:number[]};
     selected?: string[]; // selected curves for interpolation
+    sortedTable?: any[]; // property table order
 };
 
 // use to initialize ant Tree component

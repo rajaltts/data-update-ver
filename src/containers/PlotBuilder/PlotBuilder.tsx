@@ -25,7 +25,8 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
            setOperationsType,
            allOperations,setAllOperations,
            convertToTrue,updatedCurve,failureInterpolation,removeFailureInterpolation,adjustCurves,
-           initOperationsFromTemplate] = useModel();
+           initOperationsFromTemplate,
+           setSortedTable] = useModel();
    
     // template is an input json file for dataclean library 
     const [template, setTemplate] = useState({"operations": []});
@@ -313,6 +314,10 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
         setDisableNextButton(true);
     }
 
+    const setSortedTableHandler = (data: any[]) => {
+        setSortedTable(data);
+    }
+        
     // Handler for Next/Previous Button 
     const handlePrevious = () =>{
         let json = {
@@ -325,7 +330,8 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
     }
 
     const handleNext= () =>{
-        //console.log('handleNext'+data.groups[0].curves[0].x);
+        // clean data 
+        data.interpolation = { x:[], y:[]};
 
         let json = {
             current: 3,
@@ -375,6 +381,7 @@ const PlotBuilder: React.FC<PlotBuilderProps> = (props) => {
             failureInterpolationHandler_={failureInterpolationHandler}
             adjustCurvesHandler_={adjustCurvesHandler}
             resetConsolidationActionsHandler_={resetConsolidationActionsHandler}
+            setSortedTableHandler_={setSortedTableHandler}
         />
         </div>
         <div className="ButtonPanel">

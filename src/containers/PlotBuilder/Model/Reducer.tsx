@@ -28,6 +28,7 @@ const dataReducer = (currentData: Data, action: any) => {
                                          selectedGroup: 0},
                                  interpolation: (action.input.interpolation?action.input.interpolation:{x:[],y:[]}),
                                  selected: (action.input.selected?action.input.selected:[]),
+                                 sortedTable: (action.input.sortedTable?action.input.sortedTable:[]),
                                  };
              const initState = (action.input.tree === undefined?true:false);
              action.input.groups.forEach( (g,index_g) => {
@@ -162,6 +163,10 @@ const dataReducer = (currentData: Data, action: any) => {
          case 'SET_MEASUREMENT': {
              const newData = {...currentData};
              newData.measurement = action.val;
+             if(action.val==='true'){
+                 newData.xtype = currentData.xtype.replace("_engineering","");
+                 newData.ytype = currentData.ytype.replace("_engineering","");
+             }
              return newData;
          }
          case 'SET_INTERPOLATION': {
@@ -177,6 +182,11 @@ const dataReducer = (currentData: Data, action: any) => {
          case 'REMOVE_INTERPOLATION': {
             const newData = {...currentData};
             newData.interpolation = { x:[], y:[]};
+            return newData;
+         }
+         case 'SET_SORTED_TABLE': {
+            const newData = {...currentData};
+            newData.sortedTable = action.data;
             return newData;
          }
          default:

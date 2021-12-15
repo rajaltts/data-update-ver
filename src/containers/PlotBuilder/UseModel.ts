@@ -26,6 +26,10 @@ const useModel = () => {
     const [backupAllOperations, setBackupAllOperations] = useState<Operations[]>([]);
     
     // ----Functions for Data-----
+    const setSortedTable = (data: any[]) => {
+       dispatch(actions.setSortedTable(data));
+    }
+
     const createBackupAllOperations = () => {
         const allOpsBU = clone(allOperations); // efficient deep copy
         setBackupAllOperations(allOpsBU);
@@ -805,7 +809,8 @@ const useModel = () => {
             setOperationsType,
             allOperations,setAllOperations,
             convertToTrue,updatedCurve,failureInterpolation,removeFailureInterpolation,adjustCurves,
-            initOperationsFromTemplate] as const; // as const to ensure argument order not guaranteed
+            initOperationsFromTemplate,
+            setSortedTable] as const; // as const to ensure argument order not guaranteed
 };
 
 export default useModel;

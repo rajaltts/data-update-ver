@@ -58,6 +58,10 @@ const setSelected= (val: string[]) =>({
 
 const removeInterpolation = () =>({type: 'REMOVE_INTERPOLATION'});
 
+const setSortedTable =  (data: any[]) =>({
+    type: 'SET_SORTED_TABLE',
+    data: data
+})
 const Actions = {
  setModel,
  setMarker,
@@ -70,6 +74,7 @@ const Actions = {
  setInterpolation,
  removeInterpolation,
  setSelected,
+ setSortedTable,
 };
 
 export default Actions;

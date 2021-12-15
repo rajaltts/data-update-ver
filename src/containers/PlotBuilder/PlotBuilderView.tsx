@@ -32,6 +32,7 @@ interface PlotBuilderViewProps {
     failureInterpolationHandler_: (curves: string[],post: () => void) =>  void;
     adjustCurvesHandler_: (algo:string, curves:string[], parameters: {curve: string, parameter: string, value: number}[], post: (msg:string) => void) => void;
     resetConsolidationActionsHandler_: (post: () => void) => void;
+    setSortedTableHandler_: (data: any[]) => void;
 }
 
 const PlotBuilderView: React.FC<PlotBuilderViewProps> = (props)  => {
@@ -55,7 +56,8 @@ const PlotBuilderView: React.FC<PlotBuilderViewProps> = (props)  => {
         changeCollapseHandler_,
         failureInterpolationHandler_,
         adjustCurvesHandler_,
-        resetConsolidationActionsHandler_
+        resetConsolidationActionsHandler_,
+        setSortedTableHandler_
 
     } = props;
 
@@ -64,7 +66,7 @@ const PlotBuilderView: React.FC<PlotBuilderViewProps> = (props)  => {
     const [displayGids,setDisplayGids] = useState<string[]>([]);
     const [selectedCurves,setSelectedCurves] = useState<string[]>([]); // curves selected for interpolation
     const [computationInProgress,setComputationInProgress] = useState(false);
-    const [sortedTable,setSortedTable]= useState([]);
+  //  const [sortedTable,setSortedTable]= useState([]);
     const [unselectCurvesFailureAdjust,setUnselectCurvesFailureAdjust] = useState(false);
     const [resetFailureCurve,setResetFailureCurve]= useState(false);
     const [statusConsolidation,setStatusConsolidation] = useState('success');
@@ -136,7 +138,7 @@ const PlotBuilderView: React.FC<PlotBuilderViewProps> = (props)  => {
         setComputationInProgress(true);
         return resetConsolidationActionsHandler_(postOp);
     };
-   
+   const setSortedTableHandler = (data: any[]) => {setSortedTableHandler_(data)};
 
     // --internal functions---
     const axisLabel = { 
@@ -149,7 +151,8 @@ const PlotBuilderView: React.FC<PlotBuilderViewProps> = (props)  => {
     }
     
     const updateSortedTable = (data: any) => {
-        setSortedTable(data);
+        //setSortedTable(data);
+        setSortedTableHandler(data);
     }
 
     const cleanErrorHandler = () => {
@@ -227,7 +230,7 @@ const PlotBuilderView: React.FC<PlotBuilderViewProps> = (props)  => {
                 {plotMode===PlotMode.Consolidation&&
                     <PropertyTable
                         data={data}
-                        sortedTable={sortedTable}
+                        // sortedTable={sortedTable}
                         setSortedTable={updateSortedTable}
                     />    
                 }    
