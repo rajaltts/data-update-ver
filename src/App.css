@@ -1,4 +1,424 @@
+img{
+  vertical-align: unset;
+}
 .App {
-    margin: 1rem;
-    font-family: Arial, Helvetica, sans-serif;
+  margin: 1rem;
+  font-family: Arial, Helvetica, sans-serif;
+  color:#666666;
+}
+
+.PropertyDef .ant-checkbox-group .ant-checkbox-group-item{
+  display: block;
+ 
+}
+
+.PropertyDef .ant-checkbox-group{
+  margin-left: 40px;
+}
+
+.PropertyDef{
+  margin: 20px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: rgb(231, 230, 230);
+  padding: 20px;
+  margin-top: 40px;
+  
+}
+.PropertyDefLayout{
+  padding: 20px 20px 20px 0;
+  border: 1px solid rgb(231, 230, 230);
+
+}
+.AnalysisClass{
+  padding: 20px 20px 20px 0;    
+}
+
+  .DefineGroup{
+  margin-left: 30px;
+  width:100%;
+}
+
+div.ButtonPanel{
+
+  padding-top:10px;
+}
+
+div.ButtonPrevious{
+  float: left;
+}
+div.ButtonNext{
+  float: right;
+  padding-right: 10px;
+}
+
+div.ButtonSave{
+  float: right;
+  padding-right: 10px;
+}
+
+div.ButtonCancel{
+  float: right;
+  padding-right: 10px;
+}
+
+div.DefineGroupsDiv{
+  margin:30px;
+}
+
+div.DefineGroupLayout{
+  width:55%;
+}
+
+div.DefineGroupPlot{
+  width:40%;
+}
+
+tr.DefineGroupOuterRow{
+  width:100%;
+}
+
+td.DefineGroupOuterCol1{
+  vertical-align: top;
+}
+
+td.DefineGroupOuterCol2{
+  width:100%;
+  vertical-align: top;
+}
+
+div.steps-content{
+  overflow: auto;
+}
+
+section.DRLayout{
+  background: none;
+}
+
+
+.InputAttribute{
+  width: 100%;
+  padding : 4px 11px;
+  color : rgba(0, 0, 0, 0.75) !important;
+  font: normal 12px sans-serif;
+  font-style: normal;
+  font-variant-ligatures: normal;
+  font-variant-caps: normal;
+  font-variant-numeric: normal;
+  font-variant-east-asian: normal;
+  font-weight: normal;
+  font-stretch: normal;
+  font-size: 12px !important;
+  line-height: normal;
+  font-family: sans-serif;
+}
+
+
+
+.DropContainer {
+  text-align: center;
+}
+.DropContainerButton{
+  text-align: left;
+}
+
+.DropContainer-header {
+  /*background-color: #282c34;*/
+  min-height: 90%;
+  display: flex;
+  /* flex-direction: column;
+  align-items: center;
+  justify-content: center; */
+  /*font-size: calc(1px + 2vmin);*/
+  /*color: white;*/
+}
+.DefineDropContainer-header {
+  /*background-color: #282c34;*/
+  min-height: 90%;
+  display: flex;
+  padding-bottom: 10px;
+  /* flex-direction: column;
+  align-items: center;
+  justify-content: center; */
+  /*font-size: calc(1px + 2vmin);*/
+  /*color: white;*/
+}
+div.AssignedCurveDiv{
+  max-height: 570px;
+  overflow-y: auto;
+}
+.drag-n-drop {
+  padding: .5rem;
+  display: grid;
+  gap: .5rem;
+  width: 100%;
+  height: 100%;
+  grid-template-columns: repeat(auto-fill, 300px);
+  align-items: start;
+}
+.dnd-group {
+  border-radius: 5px;
+  padding: 1px;
+  min-height: 90px;
+  box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.3);
+  max-height: 200px;
+  overflow: auto;
+  margin-top: -4px;
+}
+.UnAssignedGroupDiv{
+  margin-top: 6px;
+  margin-top: 6px;
+  overflow-y: auto;
+}
+.dnd-group-unAssigned{
+  margin: 1px;
+  max-height: 570px;
+  border-radius: 5px;
+  padding: 1px;
+  min-height: 90px;
+  box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.3);
+}
+.dnd-item {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /*min-height: 150px;*/
+  background-color: white;
+  border-radius: 5px;
+  color: black;
+  font-size: 12px;
+  box-shadow:0 0 5px 0 rgba(0, 0, 0, 0.3);
+ }
+.dnd-item:not(:last-of-type) {
+  margin-bottom: 5px;
+}
+.dnd-item * {  
+  margin: 0;
+  font-size: 12px;
+}
+.group-title {
+  text-align: left;
+  margin-bottom: .5rem;
+  font-size: 12px;
+  font-weight: bold;
+}
+.current {
+  background-color: #F5F5F5;;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
   }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+div.GroupLabel{
+  justify-content: center;
+  font-size: 13px;
+  font-weight:bold;
+}
+
+div.GroupLabel .ant-col input{
+  font-size: 13px;
+}
+
+.PlotCurve{
+width: 50%;
+height: 80%;
+}
+.CardTitle{
+font-weight: bold;
+}
+.Available{
+background-color: green;
+}
+.NotAvailable{
+background-color: red;
+}
+
+
+.Grid {
+font-family: Arial, Helvetica, sans-serif;
+border-collapse: collapse;
+width: 100%;
+}
+.GridAttribute{
+  font-family: Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+}
+
+.Grid td, .Grid th {
+border: 1px solid #ddd;
+padding: 8px;
+}
+
+.Grid tr:nth-child(even){background-color: #F7F7F7;}
+
+.Grid tr:nth-child(odd){background-color: #FFF;}
+
+.Grid th {
+padding-top: 12px;
+padding-bottom: 12px;
+text-align: left;
+background-color: #CCCCCC;
+color: #666666;
+}
+
+.Grid td.MatData {
+padding: 12px;
+text-align: left;
+color: #666666;
+white-space: nowrap;
+}
+
+.GridAttribute td, .GridAttribute th {
+  border: 1px solid #ddd;
+  padding: 8px;
+  }
+
+  .Grid th.DraggableTH{
+    text-align: center !important; 
+    cursor: move;
+    color: #666666;
+    box-shadow: 0 0 5px 0 rgb(0 0 0 / 30%) !important;
+  }
+  .Grid th.DraggableTHDrag{
+    background-color: #666666;
+    text-align: center !important; 
+    cursor: move;
+    border: 2px solid #1890FF;
+    color: #CCCCCC;
+    box-shadow: 0 0 5px 0 rgb(0 0 0 / 30%) !important;
+  }
+  
+  .GridAttribute tr:nth-child(even){background-color: #F7F7F7;}
+  
+  .GridAttribute tr:nth-child(odd){background-color: #FFF;}
+  
+  .GridAttribute th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #CCCCCC;
+  color: #666666;
+  }
+  
+  .GridAttribute td.MatData {
+  padding: 12px;
+  text-align: left;
+  color: #666666;
+  white-space: nowrap;
+  }
+span.EmptyPropDef{
+text-decoration: line-through;
+}
+
+div.criteriaDiv .ant-checkbox-group-item{
+display: block;
+margin-right: 0px;
+}
+
+.dnd-item.DNDSelect{
+background-color: #666666;
+}
+
+.AnalysisResultLabel{
+    font: bold 12px sans-serif;
+    font-style: normal;
+    font-variant-ligatures: normal;
+    font-variant-caps: normal;
+    font-variant-numeric: normal;
+    font-variant-east-asian: normal;
+    font-stretch: normal;
+    font-size: 12px;
+    line-height: normal;
+    font-family: sans-serif;
+}
+
+td.LeftColumn{
+ width: 40%;
+ vertical-align: top;
+ margin: 30px;
+}
+
+td.RightColumn{
+width: 60%;
+vertical-align: top;
+margin: 30px;
+}
+tr.DefineRow{
+width: 100%;
+}
+div.PlotCurveDiv{
+top: 30px;
+}
+
+table.DefineTable{
+margin: 40px;
+}
+
+table.DefineGroupOuterTable{
+width:100%;
+}
+
+div.DRContainerDiv{
+margin-top: 20px;
+}
+
+div.ant-tree-list-holder{
+overflow: auto !important;
+}
+
+div.ant-tree-list-scrollbar{
+display: none !important;
+}
+div.OuterDivScroll{
+width:100%;
+height: 65vh;
+overflow: auto;
+}
+div.OuterTableScroll{
+  width: 100%;
+  min-height: 70vh;
+  max-height: 70vh;
+  overflow: auto;
+}
+div.OuterDivSaveScroll{
+  width:100%;
+  height: 65vh;
+  overflow: auto;
+}
+.js-plotly-plot .plotly .modebar {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    z-index: 1000;
+}
+.js-plotly-plot .plotly .modebar-group {
+  float: left;
+  display: inline-flex;
+  box-sizing: border-box;
+  margin-left: 8px;
+  position: relative;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.PlotBuilderCollapse .ant-collapse-header{
+  font-size: 15px;
+  font-weight: bold;
+}
+
+.ant-collapse > .ant-collapse-item > .ant-collapse-header {
+    padding: 0px 16px;
+}
+.ant-collapse-content > .ant-collapse-content-box {
+  padding: 0px;
+}

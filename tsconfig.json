@@ -1,0 +1,42 @@
+
+{
+  "compilerOptions": {
+    "outDir": "./dist/",
+    "target": "es6", // can be es5 for old browser
+    "module": "es6",  // =es2015
+    "jsx": "react",
+    "noImplicitAny": false, //Raise error on expressions and declarations with an implied any type.
+    // Modules import
+    "allowSyntheticDefaultImports": true, // Allow importing like `import React from 'react'`
+    "moduleResolution": "node", // Resolve modules using Node-resolution algorithm
+    "lib": [
+      "dom",
+      "es6",
+      "dom.iterable",
+      "scripthost"
+    ] /* Specify library files to be included in the compilation. */,
+    //"typeRoots": ["node_modules/mymodule/mymodule/ambient","node_modules/ammojs-typed/ammo/ambient"],                       /* List of folders to include type definitions from. */
+
+    // Include module source maps for debugging
+    "sourceMap": true,
+    "removeComments": true, /* Do not emit comments to output. */
+   
+    "strict": true,  /* Enable all strict type-checking options. */
+    "strictNullChecks": false,
+
+    "resolveJsonModule": true, /* to importing json file (see data folder) */
+    // Tells TypeScript to read JS files, as
+    // normally they are ignored as source files
+     "allowJs": true,
+    // Generate d.ts files
+   // "declaration": true,
+    // This compiler run should
+    // only output d.ts files
+   // "emitDeclarationOnly": true,
+
+    
+
+  }
+  
+}
+

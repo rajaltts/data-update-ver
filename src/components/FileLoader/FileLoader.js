@@ -1,9 +1,14 @@
 import React, { Component } from 'react'
 import { CSVReader } from 'react-papaparse';
+import {Button } from 'antd';
+import { UploadOutlined } from '@ant-design/icons';
+import { Fragment } from 'react';
+
 
 const buttonRef = React.createRef()
 
 class FileLoader extends Component {
+  
 
     handleOpenDialog = (e) => {
         // Note that the ref is set async, so it might be null at some point
@@ -30,60 +35,24 @@ class FileLoader extends Component {
       }
 
       render() {
-          return(
-            <CSVReader
+        return(
+          <CSVReader
             ref={buttonRef}
             onFileLoad={this.props.handleOnFileLoad}
             onError={this.handleOnError}
             noClick
             noDrag
             onRemoveFile={this.handleOnRemoveFile}
-        >
-            {({ file }) => (
-            <aside
-                style={{
-                display: 'flex',
-                flexDirection: 'row',
-                marginBottom: 10
-                }}
-            >
-                <button
-                type='button'
-                onClick={this.handleOpenDialog}
-                style={{
-                    borderRadius: 0,
-                    marginLeft: 0,
-                    marginRight: 0,
-                    width: '20%',
-                    paddingLeft: 0,
-                    paddingRight: 0
-                }}
-                >
-                Browse file
-                </button>
-                <div
-                style={{
-                    borderWidth: 1,
-                    borderStyle: 'solid',
-                    borderColor: '#ccc',
-                    height: 35,
-                    lineHeight: 2.5,
-                    marginTop: 5,
-                    marginBottom: 5,
-                    paddingLeft: 13,
-                    paddingTop: 3,
-                    width: '80%'
-                }}
-                >
-                {file && file.name}
-                </div>
-               
-            </aside>
-            )}
-            </CSVReader>
-          );
+          >
+          {({ file }) => (
+            <Fragment>
+              <Button onClick={this.handleOpenDialog} icon={<UploadOutlined/>} >Click to Upload</Button>
+              {file && file.name}
+            </Fragment>
+          )}
+          </CSVReader>
+        );
       }
-
 }
 
 export default FileLoader;
