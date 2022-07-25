@@ -2,7 +2,7 @@
 export type Selection = {
  label: string;
   name: string;
-  link?: string;
+  link?: string[];
   tip?: string;
 };
 
@@ -37,3 +37,9 @@ export type Parameter = {
     status: string;
     error: string;
    };
+
+   export type Operations = {
+     gid: number;
+     operations: Operation[];
+   };
+

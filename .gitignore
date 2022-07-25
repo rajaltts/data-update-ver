@@ -22,3 +22,7 @@ yarn-error.log*
 *.log
 launch.json
 *.zip
+/.vscode/*
+TODO
+/doc
+dist/bundle.js.LICENSE.txt

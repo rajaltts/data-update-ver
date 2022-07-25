@@ -82,12 +82,14 @@ class SaveResults extends React.Component {
        group.data.map((d,index1)=>{
            let groupObj = {};
            let selectPropLabel = d.label;
-           if(selectedResProp[d.name].label!==undefined){
-                selectPropLabel = selectedResProp[d.name].label+" ("+selectedResProp[d.name].unit+") "
-           }
-           groupObj['Name']=selectPropLabel;
-           groupObj['Value']=d.value;
-           groupArray.push(groupObj);
+           if(!d.hide){
+                if(selectedResProp[d.name].label!==undefined){
+                        selectPropLabel = selectedResProp[d.name].label+" ("+selectedResProp[d.name].unit+") "
+                }
+                groupObj['Name']=selectPropLabel;
+                groupObj['Value']=d.value;
+                groupArray.push(groupObj);
+        }
        })
        const ws = XLSX.utils.json_to_sheet(groupArray, {skipHeader: 1});   
 
@@ -349,6 +351,7 @@ class SaveResults extends React.Component {
             res_var1: this.state.res_var1,
             targetClass: this.state.targetClass,
             selectedProject: this.state.selectedProject,
+            selected_resProp: this.props.propState.selected_resProp
         }
         this.sendData(json);
     } 
@@ -366,6 +369,8 @@ class SaveResults extends React.Component {
             type: this.props.propState.xyDisplayScale,
             xtype:this.props.propState.xtype,
             xunit: this.props.propState.xunit,
+            yunitLbl: this.props.propState.yunitLbl,
+            xunitLbl: this.props.propState.xunitLbl,
             ytype: this.props.propState.ytype,
             yunit: this.props.propState.yunit,		
             selected_group: 0,
@@ -576,15 +581,19 @@ this.state.groups.map((group, index)=>{
             </td>{
             this.props.propState.plotBuildModel.groups.map((group, index1) =>{
                 return(<td style={{textAlign: 'center'}}  key={'propColCurve'+index1+1}> <PlotCurve onClick={e => { this.handleCurveClick(index1) }}
-                curves={group.curves} showLegend={false} isThumbnail={true} showOnlyAverage={true} groupIndex={group.id} xtype={this.state.xtype} ytype={this.state.ytype}
+                curves={group.curves} showLegend={false} isThumbnail={true} showOnlyAverage={true} groupIndex={group.id}  xtype={this.state.xtype+" ["+this.state.xunitLbl+"] "} ytype={this.state.ytype+" ["+this.state.yunitLbl+"] "}
             /></td>)
             })}
         </tr>
 
     {
         Object.keys(outputGrp).map((data, index) =>{
-            let leftHeaderLabel = outputLabels[data]+" ["+this.props.propState.selected_resProp[data].unit+"] ";
             let values = outputGrp[data];
+            let d = outputGrp[data];
+            let leftHeaderLabel ='';
+            if(this.props.propState.selected_resProp[data] !== undefined)
+                leftHeaderLabel = outputLabels[data]+" ["+this.props.propState.selected_resProp[data].unit+"] ";
+           
             return(
                 leftHeaderLabel===''?'':
                 <tr key={'proptr'+index}>

@@ -6,29 +6,24 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 module.exports = {
     mode: 'development',
     target: 'web',
-    node: {
-        fs: 'empty'  // need to us plotly
-    },
-    
+    stats: 'errors-warnings',
     // The application entry point
-    entry:{
-        app: path.join(__dirname, 'src', 'index.tsx')
-    },
+    entry: './src/index.tsx',
     // Where to compile the bundle
     output: {
         filename: 'bundle.js',
         path: path.resolve(__dirname, 'dist'),
-        publicPath: 'dist'
     },
     // Supported file loaders
     module: {
         rules: [
-            {
-                test: /\.(js|jsx)$/,
-                exclude: /node_modules/,
-                  loader: "babel-loader",
-                options: { presets: ["@babel/env"] },
-            },
+        {
+            test: /\.(js|jsx)$/,
+            exclude: /node_modules/,
+            use: {
+                loader: "babel-loader"
+            }
+        },
         {
             test: /\.tsx?$/,
             loader: "ts-loader",
@@ -45,20 +40,30 @@ module.exports = {
         }
         ]
     },
-   
+
     // Set debugging source maps to be "inline" for
     // simplicity and ease of use
     devtool: "inline-source-map",  //  need in tsconfig "sourceMap": true 
     // File extensions to support resolving
     resolve: {
-        extensions: ['*','.ts', '.tsx', '.js', '.jsx']
+        extensions: ['*','.ts', '.tsx', '.js', '.jsx'],
+        fallback : {
+            fs: false,
+            crypto: false,
+            path: false,
+            stream: false,
+            assert: false,
+            buffer: false
+        }
     },
     devServer: {
-        contentBase: path.join(__dirname, ""),
-        port: 3000
+        open: true,
+        host: 'localhost',
+        port: 3000,
     },
     plugins: [
-        new HtmlWebpackPlugin()
+        new HtmlWebpackPlugin({
+            template: 'index.html'
+        })
     ]
-
 };

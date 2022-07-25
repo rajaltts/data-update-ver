@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Tree } from 'antd';
-import { CurveData } from '../../../data.model';
+import { CurveData } from '../../../containers/PlotBuilder/Model/data.model';
 import "../CurveControls.css"
 
 interface CurveSelection {
@@ -14,11 +14,10 @@ interface CurveSelection {
     const [autoExpandParent, setAutoExpandParent] = useState(true);
 
     const onSelect = (selectedKeys, info) => {
-        console.log('onSelect', info);
         setSelectedKeys(selectedKeys);
       };
     
-      const fontStyle = {
+    const fontStyle = {
         fontSize: '12px',
     };
 

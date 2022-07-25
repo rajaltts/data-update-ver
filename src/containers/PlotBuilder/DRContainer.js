@@ -112,6 +112,8 @@ class DRContainer extends React.Component {
             xtype: childData.xtype,
             xunit: childData.xunit,
             ytype: childData.ytype,
+            xunitLbl: childData.xunitLbl,
+            yunitLbl: childData.yunitLbl,
             yunit: childData.yunit,
             unitSystem: childData.unitSystem,
             xQuantityType: childData.xQuantityType,
@@ -129,7 +131,7 @@ class DRContainer extends React.Component {
     // console.log("Parent recieved Selector Data: "+JSON.stringify(childData));
       this.setState({
           current: childData.current,
-           previous: childData.revious,
+           previous: childData.previous,
            reloadStep2 : childData.stateChanged,
            plotBuildModel : childData.data,
            template : (childData.previous?tensile_template:childData.template)
@@ -182,6 +184,8 @@ class DRContainer extends React.Component {
             targetClass: this.state.targetClass,
             xunit: this.state.xunit,
             yunit: this.state.yunit,
+            xunitLbl: this.state.xunitLbl,
+            yunitLbl: this.state.yunitLbl,
             unitSystem: this.state.unitSystem,
             xQuantityType: this.state.xQuantityType,
             yQuantityType:this.state.yQuantityType,
@@ -229,6 +233,8 @@ class DRContainer extends React.Component {
           xunit: this.state.xunit,
           ytype: this.state.ytype,
           yunit: this.state.yunit,
+          xunitLbl: this.state.xunitLbl,
+          yunitLbl: this.state.yunitLbl,
           unitSystem: this.state.unitSystem,
           xQuantityType: this.state.xQuantityType,
           yQuantityType:this.state.yQuantityType,
@@ -239,6 +245,10 @@ class DRContainer extends React.Component {
           projects: this.state.projects,
           selectedProject: this.state.selectedProject,
       }
+
+      let plotBuildModel =  this.state.plotBuildModel;
+      plotBuildModel.xunit = this.state.xunitLbl;
+      plotBuildModel.yunit = this.state.yunitLbl;
 
         
 
@@ -253,7 +263,7 @@ class DRContainer extends React.Component {
             },
             {
               title: 'Data Analysis',
-              content: <PlotBuilder  data_input = {this.state.plotBuildModel} template_input = {this.state.template/*tensile_template*/} parentCallback = {this.callbackFunctionStep3}/>
+              content: <PlotBuilder  data_input = {plotBuildModel} template_input = {this.state.template/*tensile_template*/} parentCallback = {this.callbackFunctionStep3}/>
             },
             {
               title: 'Save Results',

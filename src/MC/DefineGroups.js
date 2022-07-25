@@ -6,6 +6,7 @@ import PlotCurve from '../components/PlotCurveComponent/PlotCurve';
 import "../App.css";
 import DragNDrop  from '../components/DragNDrop/DragNDrop.js'
 import {Loading3QuartersOutlined } from '@ant-design/icons';
+import ReactDragListView from 'react-drag-listview';
 
 const colors =["#e51c23", // red
 "#3f51b5", // indigo
@@ -60,6 +61,10 @@ class DefineGroups extends React.Component {
             showGroupCriteria: false,
             xtype: props.propState.xtype,
             ytype: props.propState.ytype,
+            xunit: props.propState.xunit,
+            yunit: props.propState.yunit,
+            xunitLbl: props.propState.xunitLbl,
+            yunitLbl: props.propState.yunitLbl,
             precision: 6,
             loadingIcon:false,
             projects: this.props.propState.projects,
@@ -78,6 +83,30 @@ class DefineGroups extends React.Component {
         this.removeExistingGroup = this.removeExistingGroup.bind(this);
         this.createGroup = this.createGroup.bind(this);
         this.updateAttribute = this.updateAttribute.bind(this);
+        this.dragStart = this.dragStart.bind(this);
+        this.dragEnd = this.dragEnd.bind(this);
+        const that = this;
+        this.dragProps = {
+            onDragEnd(fromIndex, toIndex) {
+                if(fromIndex === 0 || toIndex === 0)
+                    return;
+                const groups = [...that.state.groups];
+                const item = groups.splice(fromIndex, 1)[0];
+                groups.splice(toIndex, 0, item);
+                that.setState({
+                    groups
+                });
+            },
+            nodeSelector: "th"
+        };
+    }
+
+    dragStart = (event) =>{
+        event.target.className = 'DraggableTHDrag';
+    }
+
+    dragEnd = (event) =>{
+        event.target.className = 'DraggableTH';
     }
 
     handlePrevious() {
@@ -91,6 +120,8 @@ class DefineGroups extends React.Component {
             xunit: this.state.xunit,
             ytype: this.state.ytype,
             yunit: this.state.yunit,
+            xunitLbl: this.state.xunitLbl,
+            yunitLbl: this.state.yunitLbl,
             groupSelected:this.state.groupSelected,		
             selected_group: 0,
             numberOfGroups:1,
@@ -169,6 +200,8 @@ class DefineGroups extends React.Component {
             xunit: this.state.xunit,
             ytype: this.state.ytype,
             yunit: this.state.yunit,
+            xunitLbl: this.state.xunitLbl,
+            yunitLbl: this.state.yunitLbl,
             groupSelected:this.state.groupSelected,		
             selected_group: 0,
             selectedCriteria:this.state.selectedCriteria,
@@ -286,6 +319,8 @@ class DefineGroups extends React.Component {
             type: this.props.propState.xyDisplayScale,
             xtype:this.props.propState.xtype,
             xunit: this.props.propState.xunit,
+            xunitLbl: this.props.propState.xunitLbl,
+            yunitLbl: this.props.propState.yunitLbl,
             ytype: this.props.propState.ytype,
             yunit: this.props.propState.yunit,		
             selected_group: 0,
@@ -304,6 +339,8 @@ class DefineGroups extends React.Component {
             targetClass: this.props.propState.targetClass,
             xunit:this.props.propState.xunit,
             yunit: this.props.propState.yunit,
+            xunitLbl: this.props.propState.xunitLbl,
+            yunitLbl: this.props.propState.yunitLbl,
             unitSystem: this.props.propState.unitSystem,
             xQuantityType: this.props.propState.xQuantityType,
             yQuantityType:this.props.propState.yQuantityType,
@@ -344,7 +381,9 @@ class DefineGroups extends React.Component {
                     xtype: res.xtype,
                     xunit: res.xunit,
                     ytype: res.ytype,
-                    yunit: res.yunit,		
+                    yunit: res.yunit,	
+                    xunitLbl: res.xunitLbl,
+                    yunitLbl: res.yunitLbl,	
                     selected_group: 0,
                     tree: res.tree,
                     keys: res.keys,
@@ -576,11 +615,11 @@ let criteriaGrp = {};
 
 
           
-let table = !(this.state.showGroupCriteria && this.state.selectedCriteria.length>0)?"":<table className="Grid">
+let table = !(this.state.groups.length>1)?"":<table className="Grid">
 <thead><tr key={'mattr01'}><th key='propCol0'></th>{
     
 this.state.groups.map((group, index)=>{
-    return(index!==0?<th style={{textAlign: 'center'}}  key={'propCol'+index+1}>{group.label}</th>:"")
+    return(index!==0?<th className="DraggableTH" key={'propCol'+index+1} onDragStart={(e)=>this.dragStart(e)} onDragEnd={(e)=>this.dragEnd(e)} >{group.label}</th>:"")
 })}</tr>
 </thead>
 <tbody>
@@ -594,7 +633,7 @@ this.state.groups.map((group, index)=>{
                      <td  key={'proptd'+index} className="MatData"> <span> {leftHeaderLabel }</span></td>
                      { 
                        values!==undefined?values.map((val,i)=>{
-                           return(<td><Input value={val} onChange={(e)=>this.updateAttribute(e.target.value,crObj.label,i)}style={{width:'60%'}} placeholder="" /></td>) 
+                           return(<td><Input value={val} onChange={(e)=>this.updateAttribute(e.target.value,crObj.label,i)} style={{width:'60%'}} placeholder="" /></td>) 
 
                        }):""                         
                        
@@ -633,7 +672,7 @@ this.state.groups.map((group, index)=>{
                     <Skeleton loading={!this.state.loaded}>
                         <div className="PlotCurveDiv">
                          <PlotCurve
-                        curves={allCurves} showLegend={false} isThumbnail={false} showOnlyAverage={false} xtype={this.state.xtype} ytype={this.state.ytype}
+                        curves={allCurves} showLegend={false} isThumbnail={false} showOnlyAverage={false} xtype={this.state.xtype+" ["+this.state.xunitLbl+"] "} ytype={this.state.ytype+" ["+this.state.yunitLbl+"] "}
                     />
                     </div>
                     </Skeleton>
@@ -657,7 +696,9 @@ this.state.groups.map((group, index)=>{
                     </div>
 
                     <div className="DropContainer">
+                    <ReactDragListView.DragColumn {...this.dragProps}>
                        { table}
+                       </ReactDragListView.DragColumn>
                     </div>
 
                     

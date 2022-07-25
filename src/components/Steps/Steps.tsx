@@ -2,9 +2,9 @@ import React, {Fragment, useEffect, useState, useRef} from 'react'
 import {Button, Steps as AntSteps } from 'antd';
 import { CheckCircleFilled, RightCircleOutlined , ExclamationCircleTwoTone} from '@ant-design/icons';
 import Step from './Step/Step';
-import { Operation } from '../../template.model';
+import { Operation } from '../../containers/PlotBuilder/Model/template.model';
 import './Steps.css';
-import { Parameter as parameter_type } from '../../template.model';
+import { Parameter as parameter_type } from '../../containers/PlotBuilder/Model/template.model';
 
 interface StepsProps {
     operations: Operation[];
@@ -12,9 +12,6 @@ interface StepsProps {
     updatedCurve: (a: string) => void;
     changeOperations: (a: Operation[]) => void;
     restoreInitdata: any;
-    currentIn: number;
-    changeCurrent: (v: number) => void;
-    setAction: (a: string) => void;
     updatePlot: () => void;
     removeAllPoints: () => void;
     dataType: string;
@@ -26,9 +23,6 @@ const Steps: React.FC<StepsProps> = (props) => {
     const paramsRef = useRef([]);
 
     //---------EFFECT------------------------------------------
-    useEffect(() => {
-        setCurrent(props.currentIn);
-    },[props.currentIn]);
 
     //---------HANDLER----------------------------------------
     const saveParamsHandler = (p: parameter_type[] ) => {
@@ -49,13 +43,11 @@ const Steps: React.FC<StepsProps> = (props) => {
     }
 
     const stepsOnChangeHandler = (current) => {
-        console.log("useRef :");
-        paramsRef.current.forEach( p => console.log(p.name+" = "+p.value));
+        //console.log("useRef :");
+        //paramsRef.current.forEach( p => console.log(p.name+" = "+p.value));
         changeParametersHandler();
         const action = props.operations[current].action;
         setCurrent(current);
-        props.changeCurrent(current);
-        props.setAction(action);
     }
 
     const changeSelectedMethod2 = (select:string, action: string) => {
@@ -141,7 +133,7 @@ const Steps: React.FC<StepsProps> = (props) => {
     //---------RENDER-----------------------------------------
     return(
     <Fragment>
-        <div style={{height: '550px', borderStyle: 'solid', borderWidth: '2px', borderColor: '#d9d9d9', margin: 'auto', padding: '10px'}}>
+        <div style={{height: '550px', borderStyle: 'solid', borderWidth: '2px', borderColor: '#d9d9d9', margin: 'auto', padding: '8px'}}>
             <div className="analysis-type-title">
                 Analysis type: {props.dataType}
             </div>

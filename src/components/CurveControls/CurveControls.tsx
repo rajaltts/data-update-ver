@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import { GroupData } from '../../data.model';
+import React, { useState, useEffect } from 'react';
+import { GroupData } from '../../containers/PlotBuilder/Model/data.model';
 import { Radio, Row, Col, Button, Tooltip } from 'antd';
 import { RadioChangeEvent } from 'antd/lib/radio';
 import CurveSelection from './CurveSelection/CurveSelection'
 import './CurveControls.css';
 
 interface CurveControlsProps {
+   currentGroup: number;
    groupData: GroupData[];
    onCheck: any;
    measurement: string;
@@ -14,6 +15,10 @@ interface CurveControlsProps {
 
 const CurveControls: React.FC<CurveControlsProps> = (props) => {
     const [group,setGroup] = useState(0);
+
+    useEffect( () => {
+      setGroup(props.currentGroup)   
+    });
 
     const onChangeGroup = (e: RadioChangeEvent) => {
         console.log('radio checked', e.target.value);
@@ -33,7 +38,7 @@ const CurveControls: React.FC<CurveControlsProps> = (props) => {
 
     return(
         <>
-        <div style={{height: '550px',borderStyle: 'solid', borderWidth: '2px',  borderColor: '#d9d9d9', margin: 'auto', padding: '10px', width: '100%'}}>
+        <div style={{height: '400px',borderStyle: 'solid', borderWidth: '2px',  borderColor: '#d9d9d9', margin: 'auto', padding: '10px', width: '100%'}}>
           <div className="curve-title">
             Curves
           </div>

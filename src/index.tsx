@@ -1,4 +1,5 @@
-import React from "react";
+//console.log("Hello Vincent");
+ import React from "react";
 import ReactDOM from "react-dom";
 
 import './index.css';

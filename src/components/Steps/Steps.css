@@ -2,6 +2,11 @@
     font-size: 12px;
 }
 
+
+.ant-steps-small.ant-steps-horizontal:not(.ant-steps-label-vertical) .ant-steps-item {
+    padding-left: 0px;
+}
+
 .step-title {
     text-align: center;
     font-size: 14px;
@@ -36,3 +41,22 @@
     padding-top: 10px;
     padding-bottom: 10px;
 }
+
+/* .ant-collapse-header {
+    font-size: 12px;
+    line-height: 3.5715;
+    padding: 1px 1px;
+    height: 25px;
+} */
+.ant-collapse-content-box {
+    padding-top: 0px;
+    font-size: 12px;
+}
+
+.display-parameters-forms {
+    font-size: 12px;
+    padding-bottom: 0px;
+    padding-left: 7px;
+    height: 270px;
+}
+

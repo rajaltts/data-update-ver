@@ -4,10 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "webpack-dev-server --analyze",
-    "build": "webpack --config webpack.config.prod.js --progress --profile --color",
-    "startStandalone": "webpack-dev-server --analyze --env.standalone",
-    "buildStandalone": "webpack --config webpack.config.prod.js --progress --profile --color --env.standalone"
+    "start": "webpack serve",
+    "build:dev": "webpack --config webpack.config.js",
+    "build": "webpack --config webpack.config.prod.js --progress --profile --color"
   },
   "keywords": [],
   "author": "VRR",
@@ -20,34 +19,38 @@
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
     "@types/rfdc": "^1.1.0",
+    "array-move": "^4.0.0",
     "axios": "^0.21.1",
     "babel-loader": "^8.2.2",
     "file-saver": "^2.0.5",
     "plotly.js": "^1.57.1",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
+    "react-drag-listview": "^0.1.8",
     "react-papaparse": "^3.11.1",
     "react-plotly.js": "^2.5.1",
     "react-plotlyjs-ts": "^2.2.2",
+    "react-sortable-hoc": "^2.0.0",
     "rfdc": "^1.3.0",
     "typescript": "^4.1.2",
-    "xlsx": "^0.16.9"
+    "xlsx": "^0.17.2"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.12.11",
     "@babel/preset-react": "^7.12.10",
     "@types/plotly.js": "^1.54.2",
-    "antd": "^4.8.6",
+    "antd": "^4.17.2",
     "clean-webpack-plugin": "^3.0.0",
     "css-loader": "^5.0.1",
     "dotenv-webpack": "^7.0.3",
     "file-loader": "^6.2.0",
-    "html-webpack-plugin": "^4.5.0",
+    "html-webpack-plugin": "^5.5.0",
     "style-loader": "^2.0.0",
-    "ts-loader": "^8.0.11",
+    "ts-loader": "^9.2.6",
     "webidl2ts": "^1.0.4",
-    "webpack": "^4.44.2",
-    "webpack-cli": "^3.3.12",
-    "webpack-dev-server": "^3.11.0"
+    "webpack": "^5.59.1",
+    "webpack-bundle-analyzer": "^4.5.0",
+    "webpack-cli": "^4.9.1",
+    "webpack-dev-server": "^4.3.1"
   }
 }
