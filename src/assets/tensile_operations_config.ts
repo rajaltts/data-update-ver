@@ -1,12 +1,45 @@
 // for tensile case
 export enum ACTION {
-    CleaningEnds = 0,
+    CleaningBegins = 0,
+    CleaningEnds,
     Shifting,
     Averaging,
   };
 
 
 export const tensile_operations_config = [
+    {
+        action: 'Cleaning_begins',
+        action_label: 'Cleaning Begins',
+        methods: [
+            { 
+                label: 'None',
+                type: 'None',
+                params: []
+            },
+            {
+                label: 'User Defined Strain',
+                type: 'Min_X',
+                tip: 'Remove before a given strain',
+                params: [{label: 'Value', name: 'value',  value: 0.05, float: true }]
+            },
+            {
+                label: 'User Defined Stress',
+                type: 'Min_Y',
+                tip: 'Remove after a given stress',
+                params: [{label: 'Value', name: 'value',  value: 1000, float: true}]
+            },
+            {
+                label: 'User Defined Point',
+                type: 'Min_Xs',
+                tip: 'Remove after a selected point',
+                params: [ {label: '', name: 'value', value: [], curveId: []}]
+            }
+        ],
+        selected_method: 'None',
+        status: 'waiting',
+        error: ''
+    },
     {
         action: 'Cleaning_ends',
         action_label: 'Cleaning Ends',
